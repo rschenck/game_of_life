@@ -6,7 +6,9 @@ from kivy.uix.widget import Widget
 from kivy.graphics import *
 from kivy.uix.label import Label
 from kivy.clock import Clock
-
+from kivy.uix.button import Button
+from kivy.core.audio import SoundLoader
+from kivy.uix.boxlayout import BoxLayout
 import random
 
 # Considerations for user end:
@@ -22,6 +24,11 @@ def dump(obj):
 		pass
 
 class board(Widget):
+	sound = SoundLoader.load('img/emotion.wav')
+	if sound:
+		sound.loop = True
+		sound.play()
+
 	cells = {}
 	count = 0
 	screen = Window.size
@@ -52,6 +59,11 @@ class board(Widget):
 	def on_touch_down(self, touch):
 		xtouch = int(round_down(touch.x)-10)
 		ytouch = int(round_down(touch.y)-50)
+		sound = SoundLoader.load('img/button2.wav')
+		if sound:
+			sound.volume = 0.6
+			sound.play()
+
 		try: 
 			self.cells[(xtouch,ytouch)][1].rgb = [1,0,0]
 		except:
@@ -80,6 +92,7 @@ class board(Widget):
 					self.cells[cell][2] = 1
 					print self.cells[cell][2]
 
+class controls()
 
 
 class mainGameApp(App):
@@ -88,10 +101,12 @@ class mainGameApp(App):
 	# Window.size = (1200,1200)
 	
 	def build(self):
+		
 		cells = board()
 		allcells = cells.drawGrid()
-
-		# Figure out a way to allow the user to select the time frame (0->1)
+		
+		#Figure out a way to allow the user to select the time frame (0->1)
+		
 		Clock.schedule_interval(cells.update_cell, 0.2)
 		return cells
 
