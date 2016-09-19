@@ -24,27 +24,62 @@ def dump(obj):
 class board(Widget):
 	cells = {}
 	count = 0
+	screen = Window.size
+	w, h = round_down(screen[0]),round_down(screen[1])
 
 	def drawGrid(self):
-		screen = Window.size
-		w, h = round_down(screen[0]),round_down(screen[1])
+		# screen = Window.size
+		# w, h = round_down(screen[0]),round_down(screen[1])
 
 		with self.canvas:
-			for xx in range(0,w-10,10):
-				for yy in range(0,h-100,10):
+			for xx in range(0,self.w-10,10):
+				for yy in range(0,self.h-100,10):
 					self.cells.update({(xx,yy):0})
-					#if random.randint(0,1) == 1:
+					
+					stat = random.randint(0,1)
 					self.color = Color(1,1,1)
 					self.rect = Rectangle(pos=(5+xx,50+yy), size=(9,9))
-					self.cells.update({(xx,yy):[self.rect,self.color,0]})
+					self.cells.update({(xx,yy):[self.rect,self.color,stat]})
 		return self.cells
 
 	def update_cell(self, *args):
 		for cell in self.cells:
-			if random.randint(0,1) == 1:
+			if self.cells[cell][2] == 1:
 				self.cells[cell][1].rgb = [1,1,1]
 			else:
 				self.cells[cell][1].rgb = [0,0,0]
+
+	def on_touch_down(self, touch):
+		xtouch = int(round_down(touch.x)-10)
+		ytouch = int(round_down(touch.y)-50)
+		try: 
+			self.cells[(xtouch,ytouch)][1].rgb = [1,0,0]
+		except:
+			pass
+
+	def logic(self, *args):
+		for cell in self.cells:
+			alive = 0
+			for xx in [-10,10,0]:
+				for yy in [-10,10,0]:
+					if (xx,yy) != (0,0):
+						try:
+							alive += self.cells[cell][2]
+						except KeyError:
+							pass
+					else:
+						pass
+
+			if self.cells[cell][2] == 1:
+				if alive < 2 or alive > 3:
+					self.cells[cell][2] = 0
+				else:
+					self.cells[cell][2] = 1
+			else:
+				if alive == 3:
+					self.cells[cell][2] = 1
+					print self.cells[cell][2]
+
 
 
 class mainGameApp(App):
@@ -57,7 +92,7 @@ class mainGameApp(App):
 		allcells = cells.drawGrid()
 
 		# Figure out a way to allow the user to select the time frame (0->1)
-		Clock.schedule_interval(cells.update_cell, 0.1)
+		Clock.schedule_interval(cells.update_cell, 0.2)
 		return cells
 
 if __name__ == '__main__':
