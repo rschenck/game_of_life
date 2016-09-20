@@ -7,6 +7,10 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget
 from kivy.graphics import *
 from functionality import controls
+from kivy.core.audio import SoundLoader
+from kivy.clock import Clock
+
+
 
 import random
 def round_down(num):
@@ -17,48 +21,33 @@ def dump(obj):
 		print "obj.%s = %s" % (attr, getattr(obj, attr))
 		pass
 
-class myLayout(GridLayout):
+class RootWidget(FloatLayout):
+
 	def __init__(self, **kwargs):
-		super(myLayout, self).__init__(**kwargs)
-		screen = Window.size
+		super(RootWidget, self).__init__(**kwargs)
 
-		self.cols = 5
-		self.rows = 1
-		btn = Button(text = "Click")
-		btn2 = Button(text = "Click")
-		btn3 = Button(text = "Click")
-		myboard = board()
-		btn.bind(on_press=self.clk)
-		btn2.bind(on_press=self.clk)
-		btn3.bind(on_press=self.clk)
-		myboard.bind()
-
-		self.add_widget(btn)
-		self.add_widget(btn2)
-		self.add_widget(btn3)
-		self.add_widget(myboard)
+		self.add_widget(controls.sett)
+		self.add_widget(controls.info)
+		self.add_widget(controls.reset)
+		self.add_widget(controls.start)
+		self.add_widget(controls.stop)
+		self.add_widget(controls.prsts)
 
 
-	def clk(self, obj):
-		print("Hello World!")
-
-class cell(Widget):
-	def __init__(self, **kwargs):
-		self.status = 1
 
 class MyApp(App):
 	# dump(controls.start)
 
 	def build(self):
-		layout = FloatLayout()
-		# layout.add_widget(Button(text='1'))
-		# layout.add_widget(Button(text='2'))
-		# layout.add_widget(Button(text='3',size_hint=(.1,.1),pos_hint={'x':.2,'y':.0},color=[1,0,0]))
-		layout.add_widget(controls.sett)
-		layout.add_widget(controls.reset)
-		layout.add_widget(controls.start)
-		layout.add_widget(controls.stop)
-		return layout
+		# dump(RootWidget)
+
+		self.root = root = RootWidget()
+		
+				
+
+		return root
+
+
 
 
 if __name__=="__main__":

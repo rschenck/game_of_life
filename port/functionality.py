@@ -17,7 +17,17 @@ class controls():
 	reset.background_down = 'img/reset_dn.png'
 	reset.border = (0,0,0,0)
 
-	sett = Button(size_hint = (.09,.1), pos_hint = {'center_x':.1,'y':0})
-	sett.background_normal = 'img/info.png'
-	sett.background_down = 'img/info_dn.png'
+	info = Button(size_hint = (.09,.1), pos_hint = {'center_x':.1,'y':0})
+	info.background_normal = 'img/info.png'
+	info.background_down = 'img/info_dn.png'
+	info.border = (0,0,0,0)
+
+	prsts = Button(size_hint = (.09,.1), pos_hint = {'center_x':.9,'y':0})
+	prsts.background_normal = 'img/click.png'
+	prsts.background_down = 'img/click_dn.png'
+	prsts.border = (0,0,0,0)
+
+	sett = Button(size_hint = (.09,.1), pos_hint = {'center_x':.5,'top':1})
+	sett.background_normal = 'img/sett.png'
+	sett.background_down = 'img/sett_dn.png'
 	sett.border = (0,0,0,0)
