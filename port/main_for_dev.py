@@ -9,6 +9,8 @@ from kivy.clock import Clock
 from kivy.uix.button import Button
 from kivy.core.audio import SoundLoader
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
+from functionality import controls
 import random
 
 # Considerations for user end:
@@ -51,6 +53,7 @@ class board(Widget):
 
 	def update_cell(self, *args):
 		for cell in self.cells:
+			self.cells[cell][2]=random.randint(0,1)
 			if self.cells[cell][2] == 1:
 				self.cells[cell][1].rgb = [1,1,1]
 			else:
@@ -92,7 +95,6 @@ class board(Widget):
 					self.cells[cell][2] = 1
 					print self.cells[cell][2]
 
-class controls()
 
 
 class mainGameApp(App):
@@ -101,13 +103,14 @@ class mainGameApp(App):
 	# Window.size = (1200,1200)
 	
 	def build(self):
-		
+		# self.layout = FloatLayout()
+		# self.layout.add_widget(controls.start)
 		cells = board()
 		allcells = cells.drawGrid()
 		
 		#Figure out a way to allow the user to select the time frame (0->1)
 		
-		Clock.schedule_interval(cells.update_cell, 0.2)
+		Clock.schedule_interval(cells.update_cell, 0.5)
 		return cells
 
 if __name__ == '__main__':
