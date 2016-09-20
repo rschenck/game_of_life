@@ -11,8 +11,8 @@ from kivy.core.audio import SoundLoader
 from kivy.clock import Clock
 
 import random
+import time
 
-import random
 def round_down(num):
 	return num - (num%10)
 
@@ -20,19 +20,6 @@ def dump(obj):
 	for attr in dir(obj):
 		print "obj.%s = %s" % (attr, getattr(obj, attr))
 		pass
-
-class MyPaintWidget(Widget):
-
-	def on_touch_down(self, touch):
-	    color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
-	    with self.canvas:
-			Color(random.randint(0,255), random.randint(0,255), random.randint(0,255))
-			d = 30.
-			Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d))
-			touch.ud['line'] = Line(points=(touch.x, touch.y))
-
-	def on_touch_move(self, touch):
-		touch.ud['line'].points += [touch.x, touch.y]
 
 class board(Widget):
 	# sound = SoundLoader.load('img/emotion.wav')
@@ -109,6 +96,9 @@ class MyApp(App):
 		cells = theboard.drawGrid()
 
 		Clock.schedule_interval(theboard.update_cell, 0.2)
+
+		# time.sleep(60)
+		# self.root.remove_widget(theboard)
 
 		return root
 
