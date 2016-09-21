@@ -22,6 +22,12 @@ def dump(obj):
 		print "obj.%s = %s" % (attr, getattr(obj, attr))
 		pass
 
+def song():
+	sound = SoundLoader.load('img/emotion.wav')
+	if sound:
+		sound.loop = True
+		sound.play()
+
 class board(Widget):
 	# sound = SoundLoader.load('img/emotion.wav')
 	# if sound:
@@ -65,15 +71,26 @@ class board(Widget):
 class boardWidget(GridLayout):
 	def __init__(self, **kwargs):
 		super(boardWidget, self).__init__(**kwargs)
-		self.screen = Window.size
-		self.w, self.h = self.screen[0],self.screen[1]
-		self.cols = 20
-		self.rows = 10
-		self.padding = 5
-		self.pos = (0,int(self.h*.1))
-		
-		for i in range(0,200):
-			btn = Button(background_color=(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+		# Set up grid size
+		self.cols = 60
+		self.rows = 40
+		# Padding on all sides; Spacing between cells
+		self.padding = 0
+		self.spacing = [0,0]
+
+		#necessary to properly position the grid in the window
+		self.pos_hint = {'center_x':.5, 'center_y':.5}
+		self.size_hint=(.99,.8)
+
+		count = 0
+		for i in range(0,self.cols*self.rows):
+			btn = Button(background_normal='', background_color=(random.randint(0,255),random.randint(0,255),random.randint(0,255)), border = (0,0,0,0))
+			btn.id = "%s" % (i)
+			btn.stat = random.randint(0,1)
+			
+			# if btn.stat == 1:
+				# btn.background_color = (1,1,1)
+
 			self.add_widget(btn)
 
 
@@ -91,46 +108,17 @@ class RootWidget(FloatLayout):
 		dump(w)
 		self.add_widget(w)
 
-		# grid = boardWidget()
-		# self.add_widget(grid)
-		# Adds the area for the cells
-		# theboard = board()
-		# self.add_widget(theboard)
-
-
-		# cells = theboard.drawGrid()
-		# print cells
-
 
 
 
 class MyApp(App):
 
 	def build(self):
-		'''Older version'''
-		self.root = root = RootWidget()
+		root = RootWidget()
 		
-		# test = RootWidget()
+		# song()
 
-		# test.update_cell()
-
-		return self.root
-
-		'''New version?'''
-		# self.layout = RootWidget()
-
-		# theboard = board()
-
-		# self.layout.add_widget(theboard)
-
-		# cells = theboard.drawGrid()
-		# theboard.update_cell()
-
-		# Clock.schedule_interval(theboard.update_cell, 0.5)
-
-		# return self.layout
-
-
+		return root
 
 
 if __name__=="__main__":
