@@ -9,15 +9,22 @@ from kivy.clock import Clock
 from kivy.config import ConfigParser
 from kivy.uix.settings import SettingsWithSidebar
 from settings_options import settings_json
+from kivy.core.audio import SoundLoader
 from random import randint
 from random import uniform
 from functools import partial
 import math
 
-def dump(obj):
-    for attr in dir(obj):
-        print "obj.%s = %s" % (attr, getattr(obj, attr))
-        pass
+# def song(music):
+#     sound = SoundLoader.load('img/emotion.wav')
+#     if sound and music:
+#         sound.loop = True
+#         sound.play()
+
+# def dump(obj):
+#     for attr in dir(obj):
+#         print "obj.%s = %s" % (attr, getattr(obj, attr))
+#         pass
 
 class Grid(Widget):
 
@@ -165,6 +172,8 @@ class Cells(Widget):
     def place_option(self, events, *largs):
         pass
 
+    def info(self, events, *largs):
+        pass
 
 class GameApp(App):
     events = []
@@ -209,8 +218,11 @@ class GameApp(App):
         btn_place = Button(text='Place',
                            on_press=partial(cells.place_option, self.events))
 
-        btn_sett = Button(text='Settings',
-                           on_press=partial(self.settings, self.events))
+        btn_sett = Button(text='Settings',on_press=partial(self.settings, self.events))
+        btn_sett.size_hint = (.6,1)
+
+        btn_info = Button(text='info',on_press=partial(cells.info, self.events))
+        btn_info.size_hint = (.6,1)
 
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
@@ -220,6 +232,7 @@ class GameApp(App):
         buttons.add_widget(btn_reset)
         buttons.add_widget(btn_place)
         buttons.add_widget(btn_sett)
+        buttons.add_widget(btn_info)
 
         board.add_widget(buttons)
 
