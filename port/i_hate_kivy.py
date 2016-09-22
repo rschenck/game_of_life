@@ -62,13 +62,13 @@ class Cells(Widget):
 	nextRound = []
 	def assign_random(self, modal, *largs):
 	    self.create_cells(random=True)
-	    self.draw_some_cells()
+	    # self.draw_some_cells()
 	    modal.dismiss()
 
 
 	def assign_blank(self, modal, *largs):
 	    self.create_cells()
-	    self.draw_some_cells()
+	    # self.draw_some_cells()
 	    modal.dismiss()
 
 	def assign_gun(self, modal, *largs):
@@ -108,7 +108,7 @@ class Cells(Widget):
 		self.current[self.mid_x+ 15 ][self.mid_y+ 4 ]=1
 		self.current[self.mid_x+ 16 ][self.mid_y -3 ]=1
 		self.current[self.mid_x+ 17 ][self.mid_y -4 ]=1
-		self.draw_some_cells()
+		# self.draw_some_cells()
 		modal.dismiss()
 
 	def assign_ten(self, modal, *largs):
@@ -123,7 +123,7 @@ class Cells(Widget):
 		self.current[self.mid_x+ 1 ][self.mid_y+ 2 ]=1
 		self.current[self.mid_x+ 2 ][self.mid_y+ 2 ]=1
 		self.current[self.mid_x+ 3 ][self.mid_y+ 2 ]=1
-		self.draw_some_cells()
+		# self.draw_some_cells()
 		modal.dismiss()
 
 	def assign_binary(self, modal, *largs):
@@ -195,7 +195,7 @@ class Cells(Widget):
 		self.current[self.mid_x+ 5 ][self.mid_y+ 1 ]=1
 		self.current[self.mid_x+ 5 ][self.mid_y+ 4 ]=1
 		self.current[self.mid_x+ 5 ][self.mid_y+ 5 ]=1
-		self.draw_some_cells()
+		# self.draw_some_cells()
 		modal.dismiss()
 
 	def assign_face(self, modal, *largs):
@@ -269,7 +269,7 @@ class Cells(Widget):
 		self.current[self.mid_x+ 6 ][self.mid_y+ 9 ]=1
 		self.current[self.mid_x+ 6 ][self.mid_y+ 10 ]=1
 		self.current[self.mid_x+ 7 ][self.mid_y -4 ]=1
-		self.draw_some_cells()
+		# self.draw_some_cells()
 		modal.dismiss()
 
 	def assign_maze(self, modal, *largs):
@@ -286,7 +286,7 @@ class Cells(Widget):
 		self.current[self.mid_x+ 2 ][self.mid_y+ 3 ]=1
 		self.current[self.mid_x+ 3 ][self.mid_y+ 3 ]=1
 		self.current[self.mid_x+ 3 ][self.mid_y+ 4 ]=1
-		self.draw_some_cells()
+		# self.draw_some_cells()
 		modal.dismiss()
 
 	def assign_pulsar(self, modal, *largs):
@@ -339,7 +339,7 @@ class Cells(Widget):
 		self.current[self.mid_x+ 6 ][self.mid_y+ 4 ]=1
 		self.current[self.mid_x+ 6 ][self.mid_y+ 5 ]=1
 		self.current[self.mid_x+ 6 ][self.mid_y+ 6 ]=1
-		self.draw_some_cells()
+		# self.draw_some_cells()
 		modal.dismiss()
 
 	def assign_gliders(self, modal, *largs):
@@ -358,7 +358,7 @@ class Cells(Widget):
 		self.current[self.mid_x+ 1 ][self.mid_y ]=1
 		self.current[self.mid_x+ 2 ][self.mid_y ]=1
 		self.current[self.mid_x+ 3 ][self.mid_y ]=1
-		self.draw_some_cells()
+		# self.draw_some_cells()
 		modal.dismiss()
 
 
@@ -564,14 +564,14 @@ class GameApp(App):
 		start_patterns.attach_on = board
 		start_patterns.open()
 		start_patterns.bind(on_dismiss=grid.draw_grid)
-		# start_patterns.bind(on_dismiss=cells.draw_some_cells)
+		start_patterns.bind(on_dismiss=cells.draw_some_cells)
 		board.add_widget(buttons)
 
 		return board
 
     def build_config(self, config):
         config.setdefaults('initiate', {
-            'Speed': 0.1,
+            'Speed': 0.05,
             'Lonely': 1,
             'Crowded': 4,
             'Born': 3,
