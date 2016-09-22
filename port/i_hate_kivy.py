@@ -509,73 +509,73 @@ class GameApp(App):
             self.open_settings()
 
     def build(self):
-        self.settings_cls = SettingsWithSidebar
-        self.config.items('initiate')
-        self.use_kivy_settings = False
-        # Window.size = (1334,750)
+		self.settings_cls = SettingsWithSidebar
+		self.config.items('initiate')
+		self.use_kivy_settings = False
+		Window.size = (1334,750)
 
-        # make layout and additional widgets
-        board = FloatLayout(size=(Window.width, Window.height))
-        grid = Grid(size_hint=(1, 0.93), pos=(0,50))
-        cells = Cells(size_hint=(0.985,0.91), pos=(11,61))
+		# make layout and additional widgets
+		board = FloatLayout(size=(Window.width, Window.height))
+		grid = Grid(size_hint=(1, 0.93), pos=(0,50))
+		cells = Cells(size_hint=(0.985,0.91), pos=(11,61))
 
-        # generate cell lists
-        # cells.create_cells()
-        # add grid and cells to layout
-        board.add_widget(grid)
-        board.add_widget(cells)
-        # draw grid and initial cells
-        # grid.draw_grid()
-        # cells.draw_some_cells()
-        # schedule the updating of cells
-        start_patterns = ModalView(size_hint=(0.3,0.8), pos_hint={'top': 0.95}, auto_dismiss=False)
-        start_layout = BoxLayout(size_hint=(1,1), orientation='vertical')
-        patt_label = Label(text='Select Start Pattern', pos=(200,200), font_size='25sp')
-        patt_blank = Button(text='Blank',on_press=partial(cells.assign_blank, start_patterns))
-        patt_random = Button(text='Random',on_press=partial(cells.assign_random, start_patterns))
-        patt_gun = Button(text='Gun',on_press=partial(cells.assign_gun, start_patterns))
-        patt_ten = Button(text='Ten',on_press=partial(cells.assign_ten, start_patterns))
-        patt_binary = Button(text='Binary',on_press=partial(cells.assign_binary, start_patterns))
-        patt_face = Button(text='Face',on_press=partial(cells.assign_face, start_patterns))
-        patt_maze = Button(text='Maze',on_press=partial(cells.assign_maze, start_patterns))
-        patt_pulsar = Button(text='Pulsar',on_press=partial(cells.assign_pulsar, start_patterns))
-        patt_gliders = Button(text='Gliders',on_press=partial(cells.assign_gliders, start_patterns))
+		# generate cell lists
+		# cells.create_cells()
+		# add grid and cells to layout
+		board.add_widget(grid)
+		board.add_widget(cells)
+		# draw grid and initial cells
+		# grid.draw_grid()
+		# cells.draw_some_cells()
+		# schedule the updating of cells
+		start_patterns = ModalView(size_hint=(0.3,0.8), pos_hint={'top': 0.95}, auto_dismiss=False)
+		start_layout = BoxLayout(size_hint=(1,1), orientation='vertical')
+		patt_label = Label(text='Select Start Pattern', pos=(200,200), font_size='25sp')
+		patt_blank = Button(text='Blank',on_press=partial(cells.assign_blank, start_patterns))
+		patt_random = Button(text='Random',on_press=partial(cells.assign_random, start_patterns))
+		patt_gun = Button(text='Gun',on_press=partial(cells.assign_gun, start_patterns))
+		patt_ten = Button(text='Ten',on_press=partial(cells.assign_ten, start_patterns))
+		patt_binary = Button(text='Binary',on_press=partial(cells.assign_binary, start_patterns))
+		patt_face = Button(text='Face',on_press=partial(cells.assign_face, start_patterns))
+		patt_maze = Button(text='Maze',on_press=partial(cells.assign_maze, start_patterns))
+		patt_pulsar = Button(text='Pulsar',on_press=partial(cells.assign_pulsar, start_patterns))
+		patt_gliders = Button(text='Gliders',on_press=partial(cells.assign_gliders, start_patterns))
 		# add pattern buttons to the layout
 		start_layout.add_widget(patt_label)
-        start_layout.add_widget(patt_blank)
-        start_layout.add_widget(patt_random)
-        start_layout.add_widget(patt_gun)
-        start_layout.add_widget(patt_ten)
-        start_layout.add_widget(patt_binary)
-        start_layout.add_widget(patt_face)
-        start_layout.add_widget(patt_maze)
-        start_layout.add_widget(patt_pulsar)
-        start_layout.add_widget(patt_gliders)
-        start_patterns.add_widget(start_layout)
+		start_layout.add_widget(patt_blank)
+		start_layout.add_widget(patt_random)
+		start_layout.add_widget(patt_gun)
+		start_layout.add_widget(patt_ten)
+		start_layout.add_widget(patt_binary)
+		start_layout.add_widget(patt_face)
+		start_layout.add_widget(patt_maze)
+		start_layout.add_widget(patt_pulsar)
+		start_layout.add_widget(patt_gliders)
+		start_patterns.add_widget(start_layout)
 
-        btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events))
-        btn_stop = Button(text='Stop', on_press=partial(cells.stop_interval, self.events))
-        btn_step = Button(text='Step', on_press=partial(cells.step, self.events))
-        btn_reset = Button(text='Reset',
-                           on_press=partial(cells.reset_interval, self.events,grid,start_patterns))
-        btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events))
-        btn_sett = Button(text='Settings',on_press=partial(self.settings, self.events))
-        btn_sett.size_hint = (.6,1)
-        btn_info = Button(text='info',on_press=partial(cells.info, self.events))
-        btn_info.size_hint = (.6,1)
+		btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events))
+		btn_stop = Button(text='Stop', on_press=partial(cells.stop_interval, self.events))
+		btn_step = Button(text='Step', on_press=partial(cells.step, self.events))
+		btn_reset = Button(text='Reset',
+		                   on_press=partial(cells.reset_interval, self.events,grid,start_patterns))
+		btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events))
+		btn_sett = Button(text='Settings',on_press=partial(self.settings, self.events))
+		btn_sett.size_hint = (.6,1)
+		btn_info = Button(text='info',on_press=partial(cells.info, self.events))
+		btn_info.size_hint = (.6,1)
 
-        buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
+		buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
 
-        controls =[btn_start,btn_stop,btn_step,btn_reset,btn_place,btn_sett,btn_info]
-        for btn in controls:
-            buttons.add_widget(btn)
+		controls =[btn_start,btn_stop,btn_step,btn_reset,btn_place,btn_sett,btn_info]
+		for btn in controls:
+		    buttons.add_widget(btn)
 
 		start_patterns.attach_on = board
-        start_patterns.open()
-        start_patterns.bind(on_dismiss=grid.draw_grid)
-        start_patterns.bind(on_dismiss=cells.draw_some_cells)
-        board.add_widget(buttons)
-        return board
+		start_patterns.open()
+		start_patterns.bind(on_dismiss=grid.draw_grid)
+		start_patterns.bind(on_dismiss=cells.draw_some_cells)
+		board.add_widget(buttons)
+		return board
 
     def build_config(self, config):
         config.setdefaults('initiate', {
