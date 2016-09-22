@@ -202,7 +202,11 @@ class GameApp(App):
             'Crowded': 4,
             'Lives1': 2,
             'Lives2': 3,
-            'Born': 3
+            'Born': 3,
+            'Color': 'White',
+            'GridColor': 'Grey',
+            'Music': True,
+            'Sound': True,
             })
 
     def build_settings(self, settings):

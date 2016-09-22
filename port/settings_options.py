@@ -44,5 +44,35 @@ settings_json = json.dumps([
 	'desc': 'Adjust conditions for a new cell to be born (Set value). (Default is 3)',
 	'section': 'initiate',
 	'key': 'Born'
+	},
+	{
+	'type': 'options',
+	'title': 'Color',
+	'desc': 'Pick the color of the cells!',
+	'section': 'initiate',
+	'key': 'Color',
+	'options': ['White','Red','Blue','Green','Random']
+	},
+	{
+	'type': 'options',
+	'title': 'Grid Color',
+	'desc': 'Pick the color of the grid!',
+	'section': 'initiate',
+	'key': 'GridColor',
+	'options': ['Grey','White','Red','Blue','Green','Random']
+	},
+	{
+	'type': 'bool',
+	'title': 'Music',
+	'desc': '',
+	'section': 'initiate',
+	'key': 'Music',
+	},
+	{
+	'type': 'bool',
+	'title': 'Sound',
+	'desc': '',
+	'section': 'initiate',
+	'key': 'Sound',
 	}
 	])
