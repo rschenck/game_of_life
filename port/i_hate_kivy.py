@@ -54,7 +54,7 @@ class Cells(Widget):
         self.pos = (11,61)
         # print "new size and pos after clear(): ", self.size, self.pos
         for x in range(len(self.current)):
-            for y in range(100,len(self.current[x])+100):
+            for y in range(len(self.current[x])):
 
                 over_x = x + 1
                 if over_x == len(self.current):
