@@ -7,6 +7,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
 from kivy.config import ConfigParser
+from kivy.uix.settings import SettingsWithSidebar
 from random import randint
 from functools import partial
 import math
@@ -133,13 +134,18 @@ class Cells(Widget):
     def place_option(self, events, *largs):
         pass
 
-    def settings(self, events, *largs):
-        pass
 
 class GameApp(App):
     events = []
+
+    def settings(self, events, *largs):
+            self.open_settings()
+
     def build(self):
+        self.settings_cls = SettingsWithSidebar
+
         Window.size = (1334,750)
+
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
         grid = Grid(size=(board.width, board.height - 50), pos=(0,50))
@@ -172,7 +178,8 @@ class GameApp(App):
                            on_press=partial(cells.place_option, self.events))
 
         btn_sett = Button(text='Settings',
-                           on_press=partial(cells.place_option, self.events))
+                           on_press=partial(self.settings, self.events))
+
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
         buttons.add_widget(btn_start)
