@@ -26,20 +26,6 @@ settings_json = json.dumps([
 	},
 	{
 	'type': 'numeric',
-	'title': 'Sustain Cell 1',
-	'desc': 'Adjust conditions for cell to stay alive (Range from Sustain Cell 1 to Sustain Cell 2). (Default is 2-3)',
-	'section': 'initiate',
-	'key': 'Lives1'
-	},
-	{
-	'type': 'numeric',
-	'title': 'Sustain Cell 2',
-	'desc': 'Adjust conditions for cell to stay alive (Range from Sustain Cell 1 to Sustain Cell 2). (Default is 2-3)',
-	'section': 'initiate',
-	'key': 'Lives2'
-	},
-	{
-	'type': 'numeric',
 	'title': 'Birth',
 	'desc': 'Adjust conditions for a new cell to be born (Set value). (Default is 3)',
 	'section': 'initiate',
@@ -52,14 +38,6 @@ settings_json = json.dumps([
 	'section': 'initiate',
 	'key': 'Color',
 	'options': ['White','Red','Blue','Green','Random']
-	},
-	{
-	'type': 'options',
-	'title': 'Grid Color',
-	'desc': 'Pick the color of the grid!',
-	'section': 'initiate',
-	'key': 'GridColor',
-	'options': ['Grey','White','Red','Blue','Green','Random']
 	},
 	{
 	'type': 'bool',

@@ -10,13 +10,21 @@ from kivy.config import ConfigParser
 from kivy.uix.settings import SettingsWithSidebar
 from settings_options import settings_json
 from random import randint
+from random import uniform
 from functools import partial
 import math
 
+def dump(obj):
+    for attr in dir(obj):
+        print "obj.%s = %s" % (attr, getattr(obj, attr))
+        pass
+
 class Grid(Widget):
+
+
     def draw_grid(self, *largs):
         with self.canvas:
-            Color(.5,.5,.5, mode='rgb')
+            Color(0.5,0.5,0.5, mode='rgb')
             for x in range(10,self.width,10):
                 Rectangle(pos=(x,self.y),size=(1,self.height))
             for y in range(self.y,self.height+self.y,10):
@@ -27,6 +35,17 @@ class Grid(Widget):
             Rectangle(pos=(self.x,self.y+self.height-10),size=(self.width,10))
 
 class Cells(Widget):
+    allcols = {
+    'White': [1,1,1],
+    'Grey': [0.5,0.5,0.5],
+    'Blue': [0,0,1],
+    'Green': [0,1,0],
+    'Red': [1,0,0],
+    'Random': [0,0,0]
+    }
+    speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
+
+
     current = []
     nextRound = []
     def create_cells(self, *largs):
@@ -43,15 +62,22 @@ class Cells(Widget):
     def draw_some_cells(self, *largs):
         # print "length of list: ", len(self.current)
         with self.canvas:
-            Color(1,1,1, mode='rgb')
+            # Initializes Color() Kivy object
+            self.color = Color(self.allcols[self.cellcol])
+            # Changes the Color() Kivy object depending what user selects
+            self.color.rgb = self.allcols[self.cellcol]
+
             for x in range(len(self.current)):
                 for y in range(len(self.current[x])):
                     if self.current[x][y] == 1:
                         x_coord = self.x + x * 10
                         y_coord = self.y + y * 10
+                        if self.cellcol == 'Random':
+                            self.color.rgb = [uniform(0.0,1.0),uniform(0.0,1.0),uniform(0.0,1.0)]
                         Rectangle(pos=(x_coord,y_coord), size=(9,9))
 
     def update_cells(self, *largs):
+
         self.canvas.clear()
         self.size = (Window.width - 20, Window.height - 70)
         self.pos = (11,61)
@@ -69,12 +95,12 @@ class Cells(Widget):
                 alive_neighbors = self.current[x-1][y-1] + self.current[x-1][y] + self.current[x-1][over_y] + self.current[x][y-1] + self.current[x][over_y] + self.current[over_x][y-1] + self.current[over_x][y] + self.current[over_x][over_y]
 
                 if self.current[x][y] == 1:
-                    if (2 > alive_neighbors or alive_neighbors > 3):
+                    if (int(self.lonely) >= alive_neighbors or alive_neighbors >= int(self.crowded)):
                         self.nextRound[x][y] = 0
                     else:
                         self.nextRound[x][y] = 1
                 elif self.current[x][y] == 0:
-                    if alive_neighbors == 3:
+                    if alive_neighbors == int(self.birth):
                         self.nextRound[x][y] = 1
                     else:
                         self.nextRound[x][y] = 0
@@ -90,10 +116,11 @@ class Cells(Widget):
         # print holder == self.nextRound
 
     def start_interval(self, events, *largs):
+        print
         if len(events) > 0:
             events[-1].cancel()
             events.pop()
-        events.append(Clock.schedule_interval(self.update_cells,1.0/15.0))
+        events.append(Clock.schedule_interval(self.update_cells,float(self.speed)))
 
     def stop_interval(self, events, *largs):
         if len(events) > 0:
@@ -125,7 +152,10 @@ class Cells(Widget):
         try:
             self.current[pos_x][pos_y] = 1
             with self.canvas:
-                Color(1,1,1,mode='rgb')
+                # Initializes Color() Kivy object
+                self.color = Color(self.allcols[self.cellcol])
+                # Changes the Color() Kivy object depending what user selects
+                self.color.rgb = self.allcols[self.cellcol]
                 x_coord = self.x + pos_x * 10
                 y_coord = self.y + pos_y * 10
                 Rectangle(pos=(x_coord,y_coord), size=(9,9))
@@ -146,7 +176,7 @@ class GameApp(App):
         self.settings_cls = SettingsWithSidebar
         self.config.items('initiate')
         self.use_kivy_settings = False
-        Window.size = (1334,750)
+        # Window.size = (1334,750)
 
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
@@ -192,7 +222,7 @@ class GameApp(App):
         buttons.add_widget(btn_sett)
 
         board.add_widget(buttons)
-        print Window.size
+
         return board
 
     def build_config(self, config):
@@ -200,17 +230,27 @@ class GameApp(App):
             'Speed': 0.1,
             'Lonely': 1,
             'Crowded': 4,
-            'Lives1': 2,
-            'Lives2': 3,
             'Born': 3,
             'Color': 'White',
-            'GridColor': 'Grey',
             'Music': True,
             'Sound': True,
             })
 
     def build_settings(self, settings):
         settings.add_json_panel('Game Settings', self.config, data=settings_json)
+
+    def on_config_change(self, config, section, key, value):
+        if key == 'Speed':
+            Cells.speed = value
+        if key == 'Color':
+            Cells.cellcol = value
+        if key == 'Born':
+            Cells.birth = value
+        if key == 'Lonely':
+            Cells.lonely = value
+        else:
+            pass
+        print config, section, key, value
 
 if __name__ == '__main__':
     GameApp().run()
