@@ -203,36 +203,21 @@ class GameApp(App):
         # schedule the updating of cells
 
 
-        btn_start = Button(text='Start',
-                            on_press=partial(cells.start_interval, self.events))
-
-        btn_stop = Button(text='Stop',
-                            on_press=partial(cells.stop_interval, self.events))
-
-        btn_step = Button(text='Step',
-                            on_press=partial(cells.step, self.events))
-
-        btn_reset = Button(text='Reset',
-                           on_press=partial(cells.reset_interval, self.events))
-
-        btn_place = Button(text='Place',
-                           on_press=partial(cells.place_option, self.events))
-
+        btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events))
+        btn_stop = Button(text='Stop', on_press=partial(cells.stop_interval, self.events))
+        btn_step = Button(text='Step', on_press=partial(cells.step, self.events))
+        btn_reset = Button(text='Reset', on_press=partial(cells.reset_interval, self.events))
+        btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events))
         btn_sett = Button(text='Settings',on_press=partial(self.settings, self.events))
         btn_sett.size_hint = (.6,1)
-
         btn_info = Button(text='info',on_press=partial(cells.info, self.events))
         btn_info.size_hint = (.6,1)
 
-
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
-        buttons.add_widget(btn_start)
-        buttons.add_widget(btn_stop)
-        buttons.add_widget(btn_step)
-        buttons.add_widget(btn_reset)
-        buttons.add_widget(btn_place)
-        buttons.add_widget(btn_sett)
-        buttons.add_widget(btn_info)
+
+        controls =[btn_start,btn_stop,btn_step,btn_reset,btn_place,btn_sett,btn_info]
+        for btn in controls:
+            buttons.add_widget(btn)
 
         board.add_widget(buttons)
 
