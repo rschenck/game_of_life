@@ -116,15 +116,18 @@ class Cells(Widget):
         self.draw_some_cells()
 
     def on_touch_down(self, touch):
-        pos_x, pos_y = touch.pos[0] - 10, touch.pos[1] - 10
+        pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
         pos_x = int(math.floor(pos_x / 10.0))
         pos_y = int(math.floor(pos_y / 10.0))
-        self.current[pos_x][pos_y] = 1
-        with self.canvas:
-            Color(1,1,1,mode='rgb')
-            x_coord = self.x + pos_x * 10
-            y_coord = self.y + pos_y * 10
-            Rectangle(pos=(x_coord,y_coord), size=(9,9))
+        try:
+            self.current[pos_x][pos_y] = 1
+            with self.canvas:
+                Color(1,1,1,mode='rgb')
+                x_coord = self.x + pos_x * 10
+                y_coord = self.y + pos_y * 10
+                Rectangle(pos=(x_coord,y_coord), size=(9,9))
+        except IndexError:
+            pass
 
     def place_option(self, events, *largs):
         pass
@@ -179,6 +182,7 @@ class GameApp(App):
         buttons.add_widget(btn_sett)
 
         board.add_widget(buttons)
+        print Window.size
         return board
 
 if __name__ == '__main__':
