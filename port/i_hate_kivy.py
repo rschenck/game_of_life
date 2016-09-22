@@ -8,19 +8,20 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
 from random import randint
 from functools import partial
+import math
 
 class Grid(Widget):
     def draw_grid(self, *largs):
         with self.canvas:
             Color(.5,.5,.5, mode='rgb')
             for x in range(10,self.width,10):
-                Rectangle(pos=(x,0),size=(1,self.height))
-            for y in range(10,self.height,10):
-                Rectangle(pos=(0,y),size=(self.width,1))
-            Rectangle(pos=(0,0),size=(10,self.height))
-            Rectangle(pos=(0,0),size=(self.width,10))
-            Rectangle(pos=(self.width-10,0),size=(10,self.height))
-            Rectangle(pos=(0,self.height-10),size=(self.width,10))
+                Rectangle(pos=(x,self.y),size=(1,self.height))
+            for y in range(self.y,self.height+self.y,10):
+                Rectangle(pos=(self.x,y),size=(self.width,1))
+            Rectangle(pos=(self.x,self.y),size=(10,self.height))
+            Rectangle(pos=(self.x,self.y),size=(self.width,10))
+            Rectangle(pos=(self.width-10,self.y),size=(10,self.height))
+            Rectangle(pos=(self.x,self.y+self.height-10),size=(self.width,10))
 
 class Cells(Widget):
     current = []
@@ -35,6 +36,7 @@ class Cells(Widget):
             self.current.append(row)
             self.nextRound.append(empties)
 
+
     def draw_some_cells(self, *largs):
         # print "length of list: ", len(self.current)
         with self.canvas:
@@ -42,14 +44,14 @@ class Cells(Widget):
             for x in range(len(self.current)):
                 for y in range(len(self.current[x])):
                     if self.current[x][y] == 1:
-                        x_coord = 11 + x * 10
-                        y_coord = 11 + y * 10
+                        x_coord = self.x + x * 10
+                        y_coord = self.y + y * 10
                         Rectangle(pos=(x_coord,y_coord), size=(9,9))
 
     def update_cells(self, *largs):
         self.canvas.clear()
         self.size = (Window.width - 20, Window.height - 70)
-        self.pos = (11,11)
+        self.pos = (11,61)
         # print "new size and pos after clear(): ", self.size, self.pos
         for x in range(len(self.current)):
             for y in range(len(self.current[x])):
@@ -88,7 +90,7 @@ class Cells(Widget):
         if len(events) > 0:
             events[-1].cancel()
             events.pop()
-        events.append(Clock.schedule_interval(self.update_cells,1.0/30.0))
+        events.append(Clock.schedule_interval(self.update_cells,1.0/15.0))
 
     def stop_interval(self, events, *largs):
         if len(events) > 0:
@@ -109,30 +111,28 @@ class Cells(Widget):
         self.nextRound = []
         self.canvas.clear()
         self.size = (Window.width - 20, Window.height - 70)
-        self.pos = (11,11)
+        self.pos = (11,61)
         self.create_cells()
         self.draw_some_cells()
 
+    def on_touch_down(self, touch):
+        pos_x, pos_y = touch.pos[0] - 10, touch.pos[1] - 10
+        pos_x = int(math.floor(pos_x / 10.0))
+        pos_y = int(math.floor(pos_y / 10.0))
+        self.current[pos_x][pos_y] = 1
+        with self.canvas:
+            Color(1,1,1,mode='rgb')
+            x_coord = self.x + pos_x * 10
+            y_coord = self.y + pos_y * 10
+            Rectangle(pos=(x_coord,y_coord), size=(9,9))
+
 class GameApp(App):
     events = []
-    def draw_grid(self, wid,*largs):
-        # print wid.height, wid.width, wid.size, wid.pos
-        with wid.canvas:
-            Color(.5,.5,.5, mode='rgb')
-            for x in range(10,wid.width,10):
-                Rectangle(pos=(x,0),size=(1,wid.height))
-            for y in range(10,wid.height,10):
-                Rectangle(pos=(0,y),size=(wid.width,1))
-            Rectangle(pos=(0,0),size=(10,wid.height))
-            Rectangle(pos=(0,0),size=(wid.width,10))
-            Rectangle(pos=(wid.width-10,0),size=(10,wid.height))
-            Rectangle(pos=(0,wid.height-10),size=(wid.width,10))
-
     def build(self):
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
-        grid = Grid(size=(board.width, board.height - 50))
-        cells = Cells(size=(grid.width - 20, grid.height - 20), pos=(11,11))
+        grid = Grid(size=(board.width, board.height - 50), pos=(0,50))
+        cells = Cells(size=(grid.width - 20, grid.height - 20), pos=(11,61))
 
         # generate cell lists
         cells.create_cells()
@@ -157,7 +157,7 @@ class GameApp(App):
         btn_reset = Button(text='Reset',
                            on_press=partial(cells.reset_interval, self.events))
 
-        buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'top':1})
+        buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
         buttons.add_widget(btn_start)
         buttons.add_widget(btn_stop)
         buttons.add_widget(btn_step)
