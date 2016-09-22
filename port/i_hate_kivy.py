@@ -54,7 +54,7 @@ class Cells(Widget):
         self.pos = (11,61)
         # print "new size and pos after clear(): ", self.size, self.pos
         for x in range(len(self.current)):
-            for y in range(len(self.current[x])):
+            for y in range(100,len(self.current[x])+100):
 
                 over_x = x + 1
                 if over_x == len(self.current):
@@ -126,6 +126,12 @@ class Cells(Widget):
             y_coord = self.y + pos_y * 10
             Rectangle(pos=(x_coord,y_coord), size=(9,9))
 
+    def place_option(self, events, *largs):
+        pass
+
+    def settings(self, events, *largs):
+        pass
+
 class GameApp(App):
     events = []
     def build(self):
@@ -157,11 +163,19 @@ class GameApp(App):
         btn_reset = Button(text='Reset',
                            on_press=partial(cells.reset_interval, self.events))
 
+        btn_place = Button(text='Place',
+                           on_press=partial(cells.place_option, self.events))
+
+        btn_sett = Button(text='Settings',
+                           on_press=partial(cells.place_option, self.events))
+
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
         buttons.add_widget(btn_start)
         buttons.add_widget(btn_stop)
         buttons.add_widget(btn_step)
         buttons.add_widget(btn_reset)
+        buttons.add_widget(btn_place)
+        buttons.add_widget(btn_sett)
 
         board.add_widget(buttons)
         return board
