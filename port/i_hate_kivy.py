@@ -47,460 +47,451 @@ class Grid(Widget):
             Rectangle(pos=(self.x,self.y+self.height-10),size=(self.width,10))
 
 class Cells(Widget):
-    allcols = {
-    'White': [1,1,1],
-    'Grey': [0.5,0.5,0.5],
-    'Blue': [0,0,1],
-    'Green': [0,1,0],
-    'Red': [1,0,0],
-    'Random': [0,0,0]
-    }
-    speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
+	allcols = {
+	'White': [1,1,1],
+	'Grey': [0.5,0.5,0.5],
+	'Blue': [0,0,1],
+	'Green': [0,1,0],
+	'Red': [1,0,0],
+	'Random': [0,0,0]
+	}
+	speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
+
+	mid_x,mid_y = 0,0
+	current = []
+	nextRound = []
+	def assign_random(self, modal, *largs):
+	    self.create_cells(random=True)
+	    self.draw_some_cells()
+	    modal.dismiss()
 
 
-    current = []
-    nextRound = []
-    def assign_random(self, modal, *largs):
-        print "assign_random() caled"
-        self.create_cells(random=True)
-        self.draw_some_cells()
-        modal.dismiss()
+	def assign_blank(self, modal, *largs):
+	    self.create_cells()
+	    self.draw_some_cells()
+	    modal.dismiss()
+
+	def assign_gun(self, modal, *largs):
+		self.create_cells()
+		self.current[self.mid_x -20 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -20 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -19 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -19 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -12 ][self.mid_y ]=1
+		self.current[self.mid_x -12 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -11 ][self.mid_y ]=1
+		self.current[self.mid_x -11 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -10 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -10 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -4 ][self.mid_y -2 ]=1
+		self.current[self.mid_x -4 ][self.mid_y -1 ]=1
+		self.current[self.mid_x -4 ][self.mid_y ]=1
+		self.current[self.mid_x -3 ][self.mid_y ]=1
+		self.current[self.mid_x -2 ][self.mid_y -1 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y -9 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y -8 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y -10 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y -8 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y -8 ]=1
+		self.current[self.mid_x+ 14 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 14 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 15 ][self.mid_y -5 ]=1
+		self.current[self.mid_x+ 15 ][self.mid_y -4 ]=1
+		self.current[self.mid_x+ 15 ][self.mid_y -3 ]=1
+		self.current[self.mid_x+ 15 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 15 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 16 ][self.mid_y -3 ]=1
+		self.current[self.mid_x+ 17 ][self.mid_y -4 ]=1
+		self.draw_some_cells()
+		modal.dismiss()
+
+	def assign_ten(self, modal, *largs):
+		self.create_cells()
+		self.current[self.mid_x -6 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -5 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -1 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 2 ]=1
+		self.draw_some_cells()
+		modal.dismiss()
+
+	def assign_binary(self, modal, *largs):
+		self.create_cells()
+		self.current[self.mid_x -12 ][self.mid_y ]=1
+		self.current[self.mid_x -12 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -12 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -12 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x -11 ][self.mid_y ]=1
+		self.current[self.mid_x -11 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -11 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -11 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x -9 ][self.mid_y -2 ]=1
+		self.current[self.mid_x -9 ][self.mid_y -1 ]=1
+		self.current[self.mid_x -9 ][self.mid_y ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 7 ]=1
+		self.current[self.mid_x -8 ][self.mid_y -3 ]=1
+		self.current[self.mid_x -8 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x -7 ][self.mid_y -3 ]=1
+		self.current[self.mid_x -7 ][self.mid_y -2 ]=1
+		self.current[self.mid_x -7 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -7 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -7 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -7 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -7 ][self.mid_y+ 7 ]=1
+		self.current[self.mid_x -7 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x -5 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -5 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 11 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 11 ]=1
+		self.current[self.mid_x -1 ][self.mid_y+ 11 ]=1
+		self.current[self.mid_x ][self.mid_y -3 ]=1
+		self.current[self.mid_x ][self.mid_y -2 ]=1
+		self.current[self.mid_x ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x ][self.mid_y+ 7 ]=1
+		self.current[self.mid_x ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -3 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y -2 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y -1 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 7 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 5 ]=1
+		self.draw_some_cells()
+		modal.dismiss()
+
+	def assign_face(self, modal, *largs):
+		self.create_cells()
+		self.current[self.mid_x -5 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x -5 ][self.mid_y+ 9 ]=1
+		self.current[self.mid_x -5 ][self.mid_y+ 10 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 7 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 11 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 7 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 11 ]=1
+		self.current[self.mid_x -2 ][self.mid_y -4 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 9 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 10 ]=1
+		self.current[self.mid_x -1 ][self.mid_y -5 ]=1
+		self.current[self.mid_x -1 ][self.mid_y -4 ]=1
+		self.current[self.mid_x -1 ][self.mid_y -3 ]=1
+		self.current[self.mid_x ][self.mid_y -6 ]=1
+		self.current[self.mid_x ][self.mid_y -5 ]=1
+		self.current[self.mid_x ][self.mid_y -3 ]=1
+		self.current[self.mid_x ][self.mid_y -2 ]=1
+		self.current[self.mid_x ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -7 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -6 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -5 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -3 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -2 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -1 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y -7 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y -6 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y -5 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y -3 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y -2 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y -1 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y -7 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y -6 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y -5 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y -3 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y -2 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y -1 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 9 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 10 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y -7 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y -6 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y -5 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y -3 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y -2 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y -1 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y+ 7 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y+ 11 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y -6 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y -5 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y -3 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y -2 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 7 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 11 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y -5 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y -4 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y -3 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 9 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 10 ]=1
+		self.current[self.mid_x+ 7 ][self.mid_y -4 ]=1
+		self.draw_some_cells()
+		modal.dismiss()
+
+	def assign_maze(self, modal, *largs):
+		self.create_cells()
+		self.current[self.mid_x -3 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 4 ]=1
+		self.draw_some_cells()
+		modal.dismiss()
+
+	def assign_pulsar(self, modal, *largs):
+		self.create_cells()
+		self.current[self.mid_x -6 ][self.mid_y -2 ]=1
+		self.current[self.mid_x -6 ][self.mid_y -1 ]=1
+		self.current[self.mid_x -6 ][self.mid_y ]=1
+		self.current[self.mid_x -6 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -6 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x -6 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x -4 ][self.mid_y -4 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x -3 ][self.mid_y -4 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x -2 ][self.mid_y -4 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x -1 ][self.mid_y -2 ]=1
+		self.current[self.mid_x -1 ][self.mid_y -1 ]=1
+		self.current[self.mid_x -1 ][self.mid_y ]=1
+		self.current[self.mid_x -1 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -1 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x -1 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -2 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -1 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y -4 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y -4 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y -4 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 4 ][self.mid_y+ 8 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y -2 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y -1 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 6 ]=1
+		self.draw_some_cells()
+		modal.dismiss()
+
+	def assign_gliders(self, modal, *largs):
+		self.create_cells()
+		self.current[self.mid_x -11 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -10 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x -5 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -2 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y -1 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y ]=1
+		self.current[self.mid_x+ 3 ][self.mid_y ]=1
+		self.draw_some_cells()
+		modal.dismiss()
 
 
-    def assign_blank(self, modal, *largs):
-        print "assign_blank() caled"
-        self.create_cells()
-        self.draw_some_cells()
-        modal.dismiss()
+	def create_cells(self, random=False,*largs):
+		self.size = (Window.width - 20, Window.height - 70)
+		self.pos = (11,61)
+		for x in range(0,self.width/10):
+		    row = []
+		    empties = []
+		    for y in range(0,self.height/10):
+		        if random:
+		            row.append(randint(0,1))
+		        else:
+		            row.append(0)
+		        empties.append(0)
+		    self.current.append(row)
+		    self.nextRound.append(empties)
+		self.mid_x,self.mid_y = len(self.current)/2, len(self.current[0])/2
 
-    def assign_gun(self, modal, *largs):
-        print "assign_gun() caled"
-        self.create_cells()
-        self.current[ 62 ][ 34 ]=1
-        self.current[ 61 ][ 34 ]=1
-        self.current[ 61 ][ 33 ]=1
-        self.current[ 61 ][ 32 ]=1
-        self.current[ 63 ][ 33 ]=1
-        self.current[ 54 ][ 34 ]=1
-        self.current[ 53 ][ 34 ]=1
-        self.current[ 53 ][ 35 ]=1
-        self.current[ 54 ][ 36 ]=1
-        self.current[ 55 ][ 36 ]=1
-        self.current[ 55 ][ 35 ]=1
-        self.current[ 46 ][ 35 ]=1
-        self.current[ 45 ][ 35 ]=1
-        self.current[ 45 ][ 36 ]=1
-        self.current[ 46 ][ 36 ]=1
-        self.current[ 67 ][ 37 ]=1
-        self.current[ 67 ][ 36 ]=1
-        self.current[ 68 ][ 36 ]=1
-        self.current[ 68 ][ 38 ]=1
-        self.current[ 69 ][ 38 ]=1
-        self.current[ 69 ][ 37 ]=1
-        self.current[ 79 ][ 38 ]=1
-        self.current[ 79 ][ 37 ]=1
-        self.current[ 80 ][ 37 ]=1
-        self.current[ 80 ][ 38 ]=1
-        self.current[ 80 ][ 31 ]=1
-        self.current[ 80 ][ 30 ]=1
-        self.current[ 80 ][ 29 ]=1
-        self.current[ 81 ][ 31 ]=1
-        self.current[ 82 ][ 30 ]=1
-        self.current[ 69 ][ 26 ]=1
-        self.current[ 69 ][ 25 ]=1
-        self.current[ 70 ][ 26 ]=1
-        self.current[ 71 ][ 26 ]=1
-        self.current[ 70 ][ 24 ]=1
-        self.draw_some_cells()
-        # self.current[][]=1
-        modal.dismiss()
+	def draw_some_cells(self, *largs):
+		# print "drawing some cells"
+		# print "length of list: ", len(self.current)
+		with self.canvas:
+		# Initializes Color() Kivy object
+			self.color = Color(self.allcols[self.cellcol])
+			# Changes the Color() Kivy object depending what user selects
+			self.color.rgb = self.allcols[self.cellcol]
 
-    def assign_ten(self, modal, *largs):
-        print "assign_ten() caled"
-        self.create_cells()
-        self.current[ 64 ][ 36 ]=1
-        self.current[ 63 ][ 36 ]=1
-        self.current[ 62 ][ 36 ]=1
-        self.current[ 61 ][ 36 ]=1
-        self.current[ 60 ][ 36 ]=1
-        self.current[ 59 ][ 36 ]=1
-        self.current[ 65 ][ 36 ]=1
-        self.current[ 66 ][ 36 ]=1
-        self.current[ 67 ][ 36 ]=1
-        self.current[ 68 ][ 36 ]=1
-        self.draw_some_cells()
-        modal.dismiss()
+			for x in range(len(self.current)):
+				for y in range(len(self.current[x])):
+					if self.current[x][y] == 1:
+						# p_x = "+" if x-65 > 0 else ""
+						# p_y = "+" if y-34 > 0 else ""
+						# print "self.current[self.mid_x" + p_x,x-65,"][self.mid_y"+p_y,y-34,"]=1"
+						x_coord = self.x + x * 10
+						y_coord = self.y + y * 10
+						if self.cellcol == 'Random':
+						    self.color.rgb = [uniform(0.0,1.0),uniform(0.0,1.0),uniform(0.0,1.0)]
+						Rectangle(pos=(x_coord,y_coord), size=(9,9))
 
-    def assign_binary(self, modal, *largs):
-        print "assign_binary() caled"
-        self.create_cells()
-        self.current[ 61 ][ 38 ]=1
-        self.current[ 62 ][ 38 ]=1
-        self.current[ 63 ][ 37 ]=1
-        self.current[ 63 ][ 36 ]=1
-        self.current[ 62 ][ 35 ]=1
-        self.current[ 61 ][ 35 ]=1
-        self.current[ 60 ][ 36 ]=1
-        self.current[ 60 ][ 37 ]=1
-        self.current[ 65 ][ 38 ]=1
-        self.current[ 65 ][ 37 ]=1
-        self.current[ 65 ][ 36 ]=1
-        self.current[ 65 ][ 35 ]=1
-        self.current[ 58 ][ 38 ]=1
-        self.current[ 58 ][ 37 ]=1
-        self.current[ 58 ][ 36 ]=1
-        self.current[ 58 ][ 35 ]=1
-        self.current[ 65 ][ 41 ]=1
-        self.current[ 65 ][ 42 ]=1
-        self.current[ 66 ][ 42 ]=1
-        self.current[ 65 ][ 32 ]=1
-        self.current[ 65 ][ 31 ]=1
-        self.current[ 66 ][ 31 ]=1
-        self.current[ 58 ][ 32 ]=1
-        self.current[ 58 ][ 31 ]=1
-        self.current[ 57 ][ 31 ]=1
-        self.current[ 58 ][ 41 ]=1
-        self.current[ 58 ][ 42 ]=1
-        self.current[ 57 ][ 42 ]=1
-        self.current[ 67 ][ 41 ]=1
-        self.current[ 67 ][ 40 ]=1
-        self.current[ 67 ][ 38 ]=1
-        self.current[ 67 ][ 39 ]=1
-        self.current[ 67 ][ 37 ]=1
-        self.current[ 67 ][ 36 ]=1
-        self.current[ 67 ][ 35 ]=1
-        self.current[ 67 ][ 34 ]=1
-        self.current[ 67 ][ 33 ]=1
-        self.current[ 67 ][ 32 ]=1
-        self.current[ 56 ][ 32 ]=1
-        self.current[ 56 ][ 33 ]=1
-        self.current[ 56 ][ 34 ]=1
-        self.current[ 56 ][ 35 ]=1
-        self.current[ 56 ][ 36 ]=1
-        self.current[ 56 ][ 37 ]=1
-        self.current[ 56 ][ 38 ]=1
-        self.current[ 56 ][ 39 ]=1
-        self.current[ 56 ][ 40 ]=1
-        self.current[ 56 ][ 41 ]=1
-        self.current[ 64 ][ 45 ]=1
-        self.current[ 63 ][ 45 ]=1
-        self.current[ 62 ][ 45 ]=1
-        self.current[ 69 ][ 38 ]=1
-        self.current[ 69 ][ 39 ]=1
-        self.current[ 70 ][ 39 ]=1
-        self.current[ 70 ][ 38 ]=1
-        self.current[ 69 ][ 35 ]=1
-        self.current[ 69 ][ 34 ]=1
-        self.current[ 70 ][ 34 ]=1
-        self.current[ 70 ][ 35 ]=1
-        self.current[ 54 ][ 38 ]=1
-        self.current[ 54 ][ 39 ]=1
-        self.current[ 53 ][ 39 ]=1
-        self.current[ 53 ][ 38 ]=1
-        self.current[ 54 ][ 35 ]=1
-        self.current[ 53 ][ 35 ]=1
-        self.current[ 53 ][ 34 ]=1
-        self.current[ 54 ][ 34 ]=1
-        self.draw_some_cells()
-        modal.dismiss()
+	def update_cells(self, *largs):
 
-    def assign_face(self, modal, *largs):
-        print "assign_face() caled"
-        self.create_cells()
-        self.current[ 70 ][ 36 ]=1
-        self.current[ 70 ][ 37 ]=1
-        self.current[ 71 ][ 37 ]=1
-        self.current[ 71 ][ 36 ]=1
-        self.current[ 70 ][ 41 ]=1
-        self.current[ 69 ][ 41 ]=1
-        self.current[ 71 ][ 42 ]=1
-        self.current[ 71 ][ 43 ]=1
-        self.current[ 71 ][ 44 ]=1
-        self.current[ 70 ][ 45 ]=1
-        self.current[ 69 ][ 45 ]=1
-        self.current[ 68 ][ 44 ]=1
-        self.current[ 68 ][ 43 ]=1
-        self.current[ 68 ][ 42 ]=1
-        self.current[ 63 ][ 42 ]=1
-        self.current[ 63 ][ 43 ]=1
-        self.current[ 63 ][ 44 ]=1
-        self.current[ 62 ][ 45 ]=1
-        self.current[ 61 ][ 45 ]=1
-        self.current[ 60 ][ 44 ]=1
-        self.current[ 60 ][ 43 ]=1
-        self.current[ 60 ][ 42 ]=1
-        self.current[ 61 ][ 41 ]=1
-        self.current[ 62 ][ 41 ]=1
-        self.current[ 68 ][ 37 ]=1
-        self.current[ 67 ][ 38 ]=1
-        self.current[ 67 ][ 36 ]=1
-        self.current[ 66 ][ 36 ]=1
-        self.current[ 65 ][ 37 ]=1
-        self.current[ 66 ][ 33 ]=1
-        self.current[ 67 ][ 33 ]=1
-        self.current[ 68 ][ 33 ]=1
-        self.current[ 69 ][ 33 ]=1
-        self.current[ 65 ][ 32 ]=1
-        self.current[ 66 ][ 32 ]=1
-        self.current[ 67 ][ 32 ]=1
-        self.current[ 68 ][ 32 ]=1
-        self.current[ 69 ][ 32 ]=1
-        self.current[ 70 ][ 32 ]=1
-        self.current[ 64 ][ 31 ]=1
-        self.current[ 65 ][ 31 ]=1
-        self.current[ 66 ][ 31 ]=1
-        self.current[ 67 ][ 31 ]=1
-        self.current[ 68 ][ 31 ]=1
-        self.current[ 69 ][ 31 ]=1
-        self.current[ 70 ][ 31 ]=1
-        self.current[ 71 ][ 31 ]=1
-        self.current[ 72 ][ 30 ]=1
-        self.current[ 71 ][ 30 ]=1
-        self.current[ 63 ][ 30 ]=1
-        self.current[ 64 ][ 30 ]=1
-        self.current[ 64 ][ 29 ]=1
-        self.current[ 65 ][ 29 ]=1
-        self.current[ 66 ][ 29 ]=1
-        self.current[ 67 ][ 29 ]=1
-        self.current[ 68 ][ 29 ]=1
-        self.current[ 69 ][ 29 ]=1
-        self.current[ 70 ][ 29 ]=1
-        self.current[ 71 ][ 29 ]=1
-        self.current[ 65 ][ 28 ]=1
-        self.current[ 66 ][ 28 ]=1
-        self.current[ 67 ][ 28 ]=1
-        self.current[ 68 ][ 28 ]=1
-        self.current[ 69 ][ 28 ]=1
-        self.current[ 70 ][ 28 ]=1
-        self.current[ 66 ][ 27 ]=1
-        self.current[ 67 ][ 27 ]=1
-        self.current[ 68 ][ 27 ]=1
-        self.current[ 69 ][ 27 ]=1
-        self.draw_some_cells()
-        modal.dismiss()
+	    self.canvas.clear()
+	    self.size = (Window.width - 20, Window.height - 70)
+	    self.pos = (11,61)
+	    # print "new size and pos after clear(): ", self.size, self.pos
+	    for x in range(len(self.current)):
+	        for y in range(len(self.current[x])):
 
-    def assign_maze(self, modal, *largs):
-        print "assign_maze() caled"
-        self.create_cells()
-        self.current[ 65 ][ 39 ]=1
-        self.current[ 65 ][ 40 ]=1
-        self.current[ 66 ][ 40 ]=1
-        self.current[ 67 ][ 37 ]=1
-        self.current[ 68 ][ 37 ]=1
-        self.current[ 68 ][ 38 ]=1
-        self.current[ 67 ][ 35 ]=1
-        self.current[ 65 ][ 35 ]=1
-        self.current[ 66 ][ 34 ]=1
-        self.current[ 63 ][ 39 ]=1
-        self.current[ 62 ][ 38 ]=1
-        self.current[ 63 ][ 37 ]=1
-        self.draw_some_cells()
-        modal.dismiss()
+	            over_x = x + 1
+	            if over_x == len(self.current):
+	                over_x = 0
+	            over_y = y + 1
+	            if over_y == len(self.current[x]):
+	                over_y = 0
 
-    def assign_pulsar(self, modal, *largs):
-        print "assign_pulsar() caled"
-        self.create_cells()
-        self.current[ 66 ][ 38 ]=1
-        self.current[ 64 ][ 38 ]=1
-        self.current[ 64 ][ 34 ]=1
-        self.current[ 66 ][ 34 ]=1
-        self.current[ 67 ][ 37 ]=1
-        self.current[ 67 ][ 35 ]=1
-        self.current[ 63 ][ 37 ]=1
-        self.current[ 63 ][ 35 ]=1
-        self.current[ 68 ][ 37 ]=1
-        self.current[ 69 ][ 37 ]=1
-        self.current[ 68 ][ 35 ]=1
-        self.current[ 69 ][ 35 ]=1
-        self.current[ 66 ][ 33 ]=1
-        self.current[ 66 ][ 32 ]=1
-        self.current[ 64 ][ 33 ]=1
-        self.current[ 64 ][ 32 ]=1
-        self.current[ 62 ][ 35 ]=1
-        self.current[ 61 ][ 35 ]=1
-        self.current[ 61 ][ 37 ]=1
-        self.current[ 62 ][ 37 ]=1
-        self.current[ 64 ][ 39 ]=1
-        self.current[ 64 ][ 40 ]=1
-        self.current[ 66 ][ 40 ]=1
-        self.current[ 66 ][ 39 ]=1
-        self.current[ 67 ][ 42 ]=1
-        self.current[ 68 ][ 42 ]=1
-        self.current[ 69 ][ 42 ]=1
-        self.current[ 71 ][ 38 ]=1
-        self.current[ 71 ][ 39 ]=1
-        self.current[ 71 ][ 40 ]=1
-        self.current[ 71 ][ 34 ]=1
-        self.current[ 71 ][ 33 ]=1
-        self.current[ 71 ][ 32 ]=1
-        self.current[ 67 ][ 30 ]=1
-        self.current[ 68 ][ 30 ]=1
-        self.current[ 69 ][ 30 ]=1
-        self.current[ 63 ][ 30 ]=1
-        self.current[ 62 ][ 30 ]=1
-        self.current[ 61 ][ 30 ]=1
-        self.current[ 59 ][ 34 ]=1
-        self.current[ 59 ][ 33 ]=1
-        self.current[ 59 ][ 32 ]=1
-        self.current[ 59 ][ 38 ]=1
-        self.current[ 59 ][ 39 ]=1
-        self.current[ 59 ][ 40 ]=1
-        self.current[ 63 ][ 42 ]=1
-        self.current[ 62 ][ 42 ]=1
-        self.current[ 61 ][ 42 ]=1
-        self.draw_some_cells()
-        modal.dismiss()
+	            alive_neighbors = self.current[x-1][y-1] + self.current[x-1][y] + self.current[x-1][over_y] + self.current[x][y-1] + self.current[x][over_y] + self.current[over_x][y-1] + self.current[over_x][y] + self.current[over_x][over_y]
 
-    def assign_gliders(self, modal, *largs):
-        print "assign_gliders() caled"
-        self.create_cells()
-        self.current[ 60 ][ 36 ]=1
-        self.current[ 61 ][ 36 ]=1
-        self.current[ 62 ][ 36 ]=1
-        self.current[ 61 ][ 35 ]=1
-        self.current[ 66 ][ 34 ]=1
-        self.current[ 67 ][ 34 ]=1
-        self.current[ 68 ][ 34 ]=1
-        self.current[ 66 ][ 33 ]=1
-        self.current[ 66 ][ 32 ]=1
-        self.current[ 56 ][ 38 ]=1
-        self.current[ 55 ][ 38 ]=1
-        self.current[ 54 ][ 38 ]=1
-        self.current[ 56 ][ 39 ]=1
-        self.current[ 56 ][ 40 ]=1
-        self.draw_some_cells()
-        modal.dismiss()
+	            if self.current[x][y] == 1:
+	                if (int(self.lonely) >= alive_neighbors or alive_neighbors >= int(self.crowded)):
+	                    self.nextRound[x][y] = 0
+	                else:
+	                    self.nextRound[x][y] = 1
+	            elif self.current[x][y] == 0:
+	                if alive_neighbors == int(self.birth):
+	                    self.nextRound[x][y] = 1
+	                else:
+	                    self.nextRound[x][y] = 0
 
+	    self.switch_lists()
+	    self.draw_some_cells()
 
-    def create_cells(self, random=False,*largs):
-        self.size = (Window.width - 20, Window.height - 70)
-        self.pos = (11,61)
-        print "create_cells() called, random = ", random
-        print "size of cells: ", self.size
-        for x in range(0,self.width/10):
-            row = []
-            empties = []
-            for y in range(0,self.height/10):
-                if random:
-                    row.append(randint(0,1))
-                else:
-                    row.append(0)
-                empties.append(0)
-            self.current.append(row)
-            self.nextRound.append(empties)
+	def switch_lists(self,*largs):
+	    holder = self.current
+	    self.current = self.nextRound
+	    # print holder == self.nextRound
+	    self.nextRound = holder
+	    # print holder == self.nextRound
 
+	def start_interval(self, events, *largs):
+	    if len(events) > 0:
+	        events[-1].cancel()
+	        events.pop()
+	    events.append(Clock.schedule_interval(self.update_cells,float(self.speed)))
 
-    def draw_some_cells(self, *largs):
-        # print "length of list: ", len(self.current)
-        with self.canvas:
-            # Initializes Color() Kivy object
-            self.color = Color(self.allcols[self.cellcol])
-            # Changes the Color() Kivy object depending what user selects
-            self.color.rgb = self.allcols[self.cellcol]
+	def stop_interval(self, events, *largs):
+	    if len(events) > 0:
+	        events[-1].cancel()
+	        events.pop()
 
-            for x in range(len(self.current)):
-                for y in range(len(self.current[x])):
-                    if self.current[x][y] == 1:
-                        x_coord = self.x + x * 10
-                        y_coord = self.y + y * 10
-                        if self.cellcol == 'Random':
-                            self.color.rgb = [uniform(0.0,1.0),uniform(0.0,1.0),uniform(0.0,1.0)]
-                        Rectangle(pos=(x_coord,y_coord), size=(9,9))
+	def step(self, events, *largs):
+	    if len(events) > 0:
+	        events[-1].cancel()
+	        events.pop()
+	    Clock.schedule_once(self.update_cells, 1.0/60.0)
 
-    def update_cells(self, *largs):
+	def reset_interval(self, events, grid, modal, *largs):
+	    if len(events) > 0:
+	        events[-1].cancel()
+	        events.pop()
+	    self.current = []
+	    self.nextRound = []
+	    grid.canvas.clear()
+	    self.canvas.clear()
+	    self.size = (Window.width - 20, Window.height - 70)
+	    self.pos = (11,61)
+	    # self.create_cells()
+	    # self.draw_some_cells()
+	    modal.open()
 
-        self.canvas.clear()
-        self.size = (Window.width - 20, Window.height - 70)
-        self.pos = (11,61)
-        # print "new size and pos after clear(): ", self.size, self.pos
-        for x in range(len(self.current)):
-            for y in range(len(self.current[x])):
+	def on_touch_down(self, touch):
+	    pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
+	    pos_x = int(math.floor(pos_x / 10.0))
+	    pos_y = int(math.floor(pos_y / 10.0))
+	    # print "self.current[", pos_x, "][",pos_y,"]=1"
+	    try:
+	        self.current[pos_x][pos_y] = 1
+	        with self.canvas:
+	            # Initializes Color() Kivy object
+	            self.color = Color(self.allcols[self.cellcol])
+	            # Changes the Color() Kivy object depending what user selects
+	            self.color.rgb = self.allcols[self.cellcol]
+	            x_coord = self.x + pos_x * 10
+	            y_coord = self.y + pos_y * 10
+	            Rectangle(pos=(x_coord,y_coord), size=(9,9))
+	    except IndexError:
+	        pass
 
-                over_x = x + 1
-                if over_x == len(self.current):
-                    over_x = 0
-                over_y = y + 1
-                if over_y == len(self.current[x]):
-                    over_y = 0
+	def place_option(self, events, *largs):
+	    pass
 
-                alive_neighbors = self.current[x-1][y-1] + self.current[x-1][y] + self.current[x-1][over_y] + self.current[x][y-1] + self.current[x][over_y] + self.current[over_x][y-1] + self.current[over_x][y] + self.current[over_x][over_y]
-
-                if self.current[x][y] == 1:
-                    if (int(self.lonely) >= alive_neighbors or alive_neighbors >= int(self.crowded)):
-                        self.nextRound[x][y] = 0
-                    else:
-                        self.nextRound[x][y] = 1
-                elif self.current[x][y] == 0:
-                    if alive_neighbors == int(self.birth):
-                        self.nextRound[x][y] = 1
-                    else:
-                        self.nextRound[x][y] = 0
-
-        self.switch_lists()
-        self.draw_some_cells()
-
-    def switch_lists(self,*largs):
-        holder = self.current
-        self.current = self.nextRound
-        # print holder == self.nextRound
-        self.nextRound = holder
-        # print holder == self.nextRound
-
-    def start_interval(self, events, *largs):
-        print
-        if len(events) > 0:
-            events[-1].cancel()
-            events.pop()
-        events.append(Clock.schedule_interval(self.update_cells,float(self.speed)))
-
-    def stop_interval(self, events, *largs):
-        if len(events) > 0:
-            events[-1].cancel()
-            events.pop()
-
-    def step(self, events, *largs):
-        if len(events) > 0:
-            events[-1].cancel()
-            events.pop()
-        Clock.schedule_once(self.update_cells, 1.0/60.0)
-
-    def reset_interval(self, events, grid, modal, *largs):
-        if len(events) > 0:
-            events[-1].cancel()
-            events.pop()
-        self.current = []
-        self.nextRound = []
-        grid.canvas.clear()
-        self.canvas.clear()
-        self.size = (Window.width - 20, Window.height - 70)
-        self.pos = (11,61)
-        # self.create_cells()
-        # self.draw_some_cells()
-        modal.open()
-
-    def on_touch_down(self, touch):
-        pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
-        pos_x = int(math.floor(pos_x / 10.0))
-        pos_y = int(math.floor(pos_y / 10.0))
-        print "self.current[", pos_x, "][",pos_y,"]=1"
-        try:
-            self.current[pos_x][pos_y] = 1
-            with self.canvas:
-                # Initializes Color() Kivy object
-                self.color = Color(self.allcols[self.cellcol])
-                # Changes the Color() Kivy object depending what user selects
-                self.color.rgb = self.allcols[self.cellcol]
-                x_coord = self.x + pos_x * 10
-                y_coord = self.y + pos_y * 10
-                Rectangle(pos=(x_coord,y_coord), size=(9,9))
-        except IndexError:
-            pass
-
-    def place_option(self, events, *largs):
-        pass
-
-    def info(self, events, *largs):
-        pass
+	def info(self, events, *largs):
+	    pass
 
 class GameApp(App):
     events = []
@@ -512,7 +503,7 @@ class GameApp(App):
 		self.settings_cls = SettingsWithSidebar
 		self.config.items('initiate')
 		self.use_kivy_settings = False
-		Window.size = (1334,750)
+		# Window.size = (1334,750)
 
 		# make layout and additional widgets
 		board = FloatLayout(size=(Window.width, Window.height))
@@ -573,8 +564,9 @@ class GameApp(App):
 		start_patterns.attach_on = board
 		start_patterns.open()
 		start_patterns.bind(on_dismiss=grid.draw_grid)
-		start_patterns.bind(on_dismiss=cells.draw_some_cells)
+		# start_patterns.bind(on_dismiss=cells.draw_some_cells)
 		board.add_widget(buttons)
+
 		return board
 
     def build_config(self, config):
