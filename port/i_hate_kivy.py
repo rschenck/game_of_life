@@ -8,6 +8,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
 from kivy.config import ConfigParser
 from kivy.uix.settings import SettingsWithSidebar
+from settings_options import settings_json
 from random import randint
 from functools import partial
 import math
@@ -143,7 +144,8 @@ class GameApp(App):
 
     def build(self):
         self.settings_cls = SettingsWithSidebar
-
+        self.config.items('initiate')
+        self.use_kivy_settings = False
         Window.size = (1334,750)
 
         # make layout and additional widgets
@@ -192,6 +194,19 @@ class GameApp(App):
         board.add_widget(buttons)
         print Window.size
         return board
+
+    def build_config(self, config):
+        config.setdefaults('initiate', {
+            'Speed': 0.1,
+            'Lonely': 1,
+            'Crowded': 4,
+            'Lives1': 2,
+            'Lives2': 3,
+            'Born': 3
+            })
+
+    def build_settings(self, settings):
+        settings.add_json_panel('Game Settings', self.config, data=settings_json)
 
 if __name__ == '__main__':
     GameApp().run()
