@@ -6,6 +6,7 @@ from kivy.graphics import *
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
+from kivy.config import ConfigParser
 from random import randint
 from functools import partial
 import math
