@@ -135,6 +135,7 @@ class Cells(Widget):
 class GameApp(App):
     events = []
     def build(self):
+        Window.size = (1334,750)
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
         grid = Grid(size=(board.width, board.height - 50), pos=(0,50))
