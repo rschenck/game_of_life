@@ -22,7 +22,7 @@ import math
 #     if sound and music:
 #         sound.loop = True
 #         sound.play()
-
+#
 # def dump(obj):
 #     for attr in dir(obj):
 #         print "obj.%s = %s" % (attr, getattr(obj, attr))
@@ -55,8 +55,7 @@ class Cells(Widget):
 	'Red': [1,0,0],
 	'Random': [0,0,0]
 	}
-	speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
-
+	# speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
 	mid_x,mid_y = 0,0
 	current = []
 	nextRound = []
@@ -67,9 +66,9 @@ class Cells(Widget):
 
 
 	def assign_blank(self, modal, *largs):
-	    self.create_cells()
-	    # self.draw_some_cells()
-	    modal.dismiss()
+		self.create_cells()
+		# self.draw_some_cells()
+		modal.dismiss()
 
 	def assign_gun(self, modal, *largs):
 		self.create_cells()
@@ -272,21 +271,99 @@ class Cells(Widget):
 		# self.draw_some_cells()
 		modal.dismiss()
 
-	def assign_maze(self, modal, *largs):
+	# def assign_maze(self, modal, *largs):
+	# 	self.create_cells()
+	# 	self.current[self.mid_x -3 ][self.mid_y+ 4 ]=1
+	# 	self.current[self.mid_x -2 ][self.mid_y+ 3 ]=1
+	# 	self.current[self.mid_x -2 ][self.mid_y+ 5 ]=1
+	# 	self.current[self.mid_x ][self.mid_y+ 1 ]=1
+	# 	self.current[self.mid_x ][self.mid_y+ 5 ]=1
+	# 	self.current[self.mid_x ][self.mid_y+ 6 ]=1
+	# 	self.current[self.mid_x+ 1 ][self.mid_y ]=1
+	# 	self.current[self.mid_x+ 1 ][self.mid_y+ 6 ]=1
+	# 	self.current[self.mid_x+ 2 ][self.mid_y+ 1 ]=1
+	# 	self.current[self.mid_x+ 2 ][self.mid_y+ 3 ]=1
+	# 	self.current[self.mid_x+ 3 ][self.mid_y+ 3 ]=1
+	# 	self.current[self.mid_x+ 3 ][self.mid_y+ 4 ]=1
+	# 	# self.draw_some_cells()
+	# 	modal.dismiss()
+	def assign_gol(self, modal, *largs):
 		self.create_cells()
-		self.current[self.mid_x -3 ][self.mid_y+ 4 ]=1
-		self.current[self.mid_x -2 ][self.mid_y+ 3 ]=1
-		self.current[self.mid_x -2 ][self.mid_y+ 5 ]=1
-		self.current[self.mid_x ][self.mid_y+ 1 ]=1
-		self.current[self.mid_x ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x -2 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x -1 ][self.mid_y+ 6 ]=1
 		self.current[self.mid_x ][self.mid_y+ 6 ]=1
-		self.current[self.mid_x+ 1 ][self.mid_y ]=1
 		self.current[self.mid_x+ 1 ][self.mid_y+ 6 ]=1
-		self.current[self.mid_x+ 2 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -3 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -4 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 4 ]=1
 		self.current[self.mid_x+ 2 ][self.mid_y+ 3 ]=1
-		self.current[self.mid_x+ 3 ][self.mid_y+ 3 ]=1
-		self.current[self.mid_x+ 3 ][self.mid_y+ 4 ]=1
-		# self.draw_some_cells()
+		self.current[self.mid_x+ 2 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 2 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 1 ][self.mid_y ]=1
+		self.current[self.mid_x ][self.mid_y ]=1
+		self.current[self.mid_x -1 ][self.mid_y ]=1
+		self.current[self.mid_x -2 ][self.mid_y ]=1
+		self.current[self.mid_x -3 ][self.mid_y ]=1
+		self.current[self.mid_x -7 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x -8 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x -10 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x -11 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x -11 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x -12 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x -12 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -13 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x -12 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -13 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -12 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -13 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -12 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -11 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -11 ][self.mid_y ]=1
+		self.current[self.mid_x -10 ][self.mid_y ]=1
+		self.current[self.mid_x -9 ][self.mid_y ]=1
+		self.current[self.mid_x -8 ][self.mid_y ]=1
+		self.current[self.mid_x -7 ][self.mid_y ]=1
+		self.current[self.mid_x -7 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -8 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x -8 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -7 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x -9 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -8 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x -7 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 5 ][self.mid_y ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 1 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 3 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 2 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 4 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 5 ]=1
+		self.current[self.mid_x+ 6 ][self.mid_y+ 6 ]=1
+		self.current[self.mid_x+ 7 ][self.mid_y ]=1
+		self.current[self.mid_x+ 8 ][self.mid_y ]=1
+		self.current[self.mid_x+ 9 ][self.mid_y ]=1
+		self.current[self.mid_x+ 10 ][self.mid_y ]=1
 		modal.dismiss()
 
 	def assign_pulsar(self, modal, *largs):
@@ -400,36 +477,35 @@ class Cells(Widget):
 						Rectangle(pos=(x_coord,y_coord), size=(9,9))
 
 	def update_cells(self, *largs):
+		self.canvas.clear()
+		self.size = (Window.width - 20, Window.height - 70)
+		self.pos = (11,61)
+		# print "new size and pos after clear(): ", self.size, self.pos
+		for x in range(len(self.current)):
+		    for y in range(len(self.current[x])):
 
-	    self.canvas.clear()
-	    self.size = (Window.width - 20, Window.height - 70)
-	    self.pos = (11,61)
-	    # print "new size and pos after clear(): ", self.size, self.pos
-	    for x in range(len(self.current)):
-	        for y in range(len(self.current[x])):
+		        over_x = x + 1
+		        if over_x == len(self.current):
+		            over_x = 0
+		        over_y = y + 1
+		        if over_y == len(self.current[x]):
+		            over_y = 0
 
-	            over_x = x + 1
-	            if over_x == len(self.current):
-	                over_x = 0
-	            over_y = y + 1
-	            if over_y == len(self.current[x]):
-	                over_y = 0
+		        alive_neighbors = self.current[x-1][y-1] + self.current[x-1][y] + self.current[x-1][over_y] + self.current[x][y-1] + self.current[x][over_y] + self.current[over_x][y-1] + self.current[over_x][y] + self.current[over_x][over_y]
 
-	            alive_neighbors = self.current[x-1][y-1] + self.current[x-1][y] + self.current[x-1][over_y] + self.current[x][y-1] + self.current[x][over_y] + self.current[over_x][y-1] + self.current[over_x][y] + self.current[over_x][over_y]
+		        if self.current[x][y] == 1:
+		            if (int(self.lonely) >= alive_neighbors or alive_neighbors >= int(self.crowded)):
+		                self.nextRound[x][y] = 0
+		            else:
+		                self.nextRound[x][y] = 1
+		        elif self.current[x][y] == 0:
+		            if alive_neighbors == int(self.birth):
+		                self.nextRound[x][y] = 1
+		            else:
+		                self.nextRound[x][y] = 0
 
-	            if self.current[x][y] == 1:
-	                if (int(self.lonely) >= alive_neighbors or alive_neighbors >= int(self.crowded)):
-	                    self.nextRound[x][y] = 0
-	                else:
-	                    self.nextRound[x][y] = 1
-	            elif self.current[x][y] == 0:
-	                if alive_neighbors == int(self.birth):
-	                    self.nextRound[x][y] = 1
-	                else:
-	                    self.nextRound[x][y] = 0
-
-	    self.switch_lists()
-	    self.draw_some_cells()
+		self.switch_lists()
+		self.draw_some_cells()
 
 	def switch_lists(self,*largs):
 	    holder = self.current
@@ -470,22 +546,24 @@ class Cells(Widget):
 	    modal.open()
 
 	def on_touch_down(self, touch):
-	    pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
-	    pos_x = int(math.floor(pos_x / 10.0))
-	    pos_y = int(math.floor(pos_y / 10.0))
-	    # print "self.current[", pos_x, "][",pos_y,"]=1"
-	    try:
-	        self.current[pos_x][pos_y] = 1
-	        with self.canvas:
-	            # Initializes Color() Kivy object
-	            self.color = Color(self.allcols[self.cellcol])
-	            # Changes the Color() Kivy object depending what user selects
-	            self.color.rgb = self.allcols[self.cellcol]
-	            x_coord = self.x + pos_x * 10
-	            y_coord = self.y + pos_y * 10
-	            Rectangle(pos=(x_coord,y_coord), size=(9,9))
-	    except IndexError:
-	        pass
+		pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
+		pos_x = int(math.floor(pos_x / 10.0))
+		pos_y = int(math.floor(pos_y / 10.0))
+		# sign_x = "+" if pos_x - self.mid_x > 0 else ""
+		# sign_y = "+" if pos_y - self.mid_y > 0 else ""
+		# print "self.current[self.mid_x" + sign_x, pos_x - self.mid_x,"][self.mid_y"+sign_y,pos_y-self.mid_y,"]=1"
+		try:
+		    self.current[pos_x][pos_y] = 1
+		    with self.canvas:
+		        # Initializes Color() Kivy object
+		        self.color = Color(self.allcols[self.cellcol])
+		        # Changes the Color() Kivy object depending what user selects
+		        self.color.rgb = self.allcols[self.cellcol]
+		        x_coord = self.x + pos_x * 10
+		        y_coord = self.y + pos_y * 10
+		        Rectangle(pos=(x_coord,y_coord), size=(9,9))
+		except IndexError:
+		    pass
 
 	def place_option(self, events, *largs):
 	    pass
@@ -528,18 +606,18 @@ class GameApp(App):
 		patt_ten = Button(text='Ten',on_press=partial(cells.assign_ten, start_patterns))
 		patt_binary = Button(text='Binary',on_press=partial(cells.assign_binary, start_patterns))
 		patt_face = Button(text='Face',on_press=partial(cells.assign_face, start_patterns))
-		patt_maze = Button(text='Maze',on_press=partial(cells.assign_maze, start_patterns))
+		patt_gol = Button(text='GOL',on_press=partial(cells.assign_gol, start_patterns))
 		patt_pulsar = Button(text='Pulsar',on_press=partial(cells.assign_pulsar, start_patterns))
 		patt_gliders = Button(text='Gliders',on_press=partial(cells.assign_gliders, start_patterns))
 		# add pattern buttons to the layout
 		start_layout.add_widget(patt_label)
 		start_layout.add_widget(patt_blank)
+		start_layout.add_widget(patt_gol)
 		start_layout.add_widget(patt_random)
 		start_layout.add_widget(patt_gun)
-		start_layout.add_widget(patt_ten)
 		start_layout.add_widget(patt_binary)
 		start_layout.add_widget(patt_face)
-		start_layout.add_widget(patt_maze)
+		start_layout.add_widget(patt_ten)
 		start_layout.add_widget(patt_pulsar)
 		start_layout.add_widget(patt_gliders)
 		start_patterns.add_widget(start_layout)
@@ -554,7 +632,7 @@ class GameApp(App):
 		btn_sett.size_hint = (.6,1)
 		btn_info = Button(text='info',on_press=partial(cells.info, self.events))
 		btn_info.size_hint = (.6,1)
-
+		btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 		buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
 
 		controls =[btn_start,btn_stop,btn_step,btn_reset,btn_place,btn_sett,btn_info]
@@ -570,31 +648,46 @@ class GameApp(App):
 		return board
 
     def build_config(self, config):
-        config.setdefaults('initiate', {
-            'Speed': 0.05,
-            'Lonely': 1,
-            'Crowded': 4,
-            'Born': 3,
-            'Color': 'White',
-            'Music': True,
-            'Sound': True,
-            })
+		config.setdefaults('initiate', {
+		    'Speed': 0.05,
+		    'Lonely': 1,
+		    'Crowded': 4,
+		    'Born': 3,
+		    'Color': 'White',
+		    'Music': True,
+		    'Sound': True,
+		    })
+		config.read('game.ini')
+		for item in config._sections:
+			for x in config._sections[item]:
+				if x == 'speed':
+				    Cells.speed = config._sections[item][x]
+				if x == 'color':
+				    Cells.cellcol = config._sections[item][x]
+				if x == 'born':
+				    Cells.birth = config._sections[item][x]
+				if x == 'lonely':
+				    Cells.lonely = config._sections[item][x]
+				if x == 'crowded':
+					Cells.crowded = config._sections[item][x]
 
     def build_settings(self, settings):
         settings.add_json_panel('Game Settings', self.config, data=settings_json)
 
     def on_config_change(self, config, section, key, value):
-        if key == 'Speed':
-            Cells.speed = value
-        if key == 'Color':
-            Cells.cellcol = value
-        if key == 'Born':
-            Cells.birth = value
-        if key == 'Lonely':
-            Cells.lonely = value
-        else:
-            pass
-        print config, section, key, value
+		if key == 'Speed':
+		    Cells.speed = value
+		if key == 'Color':
+		    Cells.cellcol = value
+		if key == 'Born':
+		    Cells.birth = value
+		if key == 'Lonely':
+		    Cells.lonely = value
+		if key == 'Crowded':
+			Cells.crowded = value
+		else:
+		    pass
+		print config, section, key, value
 
 if __name__ == '__main__':
     GameApp().run()
