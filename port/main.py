@@ -9,7 +9,7 @@ from kivy.uix.modalview import ModalView
 from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.config import ConfigParser
-from kivy.uix.settings import SettingsWithSidebar
+from kivy.uix.settings import SettingsWithSpinner
 from settings_options import settings_json
 from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
@@ -56,9 +56,10 @@ class Cells(Widget):
 	'Red': [1,0,0],
 	'Random': [0,0,0]
 	}
-	speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
+	# speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
 
 	mid_x,mid_y = 0,0
+	positions = []
 	current = []
 	nextRound = []
 	def assign_random(self, modal, *largs):
@@ -488,6 +489,28 @@ class Cells(Widget):
 	    except IndexError:
 	        pass
 
+	def on_touch_move(self, touch):
+		self.positions.append(touch.pos)
+		print(touch.pos)
+		for pos in self.positions:
+		    pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
+		    pos_x = int(math.floor(pos_x / 10.0))
+		    pos_y = int(math.floor(pos_y / 10.0))
+		    # print "self.current[", pos_x, "][",pos_y,"]=1"
+		    try:
+		        self.current[pos_x][pos_y] = 1
+		        with self.canvas:
+		            # Initializes Color() Kivy object
+		            self.color = Color(self.allcols[self.cellcol])
+		            # Changes the Color() Kivy object depending what user selects
+		            self.color.rgb = self.allcols[self.cellcol]
+		            x_coord = self.x + pos_x * 10
+		            y_coord = self.y + pos_y * 10
+		            Rectangle(pos=(x_coord,y_coord), size=(9,9))
+		    except IndexError:
+		        pass
+		self.positions = []
+
 	def place_option(self, events, *largs):
 	    pass
 
@@ -507,7 +530,7 @@ class GameApp(App):
             self.open_settings()
 
     def build(self):
-		self.settings_cls = SettingsWithSidebar
+		self.settings_cls = SettingsWithSpinner
 		self.config.items('initiate')
 		self.use_kivy_settings = False
 		# Window.size = (1334,750)
@@ -575,15 +598,26 @@ class GameApp(App):
 		return board
 
     def build_config(self, config):
-        config.setdefaults('initiate', {
-            'Speed': 0.05,
-            'Lonely': 1,
-            'Crowded': 4,
-            'Born': 3,
-            'Color': 'White',
-            'Music': True,
-            'Sound': True,
-            })
+		config.setdefaults('initiate', {
+			'Speed': 0.05,
+			'Lonely': 1,
+			'Crowded': 4,
+			'Born': 3,
+			'Color': 'White',
+			})
+		config.read('game.ini')
+		for item in config._sections:
+			for x in config._sections[item]:
+				if x == 'speed':
+					Cells.speed = config._sections[item][x]
+				if x == 'color':
+					Cells.cellcol = config._sections[item][x]
+				if x == 'born':
+					Cells.birth = config._sections[item][x]
+				if x == 'lonely':
+					Cells.lonely = config._sections[item][x]
+				if x == 'crowded':
+					Cells.crowded = config._sections[item][x]
 
     def build_settings(self, settings):
         settings.add_json_panel('Game Settings', self.config, data=settings_json)
