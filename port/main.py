@@ -496,7 +496,7 @@ class Cells(Widget):
 	    info2 = '''Controls:\n\nClick on an empty space to add a grid.\nModify the default rules or colors in settings.\nStop and start the simulation again for new settings to take effect.\n'''
 	    info3 = '''\nCreated by:\n\nSteven Lee-Kramer\nRyan O. Schenck'''
 	    popup = Popup(title="John Conway's Game of Life",
-	    content=Label(text=''.join([info1,info2,info3])),
+	    content=Label(text=''.join([info1,info2,info3]),font_size=14),
 	    size_hint=(.7, .8), size=(400, 400),title_align='center')
 	    popup.open()
 
@@ -528,7 +528,7 @@ class GameApp(App):
 		# schedule the updating of cells
 		start_patterns = ModalView(size_hint=(0.3,0.8), pos_hint={'top': 0.95}, auto_dismiss=False)
 		start_layout = BoxLayout(size_hint=(1,1), orientation='vertical')
-		patt_label = Label(text='Select Start Pattern', pos=(200,200), font_size='25sp')
+		patt_label = Label(text='Select Start Pattern', pos=(200,200), font_size='18sp')
 		patt_blank = Button(text='Blank',on_press=partial(cells.assign_blank, start_patterns))
 		patt_random = Button(text='Random',on_press=partial(cells.assign_random, start_patterns))
 		patt_gun = Button(text='Gun',on_press=partial(cells.assign_gun, start_patterns))
@@ -552,10 +552,11 @@ class GameApp(App):
 		btn_reset = Button(text='Reset',
 		                   on_press=partial(cells.reset_interval, self.events,grid,start_patterns))
 		btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events))
-		btn_sett = Button(text='Settings',on_press=partial(self.settings, self.events))
-		btn_sett.size_hint = (.6,1)
-		btn_info = Button(text='info',on_press=partial(cells.info, self.events))
-		btn_info.size_hint = (.6,1)
+		btn_sett = Button(text='Options',on_press=partial(self.settings, self.events))
+		# btn_sett.size_hint = (.6,1)
+		btn_info = Button(text='i',on_press=partial(cells.info, self.events))
+		# btn_info.size_hint = (.6,1)
+		btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 
 		buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
 
@@ -596,6 +597,8 @@ class GameApp(App):
             Cells.birth = value
         if key == 'Lonely':
             Cells.lonely = value
+        if key == 'Crowded':
+        	Cells.crowded = value
         else:
             pass
         print config, section, key, value    	
