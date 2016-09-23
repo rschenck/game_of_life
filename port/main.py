@@ -9,8 +9,9 @@ from kivy.uix.modalview import ModalView
 from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.config import ConfigParser
-from kivy.uix.settings import SettingsWithSidebar
+from kivy.uix.settings import SettingsWithSpinner
 from settings_options import settings_json
+from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
 from random import randint
 from random import uniform
@@ -56,7 +57,9 @@ class Cells(Widget):
 	'Random': [0,0,0]
 	}
 	# speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
+
 	mid_x,mid_y = 0,0
+	positions = []
 	current = []
 	nextRound = []
 	def assign_random(self, modal, *largs):
@@ -565,11 +568,39 @@ class Cells(Widget):
 		except IndexError:
 		    pass
 
+	def on_touch_move(self, touch):
+		self.positions.append(touch.pos)
+		print(touch.pos)
+		for pos in self.positions:
+		    pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
+		    pos_x = int(math.floor(pos_x / 10.0))
+		    pos_y = int(math.floor(pos_y / 10.0))
+		    # print "self.current[", pos_x, "][",pos_y,"]=1"
+		    try:
+		        self.current[pos_x][pos_y] = 1
+		        with self.canvas:
+		            # Initializes Color() Kivy object
+		            self.color = Color(self.allcols[self.cellcol])
+		            # Changes the Color() Kivy object depending what user selects
+		            self.color.rgb = self.allcols[self.cellcol]
+		            x_coord = self.x + pos_x * 10
+		            y_coord = self.y + pos_y * 10
+		            Rectangle(pos=(x_coord,y_coord), size=(9,9))
+		    except IndexError:
+		        pass
+		self.positions = []
+
 	def place_option(self, events, *largs):
 	    pass
 
 	def info(self, events, *largs):
-	    pass
+	    info1 = '''Rules:\n\nFor a cell that is alive:\nIf a cell has 0-1 neighbors dies.\nIf a cell has 4 or more neighbors, it dies.\nIf a cell has 2-3 neighbors it survives\n\nFor an empty space:\nIf a space is surrounded by 3 neighbors, a cell is born.\n\n'''
+	    info2 = '''Controls:\n\nClick on an empty space to add a grid.\nModify the default rules or colors in settings.\nStop and start the simulation again for new settings to take effect.\n'''
+	    info3 = '''\nCreated by:\n\nSteven Lee-Kramer\nRyan O. Schenck'''
+	    popup = Popup(title="John Conway's Game of Life",
+	    content=Label(text=''.join([info1,info2,info3]),font_size=14),
+	    size_hint=(.7, .8), size=(400, 400),title_align='center')
+	    popup.open()
 
 class GameApp(App):
     events = []
@@ -578,7 +609,7 @@ class GameApp(App):
             self.open_settings()
 
     def build(self):
-		self.settings_cls = SettingsWithSidebar
+		self.settings_cls = SettingsWithSpinner
 		self.config.items('initiate')
 		self.use_kivy_settings = False
 		# Window.size = (1334,750)
@@ -599,7 +630,7 @@ class GameApp(App):
 		# schedule the updating of cells
 		start_patterns = ModalView(size_hint=(0.3,0.8), pos_hint={'top': 0.95}, auto_dismiss=False)
 		start_layout = BoxLayout(size_hint=(1,1), orientation='vertical')
-		patt_label = Label(text='Select Start Pattern', pos=(200,200), font_size='25sp')
+		patt_label = Label(text='Select Start Pattern', pos=(200,200), font_size='18sp')
 		patt_blank = Button(text='Blank',on_press=partial(cells.assign_blank, start_patterns))
 		patt_random = Button(text='Random',on_press=partial(cells.assign_random, start_patterns))
 		patt_gun = Button(text='Gun',on_press=partial(cells.assign_gun, start_patterns))
@@ -609,17 +640,23 @@ class GameApp(App):
 		patt_gol = Button(text='GOL',on_press=partial(cells.assign_gol, start_patterns))
 		patt_pulsar = Button(text='Pulsar',on_press=partial(cells.assign_pulsar, start_patterns))
 		patt_gliders = Button(text='Gliders',on_press=partial(cells.assign_gliders, start_patterns))
+
 		# add pattern buttons to the layout
-		start_layout.add_widget(patt_label)
-		start_layout.add_widget(patt_blank)
-		start_layout.add_widget(patt_gol)
-		start_layout.add_widget(patt_random)
-		start_layout.add_widget(patt_gun)
-		start_layout.add_widget(patt_binary)
-		start_layout.add_widget(patt_face)
-		start_layout.add_widget(patt_ten)
-		start_layout.add_widget(patt_pulsar)
-		start_layout.add_widget(patt_gliders)
+
+		# start_layout.add_widget(patt_label)
+		# start_layout.add_widget(patt_blank)
+		# start_layout.add_widget(patt_gol)
+		# start_layout.add_widget(patt_random)
+		# start_layout.add_widget(patt_gun)
+		# start_layout.add_widget(patt_binary)
+		# start_layout.add_widget(patt_face)
+		# start_layout.add_widget(patt_ten)
+		# start_layout.add_widget(patt_pulsar)
+		# start_layout.add_widget(patt_gliders)
+
+		patterns = [patt_label, patt_blank,patt_gol,patt_random,patt_gun,patt_binary,patt_face,patt_ten,patt_pulsar,patt_gliders]
+		for pattern in patterns:
+			start_layout.add_widget(pattern)
 		start_patterns.add_widget(start_layout)
 
 		btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events))
@@ -628,11 +665,12 @@ class GameApp(App):
 		btn_reset = Button(text='Reset',
 		                   on_press=partial(cells.reset_interval, self.events,grid,start_patterns))
 		btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events))
-		btn_sett = Button(text='Settings',on_press=partial(self.settings, self.events))
-		btn_sett.size_hint = (.6,1)
-		btn_info = Button(text='info',on_press=partial(cells.info, self.events))
-		btn_info.size_hint = (.6,1)
+		btn_sett = Button(text='Options',on_press=partial(self.settings, self.events))
+		# btn_sett.size_hint = (.6,1)
+		btn_info = Button(text='i',on_press=partial(cells.info, self.events))
+		# btn_info.size_hint = (.6,1)
 		btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
+
 		buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
 
 		controls =[btn_start,btn_stop,btn_step,btn_reset,btn_place,btn_sett,btn_info]
@@ -645,18 +683,18 @@ class GameApp(App):
 		start_patterns.bind(on_dismiss=cells.draw_some_cells)
 		board.add_widget(buttons)
 
+
+
 		return board
 
     def build_config(self, config):
 		config.setdefaults('initiate', {
-		    'Speed': 0.05,
-		    'Lonely': 1,
-		    'Crowded': 4,
-		    'Born': 3,
-		    'Color': 'White',
-		    'Music': True,
-		    'Sound': True,
-		    })
+			'Speed': 0.05,
+			'Lonely': 1,
+			'Crowded': 4,
+			'Born': 3,
+			'Color': 'White',
+			})
 		config.read('game.ini')
 		for item in config._sections:
 			for x in config._sections[item]:
