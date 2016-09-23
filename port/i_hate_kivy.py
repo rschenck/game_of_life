@@ -11,6 +11,7 @@ from kivy.clock import Clock
 from kivy.config import ConfigParser
 from kivy.uix.settings import SettingsWithSidebar
 from settings_options import settings_json
+from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
 from random import randint
 from random import uniform
@@ -491,7 +492,13 @@ class Cells(Widget):
 	    pass
 
 	def info(self, events, *largs):
-	    pass
+	    info1 = '''Rules:\n\nFor a cell that is alive:\nIf a cell has 0-1 neighbors dies.\nIf a cell has 4 or more neighbors, it dies.\nIf a cell has 2-3 neighbors it survives\n\nFor an empty space:\nIf a space is surrounded by 3 neighbors, a cell is born.\n\n'''
+	    info2 = '''Controls:\n\nClick on an empty space to add a grid.\nModify the default rules or colors in settings.\nStop and start the simulation again for new settings to take effect.\n'''
+	    info3 = '''\nCreated by:\n\nSteven Lee-Kramer\nRyan O. Schenck'''
+	    popup = Popup(title="John Conway's Game of Life",
+	    content=Label(text=''.join([info1,info2,info3])),
+	    size_hint=(.7, .8), size=(400, 400),title_align='center')
+	    popup.open()
 
 class GameApp(App):
     events = []
@@ -531,17 +538,12 @@ class GameApp(App):
 		patt_maze = Button(text='Maze',on_press=partial(cells.assign_maze, start_patterns))
 		patt_pulsar = Button(text='Pulsar',on_press=partial(cells.assign_pulsar, start_patterns))
 		patt_gliders = Button(text='Gliders',on_press=partial(cells.assign_gliders, start_patterns))
+		
 		# add pattern buttons to the layout
-		start_layout.add_widget(patt_label)
-		start_layout.add_widget(patt_blank)
-		start_layout.add_widget(patt_random)
-		start_layout.add_widget(patt_gun)
-		start_layout.add_widget(patt_ten)
-		start_layout.add_widget(patt_binary)
-		start_layout.add_widget(patt_face)
-		start_layout.add_widget(patt_maze)
-		start_layout.add_widget(patt_pulsar)
-		start_layout.add_widget(patt_gliders)
+		patterns = [patt_label, patt_blank,patt_random,patt_gun,patt_ten,patt_binary,patt_face,patt_maze,patt_pulsar,patt_gliders]
+		for pattern in patterns:
+			start_layout.add_widget(pattern)
+		
 		start_patterns.add_widget(start_layout)
 
 		btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events))
@@ -566,6 +568,8 @@ class GameApp(App):
 		start_patterns.bind(on_dismiss=grid.draw_grid)
 		start_patterns.bind(on_dismiss=cells.draw_some_cells)
 		board.add_widget(buttons)
+
+
 
 		return board
 
@@ -594,7 +598,7 @@ class GameApp(App):
             Cells.lonely = value
         else:
             pass
-        print config, section, key, value
+        print config, section, key, value    	
 
 if __name__ == '__main__':
     GameApp().run()
