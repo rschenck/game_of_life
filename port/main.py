@@ -565,7 +565,7 @@ class Cells(Widget):
             pos_y = int(math.floor(pos_y / 10.0))
             # print "self.on_board[(", pos_x, ",",pos_y,")]=1"
             try:
-                self.canvas.add(self.rectangles_dict[(pos_x,pos_y)])
+                # self.canvas.add(self.rectangles_dict[(pos_x,pos_y)])
                 self.on_board[(pos_x,pos_y)] = 1
             except KeyError:
                 pass
