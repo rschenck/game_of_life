@@ -59,6 +59,7 @@ class Cells(Widget):
     'Random': Color(0,0,0,mode="rgb")
     }
     # speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
+    # update_count = 0
     rectangles_dict = {}
     on_board = defaultdict(int)
     changes_dict = {}
@@ -511,7 +512,10 @@ class Cells(Widget):
         self.changes_dict.clear()
 
     def update_cells(self,*largs):
+        # self.update_count += 1
         self.size = (Window.width - 20, Window.height - 70)
+        if self.cellcol == 'Random':
+            self.set_canvas_color(on_request=True)
         self.get_cell_changes()
         self.update_canvas_objects()
 
@@ -585,7 +589,7 @@ class Cells(Widget):
 
 class GameApp(App):
     events = []
-
+    seconds = 0
     def settings(self, events, *largs):
             self.open_settings()
 
@@ -664,8 +668,12 @@ class GameApp(App):
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
         board.add_widget(buttons)
-
+        # Clock.schedule_interval(partial(self.one_sec, cells),1)
         return board
+    # def one_sec(self, cells, *largs):
+    #     self.seconds += 1
+    #     print self.seconds , " seconds have passed.",
+    #     print "update rounds so far: ", cells.update_count
 
     def build_config(self, config):
         config.setdefaults('initiate', {
