@@ -30,7 +30,7 @@ import math
 #     for attr in dir(obj):
 #         print "obj.%s = %s" % (attr, getattr(obj, attr))
 #         pass
-
+#
 
 class Grid(Widget):
 
@@ -65,15 +65,15 @@ class Cells(Widget):
     changes_dict = {}
     mid_x,mid_y = 0,0
     mouse_positions = []
-
+    should_draw = False
+    first_touch = True
     def assign_random(self, modal, *largs):
         self.setup_cells()
         for x in range(0,self.width/10):
             for y in range(0,self.height/10):
-                if randint(0,1):
+                if randint(0,3) == 1:
                     self.on_board[x,y] = 1
         modal.dismiss()
-
 
     def assign_blank(self, modal, *largs):
         self.setup_cells()
@@ -482,6 +482,8 @@ class Cells(Widget):
     def starting_cells(self, *largs):
         for x_y in self.on_board:
             self.canvas.add(self.rectangles_dict[x_y])
+        self.should_draw = True
+
 
     def get_cell_changes(self, *largs):
         for x in range(0,int(self.width/10)):
@@ -502,6 +504,7 @@ class Cells(Widget):
                         pass
 
     def update_canvas_objects(self,*largs):
+
         for x_y in self.changes_dict:
             if self.changes_dict[x_y]:
                 self.canvas.add(self.rectangles_dict[x_y])
@@ -520,23 +523,27 @@ class Cells(Widget):
         self.update_canvas_objects()
 
     def start_interval(self, events, *largs):
+        self.should_draw = False
         if len(events) > 0:
             events[-1].cancel()
             events.pop()
         events.append(Clock.schedule_interval(self.update_cells,float(self.speed)))
 
     def stop_interval(self, events, *largs):
+        self.should_draw = True
         if len(events) > 0:
             events[-1].cancel()
             events.pop()
 
     def step(self, events, *largs):
+        self.should_draw = True
         if len(events) > 0:
             events[-1].cancel()
             events.pop()
         Clock.schedule_once(self.update_cells, 1.0/60.0)
 
     def reset_interval(self, events, grid, modal, *largs):
+        self.should_draw = False
         if len(events) > 0:
             events[-1].cancel()
             events.pop()
@@ -549,16 +556,24 @@ class Cells(Widget):
 
     def on_touch_down(self, touch):
         pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
+        print(touch.pos)
         pos_x = int(math.floor(pos_x / 10.0))
         pos_y = int(math.floor(pos_y / 10.0))
         # sign_x = "+" if pos_x - self.mid_x > 0 else ""
         # sign_y = "+" if pos_y - self.mid_y > 0 else ""
         # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")]=1"
-        try:
-            # self.canvas.add(self.rectangles_dict[(pos_x,pos_y)])
-            self.on_board[(pos_x,pos_y)] = 1
-        except KeyError:
-            pass
+        if not self.first_touch:
+            try:
+                if not self.on_board[pos_x,pos_y]:
+                    if self.should_draw:
+                        self.on_board[pos_x,pos_y] = 1
+                        self.canvas.add(self.rectangles_dict[pos_x,pos_y])
+                    else:
+                        self.changes_dict[(pos_x,pos_y)] = 1
+            except KeyError:
+                pass
+        else:
+            self.first_touch = False
 
     def on_touch_move(self, touch):
         self.mouse_positions.append(touch.pos)
@@ -569,8 +584,12 @@ class Cells(Widget):
             pos_y = int(math.floor(pos_y / 10.0))
             # print "self.on_board[(", pos_x, ",",pos_y,")]=1"
             try:
-                # self.canvas.add(self.rectangles_dict[(pos_x,pos_y)])
-                self.on_board[(pos_x,pos_y)] = 1
+                if not self.on_board[pos_x,pos_y]:
+                    if self.should_draw:
+                        self.on_board[pos_x,pos_y] = 1
+                        self.canvas.add(self.rectangles_dict[pos_x,pos_y])
+                    else:
+                        self.changes_dict[(pos_x,pos_y)] = 1
             except KeyError:
                 pass
         self.mouse_positions = []
@@ -589,7 +608,7 @@ class Cells(Widget):
 
 class GameApp(App):
     events = []
-    seconds = 0
+    # seconds = 0
     def settings(self, events, *largs):
             self.open_settings()
 
@@ -627,19 +646,6 @@ class GameApp(App):
         patt_pulsar = Button(text='Pulsar',on_press=partial(cells.assign_pulsar, start_patterns))
         patt_gliders = Button(text='Gliders',on_press=partial(cells.assign_gliders, start_patterns))
 
-        # add pattern buttons to the layout
-
-        # start_layout.add_widget(patt_label)
-        # start_layout.add_widget(patt_blank)
-        # start_layout.add_widget(patt_gol)
-        # start_layout.add_widget(patt_random)
-        # start_layout.add_widget(patt_gun)
-        # start_layout.add_widget(patt_binary)
-        # start_layout.add_widget(patt_face)
-        # start_layout.add_widget(patt_ten)
-        # start_layout.add_widget(patt_pulsar)
-        # start_layout.add_widget(patt_gliders)
-
         patterns = [patt_label, patt_blank,patt_gol,patt_random,patt_gun,patt_binary,patt_face,patt_ten,patt_pulsar,patt_gliders]
         for pattern in patterns:
             start_layout.add_widget(pattern)
@@ -668,12 +674,7 @@ class GameApp(App):
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
         board.add_widget(buttons)
-        # Clock.schedule_interval(partial(self.one_sec, cells),1)
         return board
-    # def one_sec(self, cells, *largs):
-    #     self.seconds += 1
-    #     print self.seconds , " seconds have passed.",
-    #     print "update rounds so far: ", cells.update_count
 
     def build_config(self, config):
         config.setdefaults('initiate', {
