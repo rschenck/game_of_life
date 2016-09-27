@@ -60,17 +60,18 @@ class Cells(Widget):
     }
     # speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
     # update_count = 0
+    size_internal,pos_internal, width_internal, height_internal = None,None,None,None
     rectangles_dict = {}
     on_board = defaultdict(int)
     changes_dict = {}
     mid_x,mid_y = 0,0
     mouse_positions = []
     should_draw = False
-    first_touch = True
+    reject_touches = True
     def assign_random(self, modal, *largs):
         self.setup_cells()
-        for x in range(0,self.width/10):
-            for y in range(0,self.height/10):
+        for x in range(0,self.dimensions[0]/10):
+            for y in range(0,self.dimensions[1]/10):
                 if randint(0,3) == 1:
                     self.on_board[x,y] = 1
         modal.dismiss()
@@ -456,18 +457,19 @@ class Cells(Widget):
         modal.dismiss()
 
     def create_rectangles(self, *largs):
-        self.size = (Window.width - 20, Window.height - 70)
-        self.pos = (11,61)
-        for x in range(0,self.width/10):
-            for y in range(0,self.height/10):
+        self.rectangles_dict.clear()
+        self.dimensions = (Window.width - 20, Window.height - 70)
+        self.pos_internal = (11,61)
+        for x in range(0,self.dimensions[0]/10):
+            for y in range(0,self.dimensions[1]/10):
                 rect = Rectangle(pos=(self.x + x * 10, self.y + y *10), size=(9,9))
                 self.rectangles_dict[x,y] = rect
 
     def setup_cells(self, *largs):
         self.set_canvas_color()
-        self.size = (Window.width - 20, Window.height - 70)
+        self.dimensions = (Window.width - 20, Window.height - 70)
         self.pos = (11,61)
-        self.mid_x,self.mid_y = self.width/20, self.height/20
+        self.mid_x,self.mid_y = self.dimensions[0]/20, self.dimensions[1]/20
 
     def set_canvas_color(self, on_request=False, *largs):
         self.canvas.before.clear()
@@ -483,13 +485,13 @@ class Cells(Widget):
         for x_y in self.on_board:
             self.canvas.add(self.rectangles_dict[x_y])
         self.should_draw = True
-
+        self.reject_touches = False
 
     def get_cell_changes(self, *largs):
-        for x in range(0,int(self.width/10)):
-            for y in range(0,int(self.height/10)):
-                over_x,over_y = (x + 1) % (self.width/10), (y + 1) % (self.height/10)
-                bel_x, bel_y = (x - 1) % (self.width/10), (y - 1) % (self.height/10)
+        for x in range(0,int(self.dimensions[0]/10)):
+            for y in range(0,int(self.dimensions[1]/10)):
+                over_x,over_y = (x + 1) % (self.dimensions[0]/10), (y + 1) % (self.dimensions[1]/10)
+                bel_x, bel_y = (x - 1) % (self.dimensions[0]/10), (y - 1) % (self.dimensions[1]/10)
                 alive_neighbors = self.on_board[bel_x,bel_y] + self.on_board[bel_x,y] + self.on_board[bel_x,over_y] + self.on_board[x,bel_y] + self.on_board[x,over_y] + self.on_board[over_x,bel_y] + self.on_board[over_x,y] + self.on_board[over_x,over_y]
 
                 if self.on_board[x,y]:
@@ -504,7 +506,6 @@ class Cells(Widget):
                         pass
 
     def update_canvas_objects(self,*largs):
-
         for x_y in self.changes_dict:
             if self.changes_dict[x_y]:
                 self.canvas.add(self.rectangles_dict[x_y])
@@ -516,7 +517,6 @@ class Cells(Widget):
 
     def update_cells(self,*largs):
         # self.update_count += 1
-        self.size = (Window.width - 20, Window.height - 70)
         if self.cellcol == 'Random':
             self.set_canvas_color(on_request=True)
         self.get_cell_changes()
@@ -556,13 +556,17 @@ class Cells(Widget):
 
     def on_touch_down(self, touch):
         pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
-        print(touch.pos)
+        print (touch.pos), self.reject_touches
         pos_x = int(math.floor(pos_x / 10.0))
         pos_y = int(math.floor(pos_y / 10.0))
+        in_bounds = (0 <= pos_x < (self.dimensions[0] / 10)) and (0 <= pos_y < (self.dimensions[1] / 10))
         # sign_x = "+" if pos_x - self.mid_x > 0 else ""
         # sign_y = "+" if pos_y - self.mid_y > 0 else ""
         # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")]=1"
-        if not self.first_touch:
+        # print "touch_down in bounds?", in_bounds
+        # print "pos_x, pos_y", pos_x ,",",pos_y
+        # print "canvas width and height", self.width, self.height
+        if not self.reject_touches and in_bounds:
             try:
                 if not self.on_board[pos_x,pos_y]:
                     if self.should_draw:
@@ -570,28 +574,39 @@ class Cells(Widget):
                         self.canvas.add(self.rectangles_dict[pos_x,pos_y])
                     else:
                         self.changes_dict[(pos_x,pos_y)] = 1
+                        self.canvas.add(self.rectangles_dict[pos_x,pos_y])
+                        print self. reject_touches, "WTF"
             except KeyError:
                 pass
         else:
-            self.first_touch = False
+            pass
 
     def on_touch_move(self, touch):
         self.mouse_positions.append(touch.pos)
-        print(touch.pos)
+        print(touch.pos), self.reject_touches
         for pos in self.mouse_positions:
             pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
             pos_x = int(math.floor(pos_x / 10.0))
             pos_y = int(math.floor(pos_y / 10.0))
+
+            in_bounds = (0 <= pos_x < (self.dimensions[0] / 10)) and (0 <= pos_y < (self.dimensions[1] / 10))
+
+            # print "touch_move in bounds?", in_bounds
+            # print "pos_x, pos_y", pos_x ,",",pos_y
+            # print "canvas width and height", self.width, self.height
             # print "self.on_board[(", pos_x, ",",pos_y,")]=1"
-            try:
-                if not self.on_board[pos_x,pos_y]:
-                    if self.should_draw:
-                        self.on_board[pos_x,pos_y] = 1
-                        self.canvas.add(self.rectangles_dict[pos_x,pos_y])
-                    else:
-                        self.changes_dict[(pos_x,pos_y)] = 1
-            except KeyError:
-                pass
+            if not self.reject_touches and in_bounds:
+                try:
+                    if not self.on_board[pos_x,pos_y]:
+                        if self.should_draw:
+                            self.on_board[pos_x,pos_y] = 1
+                            self.canvas.add(self.rectangles_dict[pos_x,pos_y])
+                        else:
+                            self.changes_dict[(pos_x,pos_y)] = 1
+                            self.canvas.add(self.rectangles_dict[pos_x,pos_y])
+                            print "WTF"
+                except KeyError:
+                    pass
         self.mouse_positions = []
 
     def place_option(self, events, *largs):
@@ -616,13 +631,14 @@ class GameApp(App):
         self.settings_cls = SettingsWithSpinner
         self.config.items('initiate')
         self.use_kivy_settings = False
-        Window.size = (1334,750)
+        if Window.width < 1334 and Window.height < 750:
+            Window.size = (1334,750)
 
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
         grid = Grid(size=(Window.width, Window.height - 50), pos=(0,50))
         cells = Cells(size=(Window.width - 20, Window.height - 70), pos=(11,61))
-
+        # Window.bind(Window.size=cells.create_rectangles)
         # generate cell lists
         # cells.create_cells()
         # add grid and cells to layout
@@ -664,7 +680,8 @@ class GameApp(App):
         btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
-
+        board.bind(size=cells.create_rectangles)
+        board.bind(size=partial(cells.reset_interval,self.events,grid,start_patterns))
         controls =[btn_start,btn_stop,btn_step,btn_reset,btn_place,btn_sett,btn_info]
         for btn in controls:
             buttons.add_widget(btn)
