@@ -67,7 +67,6 @@ class Cells(Widget):
     should_draw = False # allows touches to add rectangles
     accept_touches = False # Avoid sticky cell from intial click/move
 
-
 # Starting Patterns
 # Each will:
 # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -483,7 +482,7 @@ class Cells(Widget):
         self.canvas.before.clear()
         if self.cellcol == 'Random':
             self.canvas.before.clear()
-            self.canvas.before.add(Color(uniform(0.0,1.0),uniform(0.0,1.0),uniform(0.0,1.0)))
+            self.canvas.before.add(Color(uniform(0.0,1.0),1,1,mode="hsv"))
         else:
             self.canvas.before.add(self.allcols[self.cellcol])
         if on_request:
@@ -628,6 +627,7 @@ class Cells(Widget):
 
 class GameApp(App):
     events = []
+    game_cells = None
     # seconds = 0
     def settings(self, events, *largs):
             self.open_settings()
@@ -642,7 +642,7 @@ class GameApp(App):
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
         grid = Grid(size=(Window.width, Window.height - 50), pos=(0,50))
-        cells = Cells(size=(Window.width - 20, Window.height - 70), pos=(11,61))
+        self.game_cells = cells = Cells(size=(Window.width - 20, Window.height - 70), pos=(11,61))
         # Window.bind(Window.size=cells.create_rectangles)
         # generate cell lists
         # cells.create_cells()
@@ -695,7 +695,6 @@ class GameApp(App):
         start_patterns.open()
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
-
         board.add_widget(buttons)
         return board
 
@@ -727,16 +726,16 @@ class GameApp(App):
 
     def on_config_change(self, config, section, key, value):
         if key == 'Speed':
-            Cells.speed = value
+            self.game_cells.speed = value
         if key == 'Color':
-            Cells.cellcol = value
-            Cells.set_canvas_color()
+            self.game_cells.cellcol = value
+            self.game_cells.set_canvas_color()
         if key == 'Born':
-            Cells.birth = value
+            self.game_cells.birth = value
         if key == 'Lonely':
-            Cells.lonely = value
+            self.game_cells.lonely = value
         if key == 'Crowded':
-            Cells.crowded = value
+            self.game_cells.crowded = value
         else:
             pass
         print config, section, key, value
