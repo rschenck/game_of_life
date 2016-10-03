@@ -144,78 +144,78 @@ class Cells(Widget):
 
         modal.dismiss()
 
-    def assign_binary(self, modal, *largs):
-        self.setup_cells()
-
-        self.on_board[(self.mid_x -12 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 11 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 11 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 11 )]=1
-        self.on_board[(self.mid_x ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )]=1
-
-        modal.dismiss()
+    # def assign_binary(self, modal, *largs):
+    #     self.setup_cells()
+    #
+    #     self.on_board[(self.mid_x -12 ,self.mid_y )]=1
+    #     self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )]=1
+    #     self.on_board[(self.mid_x -12 ,self.mid_y+ 4 )]=1
+    #     self.on_board[(self.mid_x -12 ,self.mid_y+ 5 )]=1
+    #     self.on_board[(self.mid_x -11 ,self.mid_y )]=1
+    #     self.on_board[(self.mid_x -11 ,self.mid_y+ 1 )]=1
+    #     self.on_board[(self.mid_x -11 ,self.mid_y+ 4 )]=1
+    #     self.on_board[(self.mid_x -11 ,self.mid_y+ 5 )]=1
+    #     self.on_board[(self.mid_x -9 ,self.mid_y -2 )]=1
+    #     self.on_board[(self.mid_x -9 ,self.mid_y -1 )]=1
+    #     self.on_board[(self.mid_x -9 ,self.mid_y )]=1
+    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )]=1
+    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )]=1
+    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )]=1
+    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )]=1
+    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 5 )]=1
+    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )]=1
+    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 7 )]=1
+    #     self.on_board[(self.mid_x -8 ,self.mid_y -3 )]=1
+    #     self.on_board[(self.mid_x -8 ,self.mid_y+ 8 )]=1
+    #     self.on_board[(self.mid_x -7 ,self.mid_y -3 )]=1
+    #     self.on_board[(self.mid_x -7 ,self.mid_y -2 )]=1
+    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )]=1
+    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )]=1
+    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )]=1
+    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )]=1
+    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 7 )]=1
+    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 8 )]=1
+    #     self.on_board[(self.mid_x -5 ,self.mid_y+ 2 )]=1
+    #     self.on_board[(self.mid_x -5 ,self.mid_y+ 3 )]=1
+    #     self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )]=1
+    #     self.on_board[(self.mid_x -4 ,self.mid_y+ 4 )]=1
+    #     self.on_board[(self.mid_x -3 ,self.mid_y+ 1 )]=1
+    #     self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )]=1
+    #     self.on_board[(self.mid_x -3 ,self.mid_y+ 11 )]=1
+    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 2 )]=1
+    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )]=1
+    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 11 )]=1
+    #     self.on_board[(self.mid_x -1 ,self.mid_y+ 11 )]=1
+    #     self.on_board[(self.mid_x ,self.mid_y -3 )]=1
+    #     self.on_board[(self.mid_x ,self.mid_y -2 )]=1
+    #     self.on_board[(self.mid_x ,self.mid_y+ 1 )]=1
+    #     self.on_board[(self.mid_x ,self.mid_y+ 2 )]=1
+    #     self.on_board[(self.mid_x ,self.mid_y+ 3 )]=1
+    #     self.on_board[(self.mid_x ,self.mid_y+ 4 )]=1
+    #     self.on_board[(self.mid_x ,self.mid_y+ 7 )]=1
+    #     self.on_board[(self.mid_x ,self.mid_y+ 8 )]=1
+    #     self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )]=1
+    #     self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )]=1
+    #     self.on_board[(self.mid_x+ 2 ,self.mid_y -2 )]=1
+    #     self.on_board[(self.mid_x+ 2 ,self.mid_y -1 )]=1
+    #     self.on_board[(self.mid_x+ 2 ,self.mid_y )]=1
+    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )]=1
+    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
+    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
+    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )]=1
+    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 5 )]=1
+    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 6 )]=1
+    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )]=1
+    #     self.on_board[(self.mid_x+ 4 ,self.mid_y )]=1
+    #     self.on_board[(self.mid_x+ 4 ,self.mid_y+ 1 )]=1
+    #     self.on_board[(self.mid_x+ 4 ,self.mid_y+ 4 )]=1
+    #     self.on_board[(self.mid_x+ 4 ,self.mid_y+ 5 )]=1
+    #     self.on_board[(self.mid_x+ 5 ,self.mid_y )]=1
+    #     self.on_board[(self.mid_x+ 5 ,self.mid_y+ 1 )]=1
+    #     self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )]=1
+    #     self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )]=1
+    #
+    #     modal.dismiss()
 
     # def assign_face(self, modal, *largs):
     #     self.setup_cells()
@@ -924,6 +924,172 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 27 ,self.mid_y+ 1 )]=1
 
         modal.dismiss()
+
+    def assign_omega(self, modal, *largs):
+        self.setup_cells()
+
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -8 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -8 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y -9 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y -10 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y -8 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y -8 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y -8 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y -8 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -8 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -8 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 0 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 0 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 0 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 0 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 0 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 0 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )]=1
+
+        modal.dismiss()
 # Setup functions
     # Create all possible rectangles for the given window size
     def create_rectangles(self, *largs):
@@ -1123,14 +1289,15 @@ class GameApp(App):
         patt_random = Button(text='Random',on_press=partial(cells.assign_random, start_patterns))
         patt_gun = Button(text='Gun',on_press=partial(cells.assign_gun, start_patterns))
         patt_ten = Button(text='Ten',on_press=partial(cells.assign_ten, start_patterns))
-        patt_binary = Button(text='Binary',on_press=partial(cells.assign_binary, start_patterns))
+        # patt_binary = Button(text='Binary',on_press=partial(cells.assign_binary, start_patterns))
         # patt_face = Button(text='Face',on_press=partial(cells.assign_face, start_patterns))
         patt_gol = Button(text='GOL',on_press=partial(cells.assign_gol, start_patterns))
         patt_pulsar = Button(text='Pulsar',on_press=partial(cells.assign_pulsar, start_patterns))
         patt_gliders = Button(text='Gliders',on_press=partial(cells.assign_gliders, start_patterns))
         patt_imo_6 = Button(text='IMO_6', on_press=partial(cells.assign_imo_6, start_patterns))
+        patt_omega = Button(text='Resistance', on_press=partial(cells.assign_omega,start_patterns))
 
-        patterns = [patt_label, patt_imo_6,patt_blank,patt_gol,patt_random,patt_gun,patt_binary,patt_ten,patt_pulsar,patt_gliders]
+        patterns = [patt_label, patt_imo_6,patt_omega, patt_blank,patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders]
         for pattern in patterns:
             start_layout.add_widget(pattern)
         start_patterns.add_widget(start_layout)
