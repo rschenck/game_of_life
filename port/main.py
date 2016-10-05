@@ -11,10 +11,12 @@ from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.config import ConfigParser
 from kivy.uix.settings import SettingsWithSpinner
+from kivy.uix.screenmanager import ScreenManager, Screen
 from settings_options import settings_json
 from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
 from kivy.graphics.instructions import InstructionGroup
+from kivy.uix.image import Image
 from random import randint
 from random import uniform
 from functools import partial
@@ -26,11 +28,11 @@ import math
 #         sound.loop = True
 #         sound.play()
 #
-# def dump(obj):
-#     for attr in dir(obj):
-#         print "obj.%s = %s" % (attr, getattr(obj, attr))
-#         pass
-#
+def dump(obj):
+    for attr in dir(obj):
+        print "obj.%s = %s" % (attr, getattr(obj, attr))
+        pass
+
 
 class Grid(Widget):
     def draw_grid(self, *largs):
@@ -1189,10 +1191,9 @@ class Cells(Widget):
         self.setup_cells()
         modal.open()
 
-
-# Touch Handlers
-# Add rectangles and positive values to on_board when the animation is stopped.
-# Add values to changes_dict otherwise, rects added on next iteration
+    # Touch Handlers
+    # Add rectangles and positive values to on_board when the animation is stopped.
+    # Add values to changes_dict otherwise, rects added on next iteration
     def on_touch_down(self, touch):
         pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
         # print (touch.pos), self.accept_touches
@@ -1241,16 +1242,30 @@ class Cells(Widget):
                     pass
         self.mouse_positions = []
 
+    def on_rotate(self):
+        self.reset_interval
+
+    def on_flip(self):
+        self.reset_interval
+
+    # Need to add some placement options...
     def place_option(self, events, *largs):
         pass
 
     def info(self, events, *largs):
-        info1 = '''Rules:\n\nFor a cell that is alive:\nIf a cell has 0-1 neighbors dies.\nIf a cell has 4 or more neighbors, it dies.\nIf a cell has 2-3 neighbors it survives\n\nFor an empty space:\nIf a space is surrounded by 3 neighbors, a cell is born.\n\n'''
-        info2 = '''Controls:\n\nClick on an empty space to add a grid.\nModify the default rules or colors in settings.\nStop and start the simulation again for new settings to take effect.\n'''
-        info3 = '''\nCreated by:\n\nSteven Lee-Kramer\nRyan O. Schenck'''
-        popup = Popup(title="John Conway's Game of Life",
-        content=Label(text=''.join([info1,info2,info3]),font_size=14),
-        size_hint=(.7, .8), size=(400, 400),title_align='center')
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        info1 = '''Rules:\n      If a cell has 0-1 neighbors, it dies.\n      If a cell has 4 or more neighbors, it dies.\n      If a cell has 2-3 neighbors, it survives.\n      If a space is surrounded by 3 neighbors, a cell is born.\n\n'''
+        info2 = '''Controls:\n      Click or draw to add cells.\n       Modify the default rules and more in settings.\n'''
+        info3 = '''\nCreated by:\n      Steven Lee-Kramer\n      Ryan O Schenck'''
+        popup = Popup(title="John Conway's Game of Life", separator_height=0, title_size=titlesize,
+            content=Label(text=''.join([info1,info2,info3]),font_size=mysize),
+            size_hint=(.8, .8),title_align='center')
         popup.open()
 
 class GameApp(App):
@@ -1264,24 +1279,23 @@ class GameApp(App):
         self.settings_cls = SettingsWithSpinner
         self.config.items('initiate')
         self.use_kivy_settings = False
-        if Window.width < 1334 and Window.height < 750:
-            Window.size = (1334,750)
+        
+        # Delete this once finalized
+        # if Window.width < 1334 and Window.height < 750:
+        #     Window.size = (1334,750)
 
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
         grid = Grid(size=(Window.width, Window.height - 50), pos=(0,50))
         self.game_cells = cells = Cells(size=(Window.width - 20, Window.height - 70), pos=(11,61))
-        # Window.bind(Window.size=cells.create_rectangles)
-        # generate cell lists
-        # cells.create_cells()
-        # add grid and cells to layout
+        
+
         board.add_widget(grid)
         board.add_widget(cells)
         cells.create_rectangles()
-        # draw grid and initial cells
-        # grid.draw_grid()
-        # cells.draw_some_cells()
-        # schedule the updating of cells
+        
+
+
         start_patterns = ModalView(size_hint=(0.3,0.8), pos_hint={'top': 0.95}, auto_dismiss=False)
         start_layout = BoxLayout(size_hint=(1,1), orientation='vertical')
         patt_label = Label(text='Select Start Pattern', pos=(200,200), font_size='18sp')
@@ -1294,13 +1308,14 @@ class GameApp(App):
         patt_gol = Button(text='GOL',on_press=partial(cells.assign_gol, start_patterns))
         patt_pulsar = Button(text='Pulsar',on_press=partial(cells.assign_pulsar, start_patterns))
         patt_gliders = Button(text='Gliders',on_press=partial(cells.assign_gliders, start_patterns))
-        patt_imo_6 = Button(text='IMO_6', on_press=partial(cells.assign_imo_6, start_patterns))
+        patt_imo_6 = Button(text='IMO 6', on_press=partial(cells.assign_imo_6, start_patterns))
         patt_omega = Button(text='Resistance', on_press=partial(cells.assign_omega,start_patterns))
 
-        patterns = [patt_label, patt_imo_6,patt_omega, patt_blank,patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders]
+        patterns = [patt_label, patt_imo_6, patt_omega, patt_blank, patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders]
         for pattern in patterns:
             start_layout.add_widget(pattern)
         start_patterns.add_widget(start_layout)
+
 
         btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events))
         btn_stop = Button(text='Stop', on_press=partial(cells.stop_interval, self.events))
@@ -1309,14 +1324,13 @@ class GameApp(App):
                            on_press=partial(cells.reset_interval, self.events,grid,start_patterns))
         btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events))
         btn_sett = Button(text='Options',on_press=partial(self.settings, self.events))
-        # btn_sett.size_hint = (.6,1)
         btn_info = Button(text='i',on_press=partial(cells.info, self.events))
-        # btn_info.size_hint = (.6,1)
         btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
         board.bind(size=cells.create_rectangles)
         board.bind(size=partial(cells.reset_interval,self.events,grid,start_patterns))
+        
         controls =[btn_start,btn_stop,btn_step,btn_reset,btn_place,btn_sett,btn_info]
         for btn in controls:
             buttons.add_widget(btn)
@@ -1325,7 +1339,9 @@ class GameApp(App):
         start_patterns.open()
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
+
         board.add_widget(buttons)
+
         return board
 
     def build_config(self, config):
