@@ -11,7 +11,6 @@ from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.config import ConfigParser
 from kivy.uix.settings import SettingsWithSpinner
-from kivy.uix.screenmanager import ScreenManager, Screen
 from settings_options import settings_json
 from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
@@ -1243,9 +1242,11 @@ class Cells(Widget):
         self.mouse_positions = []
 
     def on_rotate(self):
+        self.loadimg
         self.reset_interval
 
     def on_flip(self):
+        self.loadimg
         self.reset_interval
 
     # Need to add some placement options...
@@ -1265,7 +1266,17 @@ class Cells(Widget):
         info3 = '''\nCreated by:\n      Steven Lee-Kramer\n      Ryan O Schenck'''
         popup = Popup(title="John Conway's Game of Life", separator_height=0, title_size=titlesize,
             content=Label(text=''.join([info1,info2,info3]),font_size=mysize),
-            size_hint=(.8, .8),title_align='center')
+            size_hint=(.8, .8),title_align='center',)
+        popup.open()
+
+    def loadimg(self, events, *largs):
+        content = Image(source='logo.png')
+        popup = Popup(title='', content=content,
+              auto_dismiss=False, separator_height=0,title_size=0, separator_color=[0.,0.,0.,0.], size=(Window.height,Window.width),
+              # border=[20,20,20,20],
+              background='black_thing.png',
+              background_color=[0,0,0,1])
+        content.bind(on_touch_down=popup.dismiss)
         popup.open()
 
 class GameApp(App):
@@ -1284,17 +1295,18 @@ class GameApp(App):
         # if Window.width < 1334 and Window.height < 750:
         #     Window.size = (1334,750)
 
+        
+
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
         grid = Grid(size=(Window.width, Window.height - 50), pos=(0,50))
         self.game_cells = cells = Cells(size=(Window.width - 20, Window.height - 70), pos=(11,61))
-        
 
         board.add_widget(grid)
         board.add_widget(cells)
         cells.create_rectangles()
-        
 
+        Clock.schedule_once(cells.loadimg, 0)
 
         start_patterns = ModalView(size_hint=(0.3,0.8), pos_hint={'top': 0.95}, auto_dismiss=False)
         start_layout = BoxLayout(size_hint=(1,1), orientation='vertical')
@@ -1317,14 +1329,15 @@ class GameApp(App):
         start_patterns.add_widget(start_layout)
 
 
-        btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events))
-        btn_stop = Button(text='Stop', on_press=partial(cells.stop_interval, self.events))
-        btn_step = Button(text='Step', on_press=partial(cells.step, self.events))
+        btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_stop = Button(text='Stop', on_press=partial(cells.stop_interval, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_step = Button(text='Step', on_press=partial(cells.step, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_reset = Button(text='Reset',
-                           on_press=partial(cells.reset_interval, self.events,grid,start_patterns))
-        btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events))
-        btn_sett = Button(text='Options',on_press=partial(self.settings, self.events))
-        btn_info = Button(text='i',on_press=partial(cells.info, self.events))
+                           on_press=partial(cells.reset_interval, self.events,grid,start_patterns), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        dump(btn_place)
+        btn_sett = Button(text='Options',on_press=partial(self.settings, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_info = Button(text='i',on_press=partial(cells.info, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
