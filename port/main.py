@@ -7,6 +7,9 @@ from kivy.graphics import *
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.modalview import ModalView
+from kivy.uix.popup import Popup
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.config import ConfigParser
@@ -145,170 +148,171 @@ class Cells(Widget):
 
         modal.dismiss()
 
-    # def assign_binary(self, modal, *largs):
-    #     self.setup_cells()
-    #
-    #     self.on_board[(self.mid_x -12 ,self.mid_y )]=1
-    #     self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x -12 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x -12 ,self.mid_y+ 5 )]=1
-    #     self.on_board[(self.mid_x -11 ,self.mid_y )]=1
-    #     self.on_board[(self.mid_x -11 ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x -11 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x -11 ,self.mid_y+ 5 )]=1
-    #     self.on_board[(self.mid_x -9 ,self.mid_y -2 )]=1
-    #     self.on_board[(self.mid_x -9 ,self.mid_y -1 )]=1
-    #     self.on_board[(self.mid_x -9 ,self.mid_y )]=1
-    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )]=1
-    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 5 )]=1
-    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )]=1
-    #     self.on_board[(self.mid_x -9 ,self.mid_y+ 7 )]=1
-    #     self.on_board[(self.mid_x -8 ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x -8 ,self.mid_y+ 8 )]=1
-    #     self.on_board[(self.mid_x -7 ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x -7 ,self.mid_y -2 )]=1
-    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )]=1
-    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 7 )]=1
-    #     self.on_board[(self.mid_x -7 ,self.mid_y+ 8 )]=1
-    #     self.on_board[(self.mid_x -5 ,self.mid_y+ 2 )]=1
-    #     self.on_board[(self.mid_x -5 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x -4 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x -3 ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x -3 ,self.mid_y+ 11 )]=1
-    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 2 )]=1
-    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 11 )]=1
-    #     self.on_board[(self.mid_x -1 ,self.mid_y+ 11 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y -2 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y+ 2 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y+ 7 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y+ 8 )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y -2 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y -1 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 5 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 6 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y+ 5 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )]=1
-    #
-    #     modal.dismiss()
+    def assign_binary(self, modal, *largs):
+        self.setup_cells()
 
-    # def assign_face(self, modal, *largs):
-    #     self.setup_cells()
-    #
-    #     self.on_board[(self.mid_x -5 ,self.mid_y+ 8 )]=1
-    #     self.on_board[(self.mid_x -5 ,self.mid_y+ 9 )]=1
-    #     self.on_board[(self.mid_x -5 ,self.mid_y+ 10 )]=1
-    #     self.on_board[(self.mid_x -4 ,self.mid_y+ 7 )]=1
-    #     self.on_board[(self.mid_x -4 ,self.mid_y+ 11 )]=1
-    #     self.on_board[(self.mid_x -3 ,self.mid_y+ 7 )]=1
-    #     self.on_board[(self.mid_x -3 ,self.mid_y+ 11 )]=1
-    #     self.on_board[(self.mid_x -2 ,self.mid_y -4 )]=1
-    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 8 )]=1
-    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 9 )]=1
-    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 10 )]=1
-    #     self.on_board[(self.mid_x -1 ,self.mid_y -5 )]=1
-    #     self.on_board[(self.mid_x -1 ,self.mid_y -4 )]=1
-    #     self.on_board[(self.mid_x -1 ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y -6 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y -5 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y -2 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y -7 )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y -6 )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y -5 )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y -2 )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y -1 )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y -7 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y -6 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y -5 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y -2 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y -1 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y -7 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y -6 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y -5 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y -2 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y -1 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y+ 9 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y+ 10 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y -7 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y -6 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y -5 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y -2 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y -1 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y+ 7 )]=1
-    #     self.on_board[(self.mid_x+ 4 ,self.mid_y+ 11 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y -6 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y -5 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y -2 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y+ 2 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y+ 7 )]=1
-    #     self.on_board[(self.mid_x+ 5 ,self.mid_y+ 11 )]=1
-    #     self.on_board[(self.mid_x+ 6 ,self.mid_y -5 )]=1
-    #     self.on_board[(self.mid_x+ 6 ,self.mid_y -4 )]=1
-    #     self.on_board[(self.mid_x+ 6 ,self.mid_y -3 )]=1
-    #     self.on_board[(self.mid_x+ 6 ,self.mid_y+ 2 )]=1
-    #     self.on_board[(self.mid_x+ 6 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x+ 6 ,self.mid_y+ 8 )]=1
-    #     self.on_board[(self.mid_x+ 6 ,self.mid_y+ 9 )]=1
-    #     self.on_board[(self.mid_x+ 6 ,self.mid_y+ 10 )]=1
-    #     self.on_board[(self.mid_x+ 7 ,self.mid_y -4 )]=1
-    #
-    #     modal.dismiss()
+        self.on_board[(self.mid_x -12 ,self.mid_y )]=1
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x -11 ,self.mid_y )]=1
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 11 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 11 )]=1
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 11 )]=1
+        self.on_board[(self.mid_x ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )]=1
 
-    # def assign_maze(self, modal, *largs):
-    #     self.setup_cells()
-    #     self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )]=1
-    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x -2 ,self.mid_y+ 5 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y+ 5 )]=1
-    #     self.on_board[(self.mid_x ,self.mid_y+ 6 )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y )]=1
-    #     self.on_board[(self.mid_x+ 1 ,self.mid_y+ 6 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )]=1
-    #     self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )]=1
-    #     self.on_board[(self.mid_x+ 3 ,self.mid_y+ 4 )]=1
-    #     # self.draw_some_cells()
-    #     modal.dismiss()
+        modal.dismiss()
+
+    def assign_face(self, modal, *largs):
+        self.setup_cells()
+
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 9 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 10 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 11 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 11 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 9 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 10 )]=1
+        self.on_board[(self.mid_x -1 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x -1 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x -1 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 9 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 10 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -7 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -1 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 11 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -6 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -2 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 7 )]=1
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 11 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -5 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -3 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 9 )]=1
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 10 )]=1
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -4 )]=1
+
+        modal.dismiss()
+
+    def assign_maze(self, modal, *largs):
+        self.setup_cells()
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )]=1
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )]=1
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 4 )]=1
+        # self.draw_some_cells()
+        modal.dismiss()
+
     def assign_gol(self, modal, *largs):
         self.setup_cells()
 
@@ -1199,9 +1203,9 @@ class Cells(Widget):
         pos_x = int(math.floor(pos_x / 10.0))
         pos_y = int(math.floor(pos_y / 10.0))
         in_bounds = (0 <= pos_x < (self.dimensions[0] / 10)) and (0 <= pos_y < (self.dimensions[1] / 10))
-        sign_x = "+" if pos_x - self.mid_x >= 0 else ""
-        sign_y = "+" if pos_y - self.mid_y >= 0 else ""
-        print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")]=1"
+        # sign_x = "+" if pos_x - self.mid_x >= 0 else ""
+        # sign_y = "+" if pos_y - self.mid_y >= 0 else ""
+        # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")]=1"
         if self.accept_touches and in_bounds:
             try:
                 if not self.on_board[pos_x,pos_y]:
@@ -1290,12 +1294,12 @@ class GameApp(App):
         self.settings_cls = SettingsWithSpinner
         self.config.items('initiate')
         self.use_kivy_settings = False
-        
+
         # Delete this once finalized
         # if Window.width < 1334 and Window.height < 750:
         #     Window.size = (1334,750)
 
-        
+
 
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
@@ -1308,25 +1312,29 @@ class GameApp(App):
 
         Clock.schedule_once(cells.loadimg, 0)
 
-        start_patterns = ModalView(size_hint=(0.3,0.8), pos_hint={'top': 0.95}, auto_dismiss=False)
-        start_layout = BoxLayout(size_hint=(1,1), orientation='vertical')
-        patt_label = Label(text='Select Start Pattern', pos=(200,200), font_size='18sp')
-        patt_blank = Button(text='Blank',on_press=partial(cells.assign_blank, start_patterns))
-        patt_random = Button(text='Random',on_press=partial(cells.assign_random, start_patterns))
-        patt_gun = Button(text='Gun',on_press=partial(cells.assign_gun, start_patterns))
-        patt_ten = Button(text='Ten',on_press=partial(cells.assign_ten, start_patterns))
-        # patt_binary = Button(text='Binary',on_press=partial(cells.assign_binary, start_patterns))
-        # patt_face = Button(text='Face',on_press=partial(cells.assign_face, start_patterns))
-        patt_gol = Button(text='GOL',on_press=partial(cells.assign_gol, start_patterns))
-        patt_pulsar = Button(text='Pulsar',on_press=partial(cells.assign_pulsar, start_patterns))
-        patt_gliders = Button(text='Gliders',on_press=partial(cells.assign_gliders, start_patterns))
-        patt_imo_6 = Button(text='IMO 6', on_press=partial(cells.assign_imo_6, start_patterns))
-        patt_omega = Button(text='Resistance', on_press=partial(cells.assign_omega,start_patterns))
+        start_patterns = Popup(title="Select Start Pattern", size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
+        start_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        start_layout.bind(minimum_height=start_layout.setter('height'))
+        patt_blank = Button(text='Blank',size_hint_y=None, height=50,on_press=partial(cells.assign_blank, start_patterns))
+        patt_random = Button(text='Random',size_hint_y=None, height=50,on_press=partial(cells.assign_random, start_patterns))
+        patt_gun = Button(text='Gun',size_hint_y=None, height=50,on_press=partial(cells.assign_gun, start_patterns))
+        patt_ten = Button(text='Ten',size_hint_y=None, height=50,on_press=partial(cells.assign_ten, start_patterns))
+        patt_binary = Button(text='Binary',size_hint_y=None, height=50,on_press=partial(cells.assign_binary, start_patterns))
+        patt_face = Button(text='Face',size_hint_y=None, height=50,on_press=partial(cells.assign_face, start_patterns))
+        patt_gol = Button(text='GOL',size_hint_y=None, height=50,on_press=partial(cells.assign_gol, start_patterns))
+        patt_pulsar = Button(text='Pulsar',size_hint_y=None, height=50,on_press=partial(cells.assign_pulsar, start_patterns))
+        patt_gliders = Button(text='Gliders',size_hint_y=None, height=50,on_press=partial(cells.assign_gliders, start_patterns))
+        patt_imo_6 = Button(text='IMO 6', size_hint_y=None, height=50,on_press=partial(cells.assign_imo_6, start_patterns))
+        patt_omega = Button(text='Resistance', size_hint_y=None, height=50,on_press=partial(cells.assign_omega,start_patterns))
+        patt_maze = Button(text='Maze', size_hint_y=None, height=50,on_press=partial(cells.assign_maze,start_patterns))
 
-        patterns = [patt_label, patt_imo_6, patt_omega, patt_blank, patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders]
+
+        patterns = [patt_imo_6, patt_omega, patt_blank, patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders,patt_face,patt_binary, patt_maze]
         for pattern in patterns:
             start_layout.add_widget(pattern)
-        start_patterns.add_widget(start_layout)
+        pattern_scroll = ScrollView(size_hint=(1, 1))
+        pattern_scroll.add_widget(start_layout)
+        start_patterns.add_widget(pattern_scroll)
 
 
         btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
@@ -1335,7 +1343,7 @@ class GameApp(App):
         btn_reset = Button(text='Reset',
                            on_press=partial(cells.reset_interval, self.events,grid,start_patterns), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        dump(btn_place)
+        # dump(btn_place)
         btn_sett = Button(text='Options',on_press=partial(self.settings, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_info = Button(text='i',on_press=partial(cells.info, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
@@ -1343,12 +1351,12 @@ class GameApp(App):
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
         board.bind(size=cells.create_rectangles)
         board.bind(size=partial(cells.reset_interval,self.events,grid,start_patterns))
-        
+
         controls =[btn_start,btn_stop,btn_step,btn_reset,btn_place,btn_sett,btn_info]
         for btn in controls:
             buttons.add_widget(btn)
 
-        start_patterns.attach_on = board
+        # start_patterns.attach_on = board
         start_patterns.open()
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
