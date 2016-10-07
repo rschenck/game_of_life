@@ -1441,7 +1441,7 @@ class GameApp(App):
 
     def on_config_change(self, config, section, key, value):
         if key == 'Speed':
-            self.game_cells.speed = value
+            self.game_cells.speed = float(value)
         if key == 'Color':
             self.game_cells.cellcol = value
             self.game_cells.set_canvas_color()
