@@ -1302,6 +1302,18 @@ class Cells(Widget):
         content.bind(on_touch_down=popup.dismiss)
         popup.open()
 
+
+class score_frame(Widget):
+    def draw_scorepad(self, *largs):
+        # self.size = (Window.width/2., 50)
+        # self.pos = (Window.width,Window.height-50)
+
+        with self.canvas:
+            border = Color(0.5,0.5,0.5, mode='rgb')
+            Rect = Rectangle(size=((Window.width),50), pos=(0,Window.height-50))
+            inner = Color(0,0,0,mode='rgb')
+            Inner_rect = Rectangle(size=(Window.width/3.*2+50-10,50-5), pos=(Window.width/3.-50+5,Window.height-50))
+
 class GameApp(App):
     events = []
     game_cells = None
@@ -1341,7 +1353,7 @@ class GameApp(App):
         patt_binary = Button(text='Binary',size_hint_y=None, height=50,on_press=partial(cells.assign_binary, start_patterns))
         patt_face = Button(text='Face',size_hint_y=None, height=50,on_press=partial(cells.assign_face, start_patterns))
         patt_gol = Button(text='GOL',size_hint_y=None, height=50,on_press=partial(cells.assign_gol, start_patterns))
-        patt_pulsar = Button(text='Pulsar',size_hint_y=None, height=50,on_press=partial(cells.assign_pulsar, start_patterns))
+        patt_pulsar = Button(text='Pulsar', size_hint_y=None, height=50,on_press=partial(cells.assign_pulsar, start_patterns))
         patt_gliders = Button(text='Gliders',size_hint_y=None, height=50,on_press=partial(cells.assign_gliders, start_patterns))
         patt_imo_6 = Button(text='IMO 6', size_hint_y=None, height=50,on_press=partial(cells.assign_imo_6, start_patterns))
         patt_omega = Button(text='Resistance', size_hint_y=None, height=50,on_press=partial(cells.assign_omega,start_patterns))
@@ -1356,15 +1368,15 @@ class GameApp(App):
         start_patterns.add_widget(pattern_scroll)
 
 
-        btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_stop = Button(text='Stop', on_press=partial(cells.stop_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_step = Button(text='Step', on_press=partial(cells.step, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_reset = Button(text='Reset',
+        btn_start = Button(text='START', font_name='joystix' ,on_press=partial(cells.start_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_stop = Button(text='Stop', font_name='joystix' ,on_press=partial(cells.stop_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_reset = Button(text='Reset', font_name='joystix' ,
                            on_press=partial(cells.reset_interval, self.events,grid,start_patterns), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_place = Button(text='Place', font_name='joystix' , on_press=partial(cells.place_option, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         # dump(btn_place)
-        btn_sett = Button(text='Options',on_press=partial(self.settings, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_info = Button(text='Info',on_press=partial(cells.info, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_sett = Button(text='Options', font_name='joystix' ,on_press=partial(self.settings, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_info = Button(text='Info', font_name='joystix' ,on_press=partial(cells.info, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
@@ -1376,7 +1388,7 @@ class GameApp(App):
         for btn in controls:
             buttons.add_widget(btn)
 
-        top_buttons = BoxLayout(size_hint=(1,None), height=50, #pos_hint={'x':0, 'y': 0}, padding=[0,0,0,Window.height-25]
+        top_buttons = BoxLayout(size_hint=(.3,None), height=50, #pos_hint={'x':0, 'y': 0}, padding=[0,0,0,Window.height-25]
             pos=[0,Window.height-50])
 
         top_controls =[btn_sett,btn_info]
@@ -1388,10 +1400,48 @@ class GameApp(App):
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
 
+        #attach the scorepad
+        scorepad = score_frame()
+        start_patterns.bind(on_dismiss=scorepad.draw_scorepad)
+        # Clock.schedule_once(scorepad.draw_scorepad, 0)
+        board.add_widget(scorepad)
+
+        
+        # Score Label Widgets
+        hs = Label(text='High Score:', font_name='Roboto',  font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-200,Window.height/2.-27))
+        hsval = Label(text='0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-80,Window.height/2.-27))
+
+        cs = Label(text='Score:', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-450,Window.height/2.-27))
+        csval = Label(text='0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-330,Window.height/2.-27))
+
+        adrat = Label(text='A/D Ratio:', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-650,Window.height/2.-27))
+        adval = Label(text='0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-530,Window.height/2.-27))
+
+        place = Label(text='Cells:', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-870,Window.height/2.-27))
+        placeval = Label(text='0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-790,Window.height/2.-27))
+
+        gen = Label(text='Gen.:', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-1050,Window.height/2.-27))
+        genval = Label(text='0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-980,Window.height/2.-27))
+        
+
+        board.add_widget(hs)
+        board.add_widget(hsval)
+        board.add_widget(cs)
+        board.add_widget(csval)
+        board.add_widget(adrat)
+        board.add_widget(adval)
+        board.add_widget(place)
+        board.add_widget(placeval)
+        board.add_widget(gen)
+        board.add_widget(genval)
+
         board.add_widget(top_buttons)
         board.add_widget(buttons)
 
         return board
+
+    def update(self,event):
+        self.hs.text = randint(0,100)
 
     def build_config(self, config):
         config.setdefaults('initiate', {
