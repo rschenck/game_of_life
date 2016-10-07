@@ -38,7 +38,7 @@ def dump(obj):
 
 class Grid(Widget):
     def draw_grid(self, *largs):
-        self.size = (Window.width, Window.height - 50) # Should be fine to draw off window size
+        self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
         self.pos = (0,50)
         with self.canvas:
             Color(0.5,0.5,0.5, mode='rgb')
@@ -75,7 +75,7 @@ class Cells(Widget):
     alive_cell_instructions = InstructionGroup()
     alive_color_instruction = InstructionGroup()
     was_cell_instructions = InstructionGroup()
-    was_cell_instructions.add(Color(0.72,0.72,0.72,mode='rgb'))
+    was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
 # Starting Patterns
 # Each will:
 # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -1104,7 +1104,7 @@ class Cells(Widget):
     # Create all possible rectangles for the given window size
     def create_rectangles(self, *largs):
         self.rectangles_dict.clear()
-        self.dimensions = (Window.width - 20, Window.height - 70)
+        self.dimensions = (Window.width - 20, Window.height - 120)
         self.pos = (11,61)
         for x in range(0,self.dimensions[0]/10):
             for y in range(0,self.dimensions[1]/10):
@@ -1205,7 +1205,7 @@ class Cells(Widget):
         grid.canvas.clear()
         self.alive_cell_instructions.clear()
         self.was_cell_instructions.clear()
-        self.was_cell_instructions.add(Color(0.72,0.72,0.72,mode='rgb'))
+        self.was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
         self.setup_cells()
         modal.open()
 
@@ -1293,7 +1293,7 @@ class Cells(Widget):
         popup.open()
 
     def loadimg(self, events, *largs):
-        content = Image(source='logo.png')
+        content = Image(source='IMO_GOL2.png')
         popup = Popup(title='', content=content,
               auto_dismiss=False, separator_height=0,title_size=0, separator_color=[0.,0.,0.,0.], size=(Window.height,Window.width),
               # border=[20,20,20,20],
@@ -1322,8 +1322,8 @@ class GameApp(App):
 
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
-        grid = Grid(size=(Window.width, Window.height - 50), pos=(0,50))
-        self.game_cells = cells = Cells(size=(Window.width - 20, Window.height - 70), pos=(11,61))
+        grid = Grid(size=(Window.width, Window.height - 100), pos=(0,50))
+        self.game_cells = cells = Cells(size=(Window.width - 20, Window.height - 120), pos=(11,61))
 
         board.add_widget(grid)
         board.add_widget(cells)
@@ -1356,30 +1356,39 @@ class GameApp(App):
         start_patterns.add_widget(pattern_scroll)
 
 
-        btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_stop = Button(text='Stop', on_press=partial(cells.stop_interval, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_step = Button(text='Step', on_press=partial(cells.step, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_stop = Button(text='Stop', on_press=partial(cells.stop_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_step = Button(text='Step', on_press=partial(cells.step, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_reset = Button(text='Reset',
-                           on_press=partial(cells.reset_interval, self.events,grid,start_patterns), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+                           on_press=partial(cells.reset_interval, self.events,grid,start_patterns), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         # dump(btn_place)
-        btn_sett = Button(text='Options',on_press=partial(self.settings, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_info = Button(text='i',on_press=partial(cells.info, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_sett = Button(text='Options',on_press=partial(self.settings, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_info = Button(text='Info',on_press=partial(cells.info, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
+
         board.bind(size=cells.create_rectangles)
         board.bind(size=partial(cells.reset_interval,self.events,grid,start_patterns))
 
-        controls =[btn_start,btn_stop,btn_step,btn_reset,btn_place,btn_sett,btn_info]
+        controls =[btn_start,btn_stop,btn_step,btn_reset]
         for btn in controls:
             buttons.add_widget(btn)
+
+        top_buttons = BoxLayout(size_hint=(1,None), height=50, #pos_hint={'x':0, 'y': 0}, padding=[0,0,0,Window.height-25]
+            pos=[0,Window.height-50])
+
+        top_controls =[btn_sett,btn_info]
+        for btn in top_controls:
+            top_buttons.add_widget(btn)
 
         # start_patterns.attach_on = board
         start_patterns.open()
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
 
+        board.add_widget(top_buttons)
         board.add_widget(buttons)
 
         return board
