@@ -11,9 +11,10 @@ from kivy.uix.popup import Popup
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
+from kivy.uix.togglebutton import ToggleButton
 from kivy.clock import Clock
 from kivy.config import ConfigParser
-from kivy.uix.settings import SettingsWithSpinner
+from kivy.uix.settings import SettingsWithSpinner, SettingOptions
 from settings_options import settings_json
 from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
@@ -22,6 +23,7 @@ from kivy.uix.image import Image
 from random import randint
 from random import uniform
 from functools import partial
+from kivy.metrics import dp
 import math
 
 # def song(music):
@@ -75,7 +77,7 @@ class Cells(Widget):
     alive_cell_instructions = InstructionGroup()
     alive_color_instruction = InstructionGroup()
     was_cell_instructions = InstructionGroup()
-    was_cell_instructions.add(Color(0.72,0.72,0.72,mode='rgb'))
+    was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
 # Starting Patterns
 # Each will:
 # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -1112,7 +1114,7 @@ class Cells(Widget):
                 self.rectangles_dict[x,y] = rect
 
     def add_instruction_groups(self, *largs):
-        self.canvas.add(self.alive_color_instruction)
+        # self.canvas.add(self.alive_color_instruction)
         self.canvas.add(self.alive_cell_instructions)
         self.canvas.add(self.was_cell_instructions)
 
@@ -1123,11 +1125,11 @@ class Cells(Widget):
         self.mid_x,self.mid_y = self.dimensions[0]/20, self.dimensions[1]/20
     # assigns color instruction to canvas.before
     def set_canvas_color(self, on_request=False, *largs):
-        self.alive_color_instruction.clear()
+        self.canvas.before.clear()
         if self.cellcol == 'Random':
-            self.alive_color_instruction.add(Color(uniform(0.0,1.0),1,1,mode="hsv"))
+            self.canvas.before.add(Color(uniform(0.0,1.0),1,1,mode="hsv"))
         else:
-            self.alive_color_instruction.add(self.allcols[self.cellcol])
+            self.canvas.before.add(self.allcols[self.cellcol])
         if on_request:
             self.canvas.ask_update()
     # add the starting rectangles to the board
@@ -1302,6 +1304,33 @@ class Cells(Widget):
         content.bind(on_touch_down=popup.dismiss)
         popup.open()
 
+class SettingScrollOptions(SettingOptions):
+
+    def _create_popup(self, instance):
+        content         = GridLayout(cols=1, spacing='5dp')
+        scrollview      = ScrollView( do_scroll_x=False)
+        scrollcontent   = GridLayout(cols=1,  spacing='5dp', size_hint=(1, None))
+        scrollcontent.bind(minimum_height=scrollcontent.setter('height'))
+        self.popup   = popup = Popup(content=content, title=self.title, title_align='center', size_hint=(0.5, 0.6),  auto_dismiss=False)
+
+        popup.open()
+        content.add_widget(Widget(size_hint_y=None, height=dp(2)))
+
+        uid = str(self.uid)
+        for option in self.options:
+            state = 'down' if option == self.value else 'normal'
+            btn = ToggleButton(text=option, state=state, group=uid, height=dp(55), size_hint=(1, None))
+            btn.bind(on_release=self._set_option)
+            scrollcontent.add_widget(btn)
+
+        scrollview.add_widget(scrollcontent)
+        content.add_widget(scrollview)
+        content.add_widget(Widget(size_hint=(1,0.02)))
+
+        btn = Button(text='Cancel', size=(popup.width, dp(50)),size_hint=(0.9, None))
+        btn.bind(on_release=popup.dismiss)
+        content.add_widget(btn)
+
 class GameApp(App):
     events = []
     game_cells = None
@@ -1381,7 +1410,6 @@ class GameApp(App):
         start_patterns.bind(on_dismiss=cells.starting_cells)
 
         board.add_widget(buttons)
-
         return board
 
     def build_config(self, config):
@@ -1408,20 +1436,21 @@ class GameApp(App):
                     Cells.crowded = config._sections[item][x]
 
     def build_settings(self, settings):
+        settings.register_type('scrolloptions', SettingScrollOptions)
         settings.add_json_panel('Game Settings', self.config, data=settings_json)
 
     def on_config_change(self, config, section, key, value):
         if key == 'Speed':
-            self.game_cells.speed = value
+            self.game_cells.speed = float(value)
         if key == 'Color':
             self.game_cells.cellcol = value
             self.game_cells.set_canvas_color()
         if key == 'Born':
-            self.game_cells.birth = value
+            self.game_cells.birth = int(value)
         if key == 'Lonely':
-            self.game_cells.lonely = value
+            self.game_cells.lonely = int(value)
         if key == 'Crowded':
-            self.game_cells.crowded = value
+            self.game_cells.crowded = int(value)
         else:
             pass
         print config, section, key, value
