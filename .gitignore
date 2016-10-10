@@ -1,8 +1,8 @@
-# Specific files
-port/scrollview_example.py
+Specific files
 port/igroupexample.py
-
+port/scrollview_example.py
 *.xcuserdatad
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
