@@ -17,7 +17,7 @@ from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.modalview import ModalView
 from kivy.uix.popup import Popup
-from kivy.uix.scrollview import ScrollVie
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.settings import SettingsWithSpinner, SettingOptions
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.widget import Widget
