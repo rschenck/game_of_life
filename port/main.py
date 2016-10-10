@@ -11,9 +11,10 @@ from kivy.uix.popup import Popup
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
+from kivy.uix.togglebutton import ToggleButton
 from kivy.clock import Clock
 from kivy.config import ConfigParser
-from kivy.uix.settings import SettingsWithSpinner
+from kivy.uix.settings import SettingsWithSpinner, SettingOptions
 from settings_options import settings_json
 from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
@@ -22,6 +23,7 @@ from kivy.uix.image import Image
 from random import randint
 from random import uniform
 from functools import partial
+from kivy.metrics import dp
 import math
 
 # def song(music):
@@ -64,13 +66,18 @@ class Cells(Widget):
     # update_count = 0
     dimensions = None # Use this instead of self.size, which resets each frame
     rectangles_dict = {}
-    on_board = defaultdict(int)
+    def default_cells():
+        return {'alive':0,'was':0}
+    on_board = defaultdict(default_cells)
     changes_dict = {}
     mid_x,mid_y = 0,0
     mouse_positions = []
     should_draw = False # allows touches to add rectangles
     accept_touches = False # Avoid sticky cell from intial click/move
-
+    alive_cell_instructions = InstructionGroup()
+    alive_color_instruction = InstructionGroup()
+    was_cell_instructions = InstructionGroup()
+    was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
 # Starting Patterns
 # Each will:
 # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -84,7 +91,7 @@ class Cells(Widget):
             for y in range(0,self.dimensions[1]/10):
                 # assign 25% chance of life
                 if randint(0,3) == 1:
-                    self.on_board[x,y] = 1
+                    self.on_board[x,y] = {'alive':1, 'was':0}
         modal.dismiss()
 
     def assign_blank(self, modal, *largs):
@@ -94,1005 +101,1005 @@ class Cells(Widget):
     def assign_gun(self, modal, *largs):
         self.setup_cells()
 
-        self.on_board[(self.mid_x -20 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -20 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -10 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -10 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x+ 14 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 14 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 15 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 15 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 15 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 15 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 15 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 16 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 17 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x -20 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -20 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -10 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -10 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 14 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 14 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 15 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 15 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 15 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 15 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 15 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 16 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 17 ,self.mid_y -4 )] = {'alive':1, 'was':0}
 
         modal.dismiss()
 
     def assign_ten(self, modal, *largs):
         self.setup_cells()
 
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 2 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
 
         modal.dismiss()
 
     def assign_binary(self, modal, *largs):
         self.setup_cells()
 
-        self.on_board[(self.mid_x -12 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 11 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 11 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 11 )]=1
-        self.on_board[(self.mid_x ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )]=1
+        self.on_board[(self.mid_x -12 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 11 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 11 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 11 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
 
         modal.dismiss()
 
     def assign_face(self, modal, *largs):
         self.setup_cells()
 
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 9 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 10 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 11 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 11 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 9 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 10 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 9 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 10 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 11 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 11 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 9 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 10 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y -4 )]=1
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 11 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 11 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 11 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 11 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -4 )] = {'alive':1, 'was':0}
 
         modal.dismiss()
 
     def assign_maze(self, modal, *largs):
         self.setup_cells()
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 4 )]=1
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
         # self.draw_some_cells()
         modal.dismiss()
 
     def assign_gol(self, modal, *largs):
         self.setup_cells()
 
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y )]=1
-        self.on_board[(self.mid_x ,self.mid_y )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -10 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -13 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -13 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -13 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -10 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y )]=1
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -10 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -13 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -13 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -13 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -10 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y )] = {'alive':1, 'was':0}
 
         modal.dismiss()
 
     def assign_pulsar(self, modal, *largs):
         self.setup_cells()
 
-        self.on_board[(self.mid_x -6 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 6 )]=1
+        self.on_board[(self.mid_x -6 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
 
         modal.dismiss()
 
     def assign_gliders(self, modal, *largs):
         self.setup_cells()
 
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -10 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y )]=1
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -10 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y )] = {'alive':1, 'was':0}
 
         modal.dismiss()
 
     def assign_imo_6(self, modal, *largs):
         self.setup_cells()
-        # self.on_board[(self.mid_x+ 72 ,self.mid_y+ 56 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 9 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 11 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 11 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 11 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -10 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -10 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -10 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -11 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -10 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y- 1 )]=1
-        self.on_board[(self.mid_x -13 ,self.mid_y- 1 )]=1
-        self.on_board[(self.mid_x -13 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -13 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -13 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -12 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -14 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -15 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -14 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -15 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -14 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -15 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -14 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -15 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -16 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -17 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -18 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -19 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -23 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -23 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -24 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -24 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -25 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -25 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -26 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -26 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -31 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -31 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -32 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -32 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -33 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -33 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -34 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -34 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -30 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -29 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -28 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -27 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -26 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -25 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -24 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -23 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -23 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -24 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -25 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -26 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -31 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -32 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -33 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -34 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -34 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -33 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -32 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -31 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 22 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 23 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 24 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 25 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 26 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 27 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 27 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 26 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 25 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 24 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 23 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 22 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 30 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 31 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 31 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 30 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 18 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 19 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 19 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 18 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 18 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 19 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 20 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 21 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 22 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 23 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 24 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 25 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 26 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 27 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 22 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 23 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 24 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 25 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 26 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 27 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 29 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 30 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 31 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 31 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 31 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 31 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 30 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 30 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 30 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 27 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 26 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 25 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 24 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 23 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 22 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 22 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 23 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 24 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 25 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 26 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 27 ,self.mid_y+ 1 )]=1
+        # self.on_board[(self.mid_x+ 72 ,self.mid_y+ 56 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 9 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 11 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 11 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 11 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 11 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 10 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -10 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -10 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -10 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -11 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -10 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y- 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -13 ,self.mid_y- 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -13 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -13 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -13 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -12 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -14 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -15 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -14 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -15 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -14 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -15 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -14 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -15 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -16 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -17 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -18 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -19 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -23 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -23 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -24 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -24 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -25 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -25 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -26 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -26 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -31 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -31 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -32 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -32 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -33 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -33 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -34 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -34 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -30 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -29 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -28 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -27 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -26 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -25 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -24 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -23 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -23 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -24 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -25 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -26 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -31 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -32 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -33 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -34 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -34 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -33 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -32 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -31 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 22 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 23 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 24 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 25 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 26 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 27 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 27 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 26 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 25 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 24 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 23 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 22 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 30 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 31 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 31 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 30 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 19 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 18 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 18 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 19 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 19 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 18 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 18 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 19 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 20 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 21 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 22 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 23 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 24 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 25 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 26 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 27 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 22 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 23 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 24 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 25 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 26 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 27 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 28 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 29 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 30 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 31 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 31 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 31 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 31 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 30 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 30 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 30 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 27 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 26 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 25 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 24 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 23 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 22 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 22 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 23 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 24 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 25 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 26 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 27 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
 
         modal.dismiss()
 
     def assign_omega(self, modal, *largs):
         self.setup_cells()
 
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -9 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y -10 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -8 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y -7 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -6 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -5 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -4 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -3 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y -1 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 0 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )]=1
-        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 4 )]=1
-        self.on_board[(self.mid_x -8 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 5 )]=1
-        self.on_board[(self.mid_x -7 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 6 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -5 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -6 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 7 )]=1
-        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -1 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -2 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -3 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x -4 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 8 )]=1
-        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )]=1
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -9 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y -10 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 8 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 7 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 6 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y -7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y -1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 0 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -9 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -8 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -7 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -5 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -6 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 4 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 5 ,self.mid_y+ 7 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 1 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 0 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -1 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -2 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -3 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x -4 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 2 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
+        self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
 
         modal.dismiss()
 # Setup functions
@@ -1105,6 +1112,12 @@ class Cells(Widget):
             for y in range(0,self.dimensions[1]/10):
                 rect = Rectangle(pos=(self.x + x * 10, self.y + y *10), size=(9,9))
                 self.rectangles_dict[x,y] = rect
+
+    def add_instruction_groups(self, *largs):
+        # self.canvas.add(self.alive_color_instruction)
+        self.canvas.add(self.alive_cell_instructions)
+        self.canvas.add(self.was_cell_instructions)
+
     # set canvas_color, self.pos and cells midpoint
     def setup_cells(self, *largs):
         self.set_canvas_color()
@@ -1114,7 +1127,6 @@ class Cells(Widget):
     def set_canvas_color(self, on_request=False, *largs):
         self.canvas.before.clear()
         if self.cellcol == 'Random':
-            self.canvas.before.clear()
             self.canvas.before.add(Color(uniform(0.0,1.0),1,1,mode="hsv"))
         else:
             self.canvas.before.add(self.allcols[self.cellcol])
@@ -1123,7 +1135,7 @@ class Cells(Widget):
     # add the starting rectangles to the board
     def starting_cells(self, *largs):
         for x_y in self.on_board:
-            self.canvas.add(self.rectangles_dict[x_y])
+            self.alive_cell_instructions.add(self.rectangles_dict[x_y])
         self.should_draw = True
         self.accept_touches = True # Only first time matters
     # game logic for each iteration
@@ -1132,9 +1144,9 @@ class Cells(Widget):
             for y in range(0,int(self.dimensions[1]/10)):
                 over_x,over_y = (x + 1) % (self.dimensions[0]/10), (y + 1) % (self.dimensions[1]/10)
                 bel_x, bel_y = (x - 1) % (self.dimensions[0]/10), (y - 1) % (self.dimensions[1]/10)
-                alive_neighbors = self.on_board[bel_x,bel_y] + self.on_board[bel_x,y] + self.on_board[bel_x,over_y] + self.on_board[x,bel_y] + self.on_board[x,over_y] + self.on_board[over_x,bel_y] + self.on_board[over_x,y] + self.on_board[over_x,over_y]
+                alive_neighbors = self.on_board[bel_x,bel_y]['alive'] + self.on_board[bel_x,y]['alive'] + self.on_board[bel_x,over_y]['alive'] + self.on_board[x,bel_y]['alive'] + self.on_board[x,over_y]['alive'] + self.on_board[over_x,bel_y]['alive'] + self.on_board[over_x,y]['alive'] + self.on_board[over_x,over_y]['alive']
 
-                if self.on_board[x,y]:
+                if self.on_board[x,y]['alive']:
                     if (int(self.lonely) >= alive_neighbors or alive_neighbors >= int(self.crowded)):
                         self.changes_dict[x,y] = 0
                     else:
@@ -1148,11 +1160,14 @@ class Cells(Widget):
     def update_canvas_objects(self,*largs):
         for x_y in self.changes_dict:
             if self.changes_dict[x_y]:
-                self.canvas.add(self.rectangles_dict[x_y])
-                self.on_board[x_y] = 1
+                if self.on_board[x_y]['was']:
+                    self.was_cell_instructions.remove(self.rectangles_dict[x_y])
+                self.alive_cell_instructions.add(self.rectangles_dict[x_y])
+                self.on_board[x_y]['alive'] = 1
             else:
-                self.canvas.remove(self.rectangles_dict[x_y])
-                del self.on_board[x_y]
+                self.alive_cell_instructions.remove(self.rectangles_dict[x_y])
+                self.was_cell_instructions.add(self.rectangles_dict[x_y])
+                self.on_board[x_y] = {'alive':0,'was':1}
         self.changes_dict.clear()
     # Our start/step scheduled function
     def update_cells(self,*largs):
@@ -1190,7 +1205,9 @@ class Cells(Widget):
         self.on_board.clear()
         self.changes_dict.clear()
         grid.canvas.clear()
-        self.canvas.clear()
+        self.alive_cell_instructions.clear()
+        self.was_cell_instructions.clear()
+        self.was_cell_instructions.add(Color(0.72,0.72,0.72,mode='rgb'))
         self.setup_cells()
         modal.open()
 
@@ -1205,13 +1222,15 @@ class Cells(Widget):
         in_bounds = (0 <= pos_x < (self.dimensions[0] / 10)) and (0 <= pos_y < (self.dimensions[1] / 10))
         # sign_x = "+" if pos_x - self.mid_x >= 0 else ""
         # sign_y = "+" if pos_y - self.mid_y >= 0 else ""
-        # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")]=1"
+        # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")] = {'alive':1, 'was':0}"
         if self.accept_touches and in_bounds:
             try:
-                if not self.on_board[pos_x,pos_y]:
+                if not self.on_board[pos_x,pos_y]['alive']:
                     if self.should_draw:
-                        self.on_board[pos_x,pos_y] = 1
-                        self.canvas.add(self.rectangles_dict[pos_x,pos_y])
+                        self.on_board[pos_x,pos_y]['alive'] = 1
+                        if self.on_board[pos_x,pos_y]['was']:
+                            self.was_cell_instructions.remove(self.rectangles_dict[pos_x,pos_y])
+                        self.alive_cell_instructions.add(self.rectangles_dict[pos_x,pos_y])
                     else:
                         self.changes_dict[(pos_x,pos_y)] = 1
             except KeyError:
@@ -1232,13 +1251,15 @@ class Cells(Widget):
             # print "touch_move in bounds?", in_bounds
             # print "pos_x, pos_y", pos_x ,",",pos_y
             # print "canvas width and height", self.width, self.height
-            # print "self.on_board[(", pos_x, ",",pos_y,")]=1"
+            # print "self.on_board[(", pos_x, ",",pos_y,")] = {'alive':1, 'was':0}"
             if self.accept_touches and in_bounds:
                 try:
-                    if not self.on_board[pos_x,pos_y]:
+                    if not self.on_board[pos_x,pos_y]['alive']:
                         if self.should_draw:
-                            self.on_board[pos_x,pos_y] = 1
-                            self.canvas.add(self.rectangles_dict[pos_x,pos_y])
+                            self.on_board[pos_x,pos_y]['alive'] = 1
+                            if self.on_board[pos_x,pos_y]['was']:
+                                self.was_cell_instructions.remove(self.rectangles_dict[pos_x,pos_y])
+                            self.alive_cell_instructions.add(self.rectangles_dict[pos_x,pos_y])
                         else:
                             self.changes_dict[(pos_x,pos_y)] = 1
                 except KeyError:
@@ -1283,6 +1304,33 @@ class Cells(Widget):
         content.bind(on_touch_down=popup.dismiss)
         popup.open()
 
+class SettingScrollOptions(SettingOptions):
+
+    def _create_popup(self, instance):
+        content         = GridLayout(cols=1, spacing='5dp')
+        scrollview      = ScrollView( do_scroll_x=False)
+        scrollcontent   = GridLayout(cols=1,  spacing='5dp', size_hint=(1, None))
+        scrollcontent.bind(minimum_height=scrollcontent.setter('height'))
+        self.popup   = popup = Popup(content=content, title=self.title, title_align='center', size_hint=(0.5, 0.6),  auto_dismiss=False)
+
+        popup.open()
+        content.add_widget(Widget(size_hint_y=None, height=dp(2)))
+
+        uid = str(self.uid)
+        for option in self.options:
+            state = 'down' if option == self.value else 'normal'
+            btn = ToggleButton(text=option, state=state, group=uid, height=dp(55), size_hint=(1, None))
+            btn.bind(on_release=self._set_option)
+            scrollcontent.add_widget(btn)
+
+        scrollview.add_widget(scrollcontent)
+        content.add_widget(scrollview)
+        content.add_widget(Widget(size_hint=(1,0.02)))
+
+        btn = Button(text='Cancel', size=(popup.width, dp(50)),size_hint=(0.9, None))
+        btn.bind(on_release=popup.dismiss)
+        content.add_widget(btn)
+
 class GameApp(App):
     events = []
     game_cells = None
@@ -1309,7 +1357,7 @@ class GameApp(App):
         board.add_widget(grid)
         board.add_widget(cells)
         cells.create_rectangles()
-
+        cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
 
         start_patterns = Popup(title="Select Start Pattern", size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
@@ -1362,7 +1410,6 @@ class GameApp(App):
         start_patterns.bind(on_dismiss=cells.starting_cells)
 
         board.add_widget(buttons)
-
         return board
 
     def build_config(self, config):
@@ -1389,20 +1436,21 @@ class GameApp(App):
                     Cells.crowded = config._sections[item][x]
 
     def build_settings(self, settings):
+        settings.register_type('scrolloptions', SettingScrollOptions)
         settings.add_json_panel('Game Settings', self.config, data=settings_json)
 
     def on_config_change(self, config, section, key, value):
         if key == 'Speed':
-            self.game_cells.speed = value
+            self.game_cells.speed = float(value)
         if key == 'Color':
             self.game_cells.cellcol = value
             self.game_cells.set_canvas_color()
         if key == 'Born':
-            self.game_cells.birth = value
+            self.game_cells.birth = int(value)
         if key == 'Lonely':
-            self.game_cells.lonely = value
+            self.game_cells.lonely = int(value)
         if key == 'Crowded':
-            self.game_cells.crowded = value
+            self.game_cells.crowded = int(value)
         else:
             pass
         print config, section, key, value
