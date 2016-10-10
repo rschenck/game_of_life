@@ -1377,13 +1377,14 @@ class GameApp(App):
     events = []
     game_cells = None
     # seconds = 0
-    def update_score(self,cells,adrat, cs, place, *largs):
+    # def update_score(self,cells,adrat, cs, place, *largs):
+
+    def update_game(self,cells,adrat, cs, place,label,game_end,*largs):
+        label.text = "Gens: " + str(cells.generations)
         cs.text = "Score: " + str(cells.all_activated + cells.a_d_ratio)
         adrat.text = "A/D (+/-): " + str(cells.a_d_ratio)
         num = cells.a_d_ratio if cells.a_d_ratio > 0 else 0
         place.text = "Spawns: " + str(num)
-    def update_game(self,cells,label,game_end,*largs):
-        label.text = "Gens: " + str(cells.generations)
         if cells.generations == 0 or cells.game_over:
             cells.stop_interval(self.events)
             game_end.open()
@@ -1507,8 +1508,8 @@ class GameApp(App):
         end_layout.add_widget(play_again)
         game_end.add_widget(end_layout)
 
-        cells.bind(a_d_ratio=partial(self.update_score, cells, adrat, cs,place))
-        cells.bind(generations=partial(self.update_game, cells, gen, game_end))
+        # cells.bind(a_d_ratio=partial(self.update_score, cells, adrat, cs,place))
+        cells.bind(generations=partial(self.update_game, cells, adrat, cs, place,gen, game_end))
         start_patterns.bind(on_open=partial(self.reset_labels,adrat, cs, gen, place))
         game_end.bind(on_open=partial(self.update_final_score_label, final_score_label, cells))
 
