@@ -1,29 +1,30 @@
-from kivy.app import App
 from collections import defaultdict
-from kivy.core.window import Window
-from kivy.uix.widget import Widget
-from kivy.uix.button import Button
-from kivy.graphics import *
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.modalview import ModalView
-from kivy.uix.popup import Popup
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
+from functools import partial
+from kivy.app import App
 from kivy.clock import Clock
 from kivy.config import ConfigParser
-from kivy.uix.settings import SettingsWithSpinner
-from settings_options import settings_json
-from kivy.uix.popup import Popup
 from kivy.core.audio import SoundLoader
-from kivy.properties import NumericProperty,BooleanProperty
+from kivy.core.window import Window
+from kivy.graphics import *
 from kivy.graphics.instructions import InstructionGroup
+from kivy.metrics import dp
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
+from kivy.uix.label import Label
+from kivy.uix.modalview import ModalView
+from kivy.uix.popup import Popup
+from kivy.properties import NumericProperty,BooleanProperty
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.settings import SettingsWithSpinner, SettingOptions
+from kivy.uix.togglebutton import ToggleButton
+from kivy.uix.widget import Widget
+import math
 from random import randint
 from random import uniform
-from functools import partial
-import math
+from settings_options import settings_json
 
 # def song(music):
 #     sound = SoundLoader.load('img/emotion.wav')
@@ -39,7 +40,7 @@ def dump(obj):
 
 class Grid(Widget):
     def draw_grid(self, *largs):
-        self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
+        self.size = (Window.width, Window.height - 50) # Should be fine to draw off window size
         self.pos = (0,50)
         with self.canvas:
             Color(0.5,0.5,0.5, mode='rgb')
@@ -82,7 +83,6 @@ class Cells(Widget):
     generations = NumericProperty(1000)
     score = NumericProperty(0)
     game_over = False
-    cell_count = NumericProperty(0)
 # Starting Patterns
 # Each will:
 # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -1111,7 +1111,7 @@ class Cells(Widget):
     # Create all possible rectangles for the given window size
     def create_rectangles(self, *largs):
         self.rectangles_dict.clear()
-        self.dimensions = (Window.width - 20, Window.height - 120)
+        self.dimensions = (Window.width - 20, Window.height - 70)
         self.pos = (11,61)
         for x in range(0,self.dimensions[0]/10):
             for y in range(0,self.dimensions[1]/10):
@@ -1119,7 +1119,7 @@ class Cells(Widget):
                 self.rectangles_dict[x,y] = rect
 
     def add_instruction_groups(self, *largs):
-        self.canvas.add(self.alive_color_instruction)
+        # self.canvas.add(self.alive_color_instruction)
         self.canvas.add(self.alive_cell_instructions)
         self.canvas.add(self.was_cell_instructions)
 
@@ -1130,11 +1130,11 @@ class Cells(Widget):
         self.mid_x,self.mid_y = self.dimensions[0]/20, self.dimensions[1]/20
     # assigns color instruction to canvas.before
     def set_canvas_color(self, on_request=False, *largs):
-        self.alive_color_instruction.clear()
+        self.canvas.before.clear()
         if self.cellcol == 'Random':
-            self.alive_color_instruction.add(Color(uniform(0.0,1.0),1,1,mode="hsv"))
+            self.canvas.before.add(Color(uniform(0.0,1.0),1,1,mode="hsv"))
         else:
-            self.alive_color_instruction.add(self.allcols[self.cellcol])
+            self.canvas.before.add(self.allcols[self.cellcol])
         if on_request:
             self.canvas.ask_update()
     # add the starting rectangles to the board
@@ -1171,13 +1171,11 @@ class Cells(Widget):
                 self.alive_cell_instructions.add(self.rectangles_dict[x_y])
                 self.on_board[x_y]['alive'] = 1
                 plus += 1
-                self.cell_count += 1
             else:
                 self.alive_cell_instructions.remove(self.rectangles_dict[x_y])
                 self.was_cell_instructions.add(self.rectangles_dict[x_y])
                 self.on_board[x_y] = {'alive':0,'was':1}
                 minus += 1
-                self.cell_count -= 1
         self.changes_dict.clear()
         self.all_activated += plus
         self.a_d_ratio += (plus - minus)
@@ -1210,10 +1208,7 @@ class Cells(Widget):
             events.pop()
         Clock.schedule_once(self.update_cells, 1.0/60.0)
 
-    def reset_interval(self, events, grid, modal,*largs):
-        for x in largs:
-            if type(x) == Popup:
-                x.dismiss()
+    def reset_interval(self, events, grid, modal, *largs):
         self.should_draw = False
         if len(events) > 0:
             events[-1].cancel()
@@ -1223,7 +1218,7 @@ class Cells(Widget):
         grid.canvas.clear()
         self.alive_cell_instructions.clear()
         self.was_cell_instructions.clear()
-        self.was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
+        self.was_cell_instructions.add(Color(0.72,0.72,0.72,mode='rgb'))
         self.setup_cells()
         self.game_over = False
         self.reset_counters()
@@ -1234,6 +1229,7 @@ class Cells(Widget):
         self.a_d_ratio = 0
         self.generations = 1000
         self.score = 0
+
     # Touch Handlers
     # Add rectangles and positive values to on_board when the animation is stopped.
     # Add values to changes_dict otherwise, rects added on next iteration
@@ -1247,7 +1243,6 @@ class Cells(Widget):
         # sign_y = "+" if pos_y - self.mid_y >= 0 else ""
         # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")] = {'alive':1, 'was':0}"
         if self.accept_touches and in_bounds and self.a_d_ratio > 0:
-        # if self.accept_touches and in_bounds:
             try:
                 if not self.on_board[pos_x,pos_y]['alive']:
                     if self.should_draw:
@@ -1278,7 +1273,6 @@ class Cells(Widget):
             # print "canvas width and height", self.width, self.height
             # print "self.on_board[(", pos_x, ",",pos_y,")] = {'alive':1, 'was':0}"
             if self.accept_touches and in_bounds and self.a_d_ratio > 0:
-            # if self.accept_touches and in_bounds:
                 try:
                     if not self.on_board[pos_x,pos_y]['alive']:
                         if self.should_draw:
@@ -1322,7 +1316,7 @@ class Cells(Widget):
         popup.open()
 
     def loadimg(self, events, *largs):
-        content = Image(source='IMO_GOL2.png')
+        content = Image(source='logo.png')
         popup = Popup(title='', content=content,
               auto_dismiss=False, separator_height=0,title_size=0, separator_color=[0.,0.,0.,0.], size=(Window.height,Window.width),
               # border=[20,20,20,20],
@@ -1331,41 +1325,45 @@ class Cells(Widget):
         content.bind(on_touch_down=popup.dismiss)
         popup.open()
 
+class SettingScrollOptions(SettingOptions):
 
-class score_frame(Widget):
-    def draw_scorepad(self, *largs):
-        # self.size = (Window.width/2., 50)
-        # self.pos = (Window.width,Window.height-50)
+    def _create_popup(self, instance):
+        content         = GridLayout(cols=1, spacing='5dp')
+        scrollview      = ScrollView( do_scroll_x=False)
+        scrollcontent   = GridLayout(cols=1,  spacing='5dp', size_hint=(1, None))
+        scrollcontent.bind(minimum_height=scrollcontent.setter('height'))
+        self.popup   = popup = Popup(content=content, title=self.title, title_align='center', size_hint=(0.5, 0.6),  auto_dismiss=False)
 
-        with self.canvas:
-            border = Color(0.5,0.5,0.5, mode='rgb')
-            Rect = Rectangle(size=((Window.width),50), pos=(0,Window.height-50))
-            inner = Color(0,0,0,mode='rgb')
-            Inner_rect = Rectangle(size=(Window.width/3.*2+50-10,50-5), pos=(Window.width/3.-50+5,Window.height-50))
+        popup.open()
+        content.add_widget(Widget(size_hint_y=None, height=dp(2)))
+
+        uid = str(self.uid)
+        for option in self.options:
+            state = 'down' if option == self.value else 'normal'
+            btn = ToggleButton(text=option, state=state, group=uid, height=dp(55), size_hint=(1, None))
+            btn.bind(on_release=self._set_option)
+            scrollcontent.add_widget(btn)
+
+        scrollview.add_widget(scrollcontent)
+        content.add_widget(scrollview)
+        content.add_widget(Widget(size_hint=(1,0.02)))
+
+        btn = Button(text='Cancel', size=(popup.width, dp(50)),size_hint=(0.9, None))
+        btn.bind(on_release=popup.dismiss)
+        content.add_widget(btn)
+
 
 class GameApp(App):
     events = []
     game_cells = None
+    game_over = False
     # seconds = 0
-    def update_score(self,cells,adrat, cs, place, *largs):
-        cs.text = "Score: " + str(cells.all_activated + cells.a_d_ratio)
-        adrat.text = "A/D (+/-): " + str(cells.a_d_ratio)
-        num = cells.a_d_ratio if cells.a_d_ratio > 0 else 0
-        place.text = "Spawns: " + str(num)
-    def update_game(self,cells,label,game_end,*largs):
+    def update_score(self,cells,label,*largs):
+        label.text = "Score: " + str(cells.all_activated + cells.a_d_ratio)
+    def update_game(self,cells,label,*largs):
         label.text = "Gens: " + str(cells.generations)
         if cells.generations == 0 or cells.game_over:
-            cells.stop_interval(self.events)
-            game_end.open()
-
-    def reset_labels(self, adrat, cs, gen, place, *largs):
-        adrat.text = "A/D (+/-): 0"
-        cs.text = "Score: 0"
-        gen.text = "Gens: 1000"
-        place.text = "Spawns: 0"
-
-    def update_final_score_label(self, label, cells, *largs):
-        label.text = "Final Score: " + str(cells.all_activated + cells.a_d_ratio)
+            pass
     def settings(self, events, *largs):
             self.open_settings()
 
@@ -1375,15 +1373,15 @@ class GameApp(App):
         self.use_kivy_settings = False
 
         # Delete this once finalized
-        if Window.width < 1334 and Window.height < 750:
-            Window.size = (1334,750)
+        # if Window.width < 1334 and Window.height < 750:
+        #     Window.size = (1334,750)
 
 
 
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
-        grid = Grid(size=(Window.width, Window.height - 100), pos=(0,50))
-        self.game_cells = cells = Cells(size=(Window.width - 20, Window.height - 120), pos=(11,61))
+        grid = Grid(size=(Window.width, Window.height - 50), pos=(0,50))
+        self.game_cells = cells = Cells(size=(Window.width - 20, Window.height - 70), pos=(11,61))
 
         board.add_widget(grid)
         board.add_widget(cells)
@@ -1401,7 +1399,7 @@ class GameApp(App):
         patt_binary = Button(text='Binary',size_hint_y=None, height=50,on_press=partial(cells.assign_binary, start_patterns))
         patt_face = Button(text='Face',size_hint_y=None, height=50,on_press=partial(cells.assign_face, start_patterns))
         patt_gol = Button(text='GOL',size_hint_y=None, height=50,on_press=partial(cells.assign_gol, start_patterns))
-        patt_pulsar = Button(text='Pulsar', size_hint_y=None, height=50,on_press=partial(cells.assign_pulsar, start_patterns))
+        patt_pulsar = Button(text='Pulsar',size_hint_y=None, height=50,on_press=partial(cells.assign_pulsar, start_patterns))
         patt_gliders = Button(text='Gliders',size_hint_y=None, height=50,on_press=partial(cells.assign_gliders, start_patterns))
         patt_imo_6 = Button(text='IMO 6', size_hint_y=None, height=50,on_press=partial(cells.assign_imo_6, start_patterns))
         patt_omega = Button(text='Resistance', size_hint_y=None, height=50,on_press=partial(cells.assign_omega,start_patterns))
@@ -1416,86 +1414,38 @@ class GameApp(App):
         start_patterns.add_widget(pattern_scroll)
 
 
-        btn_start = Button(text='START', font_name='joystix' ,on_press=partial(cells.start_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_stop = Button(text='Stop', font_name='joystix' ,on_press=partial(cells.stop_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_reset = Button(text='Reset', font_name='joystix' ,
-                           on_press=partial(cells.reset_interval, self.events,grid,start_patterns), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_place = Button(text='Place', font_name='joystix' , on_press=partial(cells.place_option, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_start = Button(text='Start', on_press=partial(cells.start_interval, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_stop = Button(text='Stop', on_press=partial(cells.stop_interval, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_step = Button(text='Step', on_press=partial(cells.step, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_reset = Button(text='Reset',
+                           on_press=partial(cells.reset_interval, self.events,grid,start_patterns), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_place = Button(text='Place', on_press=partial(cells.place_option, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         # dump(btn_place)
-        btn_sett = Button(text='Options', font_name='joystix' ,on_press=partial(self.settings, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_info = Button(text='Info', font_name='joystix' ,on_press=partial(cells.info, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_sett = Button(text='Options',on_press=partial(self.settings, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_info = Button(text='i',on_press=partial(cells.info, self.events), background_down='test_dn.png', background_normal='test.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
-
         board.bind(size=cells.create_rectangles)
         board.bind(size=partial(cells.reset_interval,self.events,grid,start_patterns))
 
-        controls =[btn_start,btn_stop,btn_step,btn_reset,btn_sett,btn_info]
+        controls =[btn_start,btn_stop,btn_step,btn_reset,btn_place,btn_sett,btn_info]
         for btn in controls:
             buttons.add_widget(btn)
-
-        # top_buttons = BoxLayout(size_hint=(.3,None), height=50, #pos_hint={'x':0, 'y': 0}, padding=[0,0,0,Window.height-25]
-        #     pos=[0,Window.height-50])
-        #
-        # top_controls =[btn_sett,btn_info]
-        # for btn in top_controls:
-        #     top_buttons.add_widget(btn)
-
+        score_label = Label(text="Score: 0",size_hint=(None,0.05),pos_hint={'x':0.8,'top':0.97},font_size="32sp")
+        generations_label = Label(text="Gens: 1000", size_hint=(None,0.05),pos_hint={'x':0.04,'top':0.97},font_size="32sp")
         # start_patterns.attach_on = board
         start_patterns.open()
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
+        cells.bind(all_activated=partial(self.update_score, cells, score_label))
+        cells.bind(generations=partial(self.update_game, cells, generations_label))
 
-        #attach the scorepad
-        scorepad = score_frame()
-        start_patterns.bind(on_dismiss=scorepad.draw_scorepad)
-        # Clock.schedule_once(scorepad.draw_scorepad, 0)
-        board.add_widget(scorepad)
-
-
-        # Score Label Widgets
-        hs = Label(text='High Score: 0', font_name='Roboto',  font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-200,Window.height/2.-27))
-
-        cs = Label(text='Score: 0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-450,Window.height/2.-27))
-
-        adrat = Label(text='A/D (+/-): 0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-650,Window.height/2.-27))
-
-        place = Label(text='Spawns: 0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-870,Window.height/2.-27))
-
-        gen = Label(text='Gens: 1000', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-1050,Window.height/2.-27))
-
-        game_end = Popup(title="Game Over", size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
-        end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
-        high_score_label = Label(text="High Score: 1000000", font_name='Roboto', font_size=24)
-        final_score_label = Label(text=("Final Score: " + str(cells.score)), font_name='Roboto', font_size=24)
-        play_again = Button(text="Play Again", on_press=partial(cells.reset_interval, self.events, grid, start_patterns, game_end))
-
-        end_layout.add_widget(high_score_label)
-        end_layout.add_widget(final_score_label)
-        end_layout.add_widget(play_again)
-        game_end.add_widget(end_layout)
-
-        cells.bind(a_d_ratio=partial(self.update_score, cells, adrat, cs,place))
-        cells.bind(generations=partial(self.update_game, cells, gen, game_end))
-        start_patterns.bind(on_open=partial(self.reset_labels,adrat, cs, gen, place))
-        game_end.bind(on_open=partial(self.update_final_score_label, final_score_label, cells))
-
-        board.add_widget(hs)
-        board.add_widget(cs)
-        board.add_widget(adrat)
-        board.add_widget(place)
-        board.add_widget(gen)
-
-
-        # board.add_widget(top_buttons)
         board.add_widget(buttons)
+        board.add_widget(score_label)
+        board.add_widget(generations_label)
 
         return board
-
-    def update(self,event):
-        self.hs.text = randint(0,100)
 
     def build_config(self, config):
         config.setdefaults('initiate', {
@@ -1521,20 +1471,21 @@ class GameApp(App):
                     Cells.crowded = config._sections[item][x]
 
     def build_settings(self, settings):
+        settings.register_type('scrolloptions', SettingScrollOptions)
         settings.add_json_panel('Game Settings', self.config, data=settings_json)
 
     def on_config_change(self, config, section, key, value):
         if key == 'Speed':
-            self.game_cells.speed = value
+            self.game_cells.speed = float(value)
         if key == 'Color':
             self.game_cells.cellcol = value
             self.game_cells.set_canvas_color()
         if key == 'Born':
-            self.game_cells.birth = value
+            self.game_cells.birth = int(value)
         if key == 'Lonely':
-            self.game_cells.lonely = value
+            self.game_cells.lonely = int(value)
         if key == 'Crowded':
-            self.game_cells.crowded = value
+            self.game_cells.crowded = int(value)
         else:
             pass
         print config, section, key, value
