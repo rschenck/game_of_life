@@ -95,3 +95,4 @@ ENV/
 .ropeproject
 
 .DS_Store
+game.ini
