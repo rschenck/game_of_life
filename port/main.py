@@ -82,7 +82,7 @@ class Cells(Widget):
     was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
     all_activated = NumericProperty(0)
     a_d_ratio = NumericProperty(0)
-    generations = NumericProperty(1000)
+    generations = NumericProperty(500)
     score = NumericProperty(0)
     game_over = False
     cell_count = NumericProperty(0)
@@ -1236,7 +1236,7 @@ class Cells(Widget):
     def reset_counters(self):
         self.all_activated = 0
         self.a_d_ratio = 0
-        self.generations = 1000
+        self.generations = 500
         self.score = 0
     # Touch Handlers
     # Add rectangles and positive values to on_board when the animation is stopped.
@@ -1391,7 +1391,7 @@ class GameApp(App):
     def reset_labels(self, adratval, csval, genval, placeval, *largs):
         adratval.text = "--"
         csval.text = "--"
-        genval.text = "1000"
+        genval.text = "500"
         placeval.text = "100"
 
     def update_final_score_label(self, label, cells, *largs):
@@ -1421,21 +1421,21 @@ class GameApp(App):
         cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
 
-        start_patterns = Popup(title="Select Start Pattern", size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
+        start_patterns = Popup(title="Select Pattern", title_font='joystix', separator_height=0 ,size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
         start_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         start_layout.bind(minimum_height=start_layout.setter('height'))
-        patt_blank = Button(text='Blank',size_hint_y=None, height=50,on_press=partial(cells.assign_blank, start_patterns))
-        patt_random = Button(text='Random',size_hint_y=None, height=50,on_press=partial(cells.assign_random, start_patterns))
-        patt_gun = Button(text='Gun',size_hint_y=None, height=50,on_press=partial(cells.assign_gun, start_patterns))
-        patt_ten = Button(text='Ten',size_hint_y=None, height=50,on_press=partial(cells.assign_ten, start_patterns))
-        patt_binary = Button(text='Binary',size_hint_y=None, height=50,on_press=partial(cells.assign_binary, start_patterns))
-        patt_face = Button(text='Face',size_hint_y=None, height=50,on_press=partial(cells.assign_face, start_patterns))
-        patt_gol = Button(text='GOL',size_hint_y=None, height=50,on_press=partial(cells.assign_gol, start_patterns))
-        patt_pulsar = Button(text='Pulsar', size_hint_y=None, height=50,on_press=partial(cells.assign_pulsar, start_patterns))
-        patt_gliders = Button(text='Gliders',size_hint_y=None, height=50,on_press=partial(cells.assign_gliders, start_patterns))
-        patt_imo_6 = Button(text='IMO 6', size_hint_y=None, height=50,on_press=partial(cells.assign_imo_6, start_patterns))
-        patt_omega = Button(text='Resistance', size_hint_y=None, height=50,on_press=partial(cells.assign_omega,start_patterns))
-        patt_maze = Button(text='Maze', size_hint_y=None, height=50,on_press=partial(cells.assign_maze,start_patterns))
+        patt_blank = Button(text='THE GAME', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.assign_blank, start_patterns))
+        patt_random = Button(text='RANDOM', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.assign_random, start_patterns))
+        patt_gun = Button(text='GUN', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.assign_gun, start_patterns))
+        patt_ten = Button(text='TEN', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.assign_ten, start_patterns))
+        patt_binary = Button(text='BINARY', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.assign_binary, start_patterns))
+        patt_face = Button(text='FACE', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.assign_face, start_patterns))
+        patt_gol = Button(text='GOL', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.assign_gol, start_patterns))
+        patt_pulsar = Button(text='PULSAR', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.assign_pulsar, start_patterns))
+        patt_gliders = Button(text='GLIDERS', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.assign_gliders, start_patterns))
+        patt_imo_6 = Button(text='IMO 6', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.assign_imo_6, start_patterns))
+        patt_omega = Button(text='RESISTANCE', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.assign_omega,start_patterns))
+        patt_maze = Button(text='MAZE', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.assign_maze,start_patterns))
 
 
         patterns = [patt_blank, patt_imo_6, patt_omega, patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders,patt_face,patt_binary, patt_maze]
@@ -1487,26 +1487,26 @@ class GameApp(App):
 
         # Score Label Widgets
         top_buttons = BoxLayout(size_hint=(1,None), height=50, pos_hint={'x':0, 'y': 0}, padding=[0,0,0,Window.height-25], pos=[0,Window.height-50])
-        hs = Button(text='High Score:', font_name='Roboto',  font_size=24, color=[1,.25,0,1])
-        hsval = Button(text='--', font_name='Roboto',  font_size=24, color=[1,.25,0,1])
-        cs = Button(text='Score:', font_name='Roboto', font_size=24, color=[1,.25,0,1])
-        csval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1])
-        adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1])
-        adratval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1])
-        place = Button(text='Spawns:', font_name='Roboto', font_size=24, color=[1,.25,0,1])
-        placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1])
-        gen = Button(text='Generations:', font_name='Roboto', font_size=24, color=[1,.25,0,1])
-        genval = Button(text='1000', font_name='Roboto', font_size=24, color=[1,.25,0,1])
+        hs = Button(text='High Score:', font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        hsval = Button(text='--', font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        cs = Button(text='Score:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        csval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        adratval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        place = Button(text='Spawns:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
 
         btns_top = [place, placeval, gen, genval, adrat, adratval, cs, csval, hs, hsval]
         for btn in btns_top:
             top_buttons.add_widget(btn)
 
-        game_end = Popup(title="Game Over", size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
+        game_end = Popup(title="Game Over", title_font='joystix', separator_height=0, size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
         high_score_label = Label(text="High Score: 1000000", font_name='Roboto', font_size=24)
         final_score_label = Label(text=("Final Score: " + str(cells.score)), font_name='Roboto', font_size=24)
-        play_again = Button(text="Play Again", on_press=partial(cells.reset_interval, self.events, grid, start_patterns, game_end))
+        play_again = Button(text="Play Again", font_name='joystix', on_press=partial(cells.reset_interval, self.events, grid, start_patterns, game_end))
 
         end_layout.add_widget(high_score_label)
         end_layout.add_widget(final_score_label)
