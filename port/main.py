@@ -1377,22 +1377,22 @@ class GameApp(App):
     events = []
     game_cells = None
     # seconds = 0
-    def update_score(self,cells,adrat, cs, place, *largs):
-        cs.text = "Score: " + str(cells.all_activated + cells.a_d_ratio)
-        adrat.text = "A/D (+/-): " + str(cells.a_d_ratio)
+    def update_score(self,cells,adratval, csval, placeval, *largs):
+        csval.text = str(cells.all_activated + cells.a_d_ratio)
+        adratval.text = str(cells.a_d_ratio)
         num = cells.a_d_ratio if cells.a_d_ratio > 0 else 0
-        place.text = "Spawns: " + str(num)
+        placeval.text = str(num)
     def update_game(self,cells,label,game_end,*largs):
-        label.text = "Gens: " + str(cells.generations)
+        label.text = str(cells.generations)
         if cells.generations == 0 or cells.game_over:
             cells.stop_interval(self.events)
             game_end.open()
 
-    def reset_labels(self, adrat, cs, gen, place, *largs):
-        adrat.text = "A/D (+/-): 0"
-        cs.text = "Score: 0"
-        gen.text = "Gens: 1000"
-        place.text = "Spawns: 0"
+    def reset_labels(self, adratval, csval, genval, placeval, *largs):
+        adratval.text = "--"
+        csval.text = "--"
+        genval.text = "1000"
+        placeval.text = "100"
 
     def update_final_score_label(self, label, cells, *largs):
         label.text = "Final Score: " + str(cells.all_activated + cells.a_d_ratio)
@@ -1438,7 +1438,7 @@ class GameApp(App):
         patt_maze = Button(text='Maze', size_hint_y=None, height=50,on_press=partial(cells.assign_maze,start_patterns))
 
 
-        patterns = [patt_imo_6, patt_omega, patt_blank, patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders,patt_face,patt_binary, patt_maze]
+        patterns = [patt_blank, patt_imo_6, patt_omega, patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders,patt_face,patt_binary, patt_maze]
         for pattern in patterns:
             start_layout.add_widget(pattern)
         pattern_scroll = ScrollView(size_hint=(1, 1))
@@ -1451,10 +1451,10 @@ class GameApp(App):
         btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_reset = Button(text='Reset', font_name='joystix' ,
                            on_press=partial(cells.reset_interval, self.events,grid,start_patterns), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_place = Button(text='Place', font_name='joystix' , on_press=partial(cells.place_option, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_place = Button(text='Place', font_name='joystix' , on_press=partial(cells.place_option, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         # dump(btn_place)
-        btn_sett = Button(text='Options', font_name='joystix' ,on_press=partial(self.settings, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_info = Button(text='Info', font_name='joystix' ,on_press=partial(cells.info, self.events), background_down='test_dn_inverse.png', background_normal='test_inverse.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_sett = Button(text='Options', font_name='joystix' ,on_press=partial(self.settings, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_info = Button(text='Info', font_name='joystix' ,on_press=partial(cells.info, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
@@ -1479,22 +1479,28 @@ class GameApp(App):
         start_patterns.bind(on_dismiss=cells.starting_cells)
 
         #attach the scorepad
-        scorepad = score_frame()
-        start_patterns.bind(on_dismiss=scorepad.draw_scorepad)
-        # Clock.schedule_once(scorepad.draw_scorepad, 0)
-        board.add_widget(scorepad)
+        # scorepad = score_frame()
+        # start_patterns.bind(on_dismiss=scorepad.draw_scorepad)
+        # # Clock.schedule_once(scorepad.draw_scorepad, 0)
+        # board.add_widget(scorepad)
 
 
         # Score Label Widgets
-        hs = Label(text='High Score: 0', font_name='Roboto',  font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-200,Window.height/2.-27))
+        top_buttons = BoxLayout(size_hint=(1,None), height=50, pos_hint={'x':0, 'y': 0}, padding=[0,0,0,Window.height-25], pos=[0,Window.height-50])
+        hs = Button(text='High Score:', font_name='Roboto',  font_size=24, color=[1,.25,0,1])
+        hsval = Button(text='--', font_name='Roboto',  font_size=24, color=[1,.25,0,1])
+        cs = Button(text='Score:', font_name='Roboto', font_size=24, color=[1,.25,0,1])
+        csval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1])
+        adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1])
+        adratval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1])
+        place = Button(text='Spawns:', font_name='Roboto', font_size=24, color=[1,.25,0,1])
+        placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1])
+        gen = Button(text='Generations:', font_name='Roboto', font_size=24, color=[1,.25,0,1])
+        genval = Button(text='1000', font_name='Roboto', font_size=24, color=[1,.25,0,1])
 
-        cs = Label(text='Score: 0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-450,Window.height/2.-27))
-
-        adrat = Label(text='A/D (+/-): 0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-650,Window.height/2.-27))
-
-        place = Label(text='Spawns: 0', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-870,Window.height/2.-27))
-
-        gen = Label(text='Gens: 1000', font_name='Roboto', font_size=24, color=[1,.25,0,1], pos=(Window.width/2.-1050,Window.height/2.-27))
+        btns_top = [place, placeval, gen, genval, adrat, adratval, cs, csval, hs, hsval]
+        for btn in btns_top:
+            top_buttons.add_widget(btn)
 
         game_end = Popup(title="Game Over", size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
@@ -1507,19 +1513,19 @@ class GameApp(App):
         end_layout.add_widget(play_again)
         game_end.add_widget(end_layout)
 
-        cells.bind(a_d_ratio=partial(self.update_score, cells, adrat, cs,place))
-        cells.bind(generations=partial(self.update_game, cells, gen, game_end))
-        start_patterns.bind(on_open=partial(self.reset_labels,adrat, cs, gen, place))
+        cells.bind(a_d_ratio=partial(self.update_score, cells, adratval, csval,placeval))
+        cells.bind(generations=partial(self.update_game, cells, genval, game_end))
+        start_patterns.bind(on_open=partial(self.reset_labels, adratval, csval, genval, placeval))
         game_end.bind(on_open=partial(self.update_final_score_label, final_score_label, cells))
 
-        board.add_widget(hs)
-        board.add_widget(cs)
-        board.add_widget(adrat)
-        board.add_widget(place)
-        board.add_widget(gen)
+        # board.add_widget(hs)
+        # board.add_widget(cs)
+        # board.add_widget(adrat)
+        # board.add_widget(place)
+        # board.add_widget(gen)
 
 
-        # board.add_widget(top_buttons)
+        board.add_widget(top_buttons)
         board.add_widget(buttons)
         return board
 
