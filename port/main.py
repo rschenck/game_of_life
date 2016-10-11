@@ -80,6 +80,7 @@ class Cells(Widget):
     game_over = False
     cell_count = NumericProperty(0)
     sound = SoundLoader.load('options_track.wav')
+    mainsound = SoundLoader.load('main_track.wav')
 
 # Starting Patterns
 # Each will:
@@ -99,7 +100,7 @@ class Cells(Widget):
 
     def assign_blank(self, modal, *largs):
         self.setup_cells()
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
     def assign_gun(self, modal, *largs):
@@ -140,7 +141,7 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 15 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 16 ,self.mid_y -3 )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 17 ,self.mid_y -4 )] = {'alive':1, 'was':0}
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
     def assign_ten(self, modal, *largs):
@@ -156,7 +157,7 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 1 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 2 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 3 ,self.mid_y+ 2 )] = {'alive':1, 'was':0}
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
     def assign_binary(self, modal, *largs):
@@ -230,7 +231,7 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 5 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 5 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
 
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
     def assign_face(self, modal, *largs):
@@ -306,7 +307,7 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 6 ,self.mid_y+ 10 )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 7 ,self.mid_y -4 )] = {'alive':1, 'was':0}
 
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
     def assign_maze(self, modal, *largs):
@@ -324,7 +325,7 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 3 ,self.mid_y+ 3 )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 3 ,self.mid_y+ 4 )] = {'alive':1, 'was':0}
         # self.draw_some_cells()
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
     def assign_gol(self, modal, *largs):
@@ -406,7 +407,7 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 9 ,self.mid_y )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 10 ,self.mid_y )] = {'alive':1, 'was':0}
 
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
     def assign_pulsar(self, modal, *largs):
@@ -461,7 +462,7 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 6 ,self.mid_y+ 5 )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 6 ,self.mid_y+ 6 )] = {'alive':1, 'was':0}
 
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
     def assign_gliders(self, modal, *largs):
@@ -482,7 +483,7 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 2 ,self.mid_y )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 3 ,self.mid_y )] = {'alive':1, 'was':0}
 
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
     def assign_imo_6(self, modal, *largs):
@@ -945,7 +946,7 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 26 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 27 ,self.mid_y+ 1 )] = {'alive':1, 'was':0}
 
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
     def assign_omega(self, modal, *largs):
@@ -1112,7 +1113,7 @@ class Cells(Widget):
         self.on_board[(self.mid_x+ 2 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
         self.on_board[(self.mid_x+ 3 ,self.mid_y+ 8 )] = {'alive':1, 'was':0}
 
-        self.stopmusic()
+        self.music_control('main', True, True)
         modal.dismiss()
 
 # Setup functions
@@ -1236,7 +1237,7 @@ class Cells(Widget):
         self.game_over = False
         self.reset_counters()
         modal.open()
-        self.startmusic()
+        self.music_control('options', True, True)
 
     def reset_counters(self):
         self.all_activated = 0
@@ -1328,9 +1329,9 @@ class Cells(Widget):
         popup = Popup(title="John Conway's Game of Life", separator_height=0, title_size=titlesize,
             content=Label(text=''.join([info1,info2,info3]),font_size=mysize),
             size_hint=(.8, .8),title_align='center')
-        popup.bind(on_dismiss=self.switchmusic)
+        popup.bind(on_dismiss=partial(self.music_control, 'main', True, True))
         # self.stopmainmusic()
-        self.startmusic()
+        self.music_control('options', True, True)
         popup.open()
 
     def loadimg(self, events, *largs):
@@ -1343,21 +1344,28 @@ class Cells(Widget):
         content.bind(on_touch_down=popup.dismiss)
         popup.open()
 
-    def startmusic(self, *largs):
-        self.sound.loop = True
-        self.sound.volume = 0.5
-        self.sound.play()
+    def music_control(self, track, switch, on, *largs):
+    	select = {'options':'options_track.wav','main':'main_track.wav','score':None}
 
-    def stopmusic(self, *largs):
-        self.sound.stop()
+    	if on == True and switch == False:
+    		sound = SoundLoader.load(select[track])
+    		global sound
+    		sound.loop = True
+    		sound.volume = 0.5
+    		sound.play()
+    	elif on == False and switch == False:
+    		sound.stop()
 
-    def switchmusic(self, *largs):
-        self.sound.stop()
-        self.sound.unload()
-        mainsound = SoundLoader.load('main_track.wav')
-        mainsound.loop = True
-        mainsound.loop = 0.5
-        mainsound.play()
+    	if switch == True:
+    		sound.stop()
+    		sound.unload()
+    		sound = None
+    		sound = SoundLoader.load(select[track])
+    		global sound
+    		sound.loop = True
+    		sound.volume = 0.5
+    		sound.play()
+    	
 
     # def stopmainmusic(self, *largs):
     #     self.mainsound.stop()
@@ -1449,7 +1457,7 @@ class GameApp(App):
         cells.create_rectangles()
         cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
-        cells.startmusic()
+        cells.music_control('options', False, True)
 
         start_patterns = Popup(title="Select Pattern", title_font='joystix', separator_height=0 ,size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
         start_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
