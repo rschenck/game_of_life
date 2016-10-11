@@ -75,7 +75,7 @@ class Cells(Widget):
     was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
     all_activated = NumericProperty(0)
     a_d_ratio = NumericProperty(0)
-    generations = NumericProperty(500)
+    generations = NumericProperty(50)
     score = NumericProperty(0)
     game_over = False
     cell_count = NumericProperty(0)
@@ -1242,7 +1242,7 @@ class Cells(Widget):
     def reset_counters(self):
         self.all_activated = 0
         self.a_d_ratio = 0
-        self.generations = 500
+        self.generations = 50
         self.score = 0
     # Touch Handlers
     # Add rectangles and positive values to on_board when the animation is stopped.
@@ -1425,8 +1425,6 @@ class GameApp(App):
             cells.stop_interval(self.events)
             cells.music_control('score', True, True)
             game_end.open()
-            
-
 
     def reset_labels(self, adratval, csval, genval, placeval, *largs):
         adratval.text = "--"
@@ -1436,6 +1434,7 @@ class GameApp(App):
 
     def update_final_score_label(self, label, cells, *largs):
         label.text = "Final Score: " + str(cells.all_activated + cells.a_d_ratio)
+    
     def settings(self, events, *largs):
             self.open_settings()
 
