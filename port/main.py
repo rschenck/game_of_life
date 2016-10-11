@@ -82,12 +82,15 @@ class Cells(Widget):
     was_cell_instructions = InstructionGroup()
     was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
     all_activated = NumericProperty(0)
+    score = NumericProperty(0)
+    bonus_multiplier = 1
     spawn_count = NumericProperty(100)
     generations = NumericProperty(500)
     all_died = NumericProperty(0)
     game_over = False
     active_cell_count = NumericProperty(0)
     game_mode = False
+    spawn_adder = NumericProperty(0)
 # Starting Patterns
 # Each will:
 # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -1188,6 +1191,8 @@ class Cells(Widget):
                 self.active_cell_count -= 1
         self.changes_dict.clear()
         self.all_activated += plus
+        self.spawn_adder = self.all_activated / 1000
+        self.score += (plus * self.bonus_multiplier)
         self.all_died += minus
     # Our start/step scheduled function
     def update_cells(self,*largs):
@@ -1196,8 +1201,18 @@ class Cells(Widget):
             self.set_canvas_color(on_request=True)
         self.get_cell_changes()
         self.update_canvas_objects()
+        self.update_counters()
+
+    def add_spawns(self, *largs):
+        self.spawn_count += 15
+
+    def update_counters(self,*largs):
         if self.game_mode:
             self.generations -= 1
+        if self.active_cell_count < 1000:
+            self.bonus_multiplier = 1
+        elif self.active_cell_count >= 1000:
+            self.bonus_multiplier = 1 + (self.active_cell_count / 1000)
 
     def start_interval(self, events, *largs):
         self.should_draw = False
@@ -1235,7 +1250,7 @@ class Cells(Widget):
         self.was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
         self.setup_cells()
         self.game_over = False
-        self.reset_counters()
+        # self.reset_counters()
         if modal:
             modal.open()
             self.game_mode = False
@@ -1251,6 +1266,9 @@ class Cells(Widget):
         self.generations = 500
         self.active_cell_count = 0
         self.spawn_count = 100
+        self.score = 0
+        self.bonus_multiplier = 1
+
     # Touch Handlers
     # Add rectangles and positive values to on_board when the animation is stopped.
     # Add values to changes_dict otherwise, rects added on next iteration
@@ -1395,10 +1413,15 @@ class GameApp(App):
     # seconds = 0
     # def update_score(self,cells,adrat, cs, place, *largs):
     def update_game(self, cells, adrat, cs, place, gen, game_end, *largs):
-        gen.text = str(cells.generations) if cells.game_mode else '∞'
-        cs.text = str(cells.all_activated)
+        if cells.game_mode:
+            gen.text = str(cells.generations)
+            place.text = str(cells.spawn_count)
+        else:
+            gen.text = '∞'
+            place.text = '∞'
+        cs.text = str(cells.score)
         adrat.text = str(cells.all_activated - cells.all_died)
-        place.text = str(cells.spawn_count) if cells.game_mode else '∞'
+
         if cells.generations == 0 or cells.game_over:
             cells.stop_interval(self.events)
             game_end.open()
@@ -1406,13 +1429,18 @@ class GameApp(App):
     def reset_labels(self, adratval, csval, genval, placeval, cells,*largs):
         adratval.text = "--"
         csval.text = "--"
-        genval.text = "500" if cells.game_mode else '∞'
-        placeval.text = "100" if cells.game_mode else '∞'
+        if cells.game_mode:
+            genval.text = "500"
+            placeval.text = "100"
+        else:
+            genval.text = '∞'
+            placeval.text = '∞'
 
     def update_final_score_label(self, label, cells, *largs):
         label.text = "Final Score: " + str(cells.all_activated)
 
     def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, genval, *largs):
+        cells.reset_counters()
         popup.dismiss()
         placeval.text = '∞'
         genval.text = '∞'
@@ -1428,12 +1456,18 @@ class GameApp(App):
         except:
             pass
 
-    def trigger_game_mode(self, main_menu, cells, grid, *largs):
+    def trigger_game_mode(self, main_menu, cells, grid, adratval, csval, genval, placeval, *largs):
         main_menu.dismiss()
+        cells.reset_counters()
+        cells.game_mode = True
+        self.reset_labels(adratval, csval, genval, placeval, cells)
         cells.reset_interval(self.events, grid, None)
 
-    def restart_btn_action(self,grid,start_patterns,cells,restart_game,*largs):
+
+    def restart_btn_action(self, grid, start_patterns, cells, restart_game, adratval, csval, genval, placeval,*largs):
         restart_game.dismiss()
+        cells.reset_counters()
+        self.reset_labels(adratval, csval, genval, placeval, cells)
         if cells.game_mode:
             cells.reset_interval(self.events,grid,None)
         else:
@@ -1464,7 +1498,7 @@ class GameApp(App):
         cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
 
-        main_menu = Popup(title="Main Menu", size_hint=(0.3,0.35), pos_hint={'x':0.35,'top':0.80}, title_align="center")
+        main_menu = Popup(title="Main Menu", size_hint=(0.3,0.35), pos_hint={'x':0.35,'top':0.80}, title_align="center",auto_dismiss=False)
         main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=1)
         playground_btn = Button(text="Playground Mode", size_hint=(1,None), height=dp(50))
         game_btn = Button(text="Game Mode",size_hint=(1,None), height=dp(50))
@@ -1511,7 +1545,7 @@ class GameApp(App):
         restart_game_label = Label(text="Are you sure you want to restart?")
 
         button_container = GridLayout(cols=1, spacing='5dp')
-        restart_btn = Button(text="Restart", on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game), size_hint=(1,None),height=dp(50))
+        restart_btn = Button(text="Restart", size_hint=(1,None),height=dp(50))
         cancel_main_box = BoxLayout(size_hint=(1,None), height=dp(55), orientation='horizontal')
         cancel_restart_button = Button(text="Cancel",on_press=restart_game.dismiss,size_hint=(1,None), height=dp(50))
         r_main_menu_button = Button(text="Main Menu", on_press=main_menu.open,size_hint=(1,None), height=dp(45))
@@ -1589,7 +1623,7 @@ class GameApp(App):
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
         high_score_label = Label(text="High Score: 1000000", font_name='Roboto', font_size=24)
         final_score_label = Label(text=("Final Score: " + str(cells.all_activated)), font_name='Roboto', font_size=24)
-        play_again = Button(text="Play Again", font_name='joystix', on_press=partial(self.trigger_game_mode, game_end, self.events, grid))
+        play_again = Button(text="Play Again", font_name='joystix', on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval))
 
         end_layout.add_widget(high_score_label)
         end_layout.add_widget(final_score_label)
@@ -1598,12 +1632,14 @@ class GameApp(App):
         # setup main menu buttons
         playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns,grid, cells,placeval,genval))
 
-        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid))
+        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid,adratval, csval, genval, placeval))
         # cells.bind(a_d_ratio=partial(self.update_score, cells, adrat, cs,place))
         cells.bind(generations=partial(self.update_game, cells, adratval, csval,placeval,genval, game_end))
         cells.bind(spawn_count=partial(self.update_game, cells, adratval, csval, placeval, genval, game_end))
         cells.bind(all_activated=partial(self.update_game, cells, adratval, csval, placeval, genval, game_end))
+        cells.bind(spawn_adder=cells.add_spawns)
         start_patterns.bind(on_open=partial(self.reset_labels, adratval, csval, genval, placeval,cells))
+        restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game,adratval, csval, genval, placeval))
 
         game_end.bind(on_open=partial(self.update_final_score_label, final_score_label, cells))
 
