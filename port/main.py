@@ -28,7 +28,7 @@ from os.path import join
 from random import randint
 from random import uniform
 from settings_options import settings_json
-
+from time import time
 
 
 # def song(music):
@@ -1158,6 +1158,7 @@ class Cells(Widget):
         self.accept_touches = True # Only first time matters
     # game logic for each iteration
     def get_cell_changes(self, *largs):
+        # then = time()
         for x in range(0,int(self.dimensions[0]/10)):
             for y in range(0,int(self.dimensions[1]/10)):
                 over_x,over_y = (x + 1) % (self.dimensions[0]/10), (y + 1) % (self.dimensions[1]/10)
@@ -1174,6 +1175,7 @@ class Cells(Widget):
                         self.changes_dict[x,y] = 1
                     else:
                         pass
+        # print "Get Cell Changes Runtime: ", time() - then
     # loops through changes from ^^ and adds the rectangles
     def update_canvas_objects(self,*largs):
         plus, minus = 0,0
@@ -1196,6 +1198,7 @@ class Cells(Widget):
         self.spawn_adder = self.all_activated / 10000
         self.score += (plus * self.bonus_multiplier)
         self.all_died += minus
+
     # Our start/step scheduled function
     def update_cells(self,*largs):
         # self.update_count += 1
