@@ -69,6 +69,7 @@ class Cells(Widget):
     }
     # speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
     # update_count = 0
+    update_time = 0
     dimensions = None # Use this instead of self.size, which resets each frame
     rectangles_dict = {}
     def default_cells():
@@ -1158,7 +1159,7 @@ class Cells(Widget):
         self.accept_touches = True # Only first time matters
     # game logic for each iteration
     def get_cell_changes(self, *largs):
-        # then = time()
+        then = time()
         for x in range(0,int(self.dimensions[0]/10)):
             for y in range(0,int(self.dimensions[1]/10)):
                 over_x,over_y = (x + 1) % (self.dimensions[0]/10), (y + 1) % (self.dimensions[1]/10)
@@ -1175,9 +1176,10 @@ class Cells(Widget):
                         self.changes_dict[x,y] = 1
                     else:
                         pass
-        # print "Get Cell Changes Runtime: ", time() - then
+        print "Get Cell Changes Runtime: ", time() - then
     # loops through changes from ^^ and adds the rectangles
     def update_canvas_objects(self,*largs):
+        then = time()
         plus, minus = 0,0
         for x_y in self.changes_dict:
             if self.changes_dict[x_y]:
@@ -1198,16 +1200,19 @@ class Cells(Widget):
         self.spawn_adder = self.all_activated / 10000
         self.score += (plus * self.bonus_multiplier)
         self.all_died += minus
-
+        print "Update Canvas Objects Runtime: ", time() - then
     # Our start/step scheduled function
     def update_cells(self,*largs):
+        print "Time since last update: ", time() - self.update_time
+        self.update_time = time()
+        then = time()
         # self.update_count += 1
         if self.cellcol == 'Random':
             self.set_canvas_color(on_request=True)
         self.get_cell_changes()
         self.update_canvas_objects()
         self.update_counters()
-
+        print "Update Cells Complete Runtime: ", time() - then
     def add_spawns(self, *largs):
         print self.all_activated, self.score, self.spawn_count
         self.spawn_count += 50
@@ -1221,6 +1226,7 @@ class Cells(Widget):
             self.bonus_multiplier = 1 + (self.active_cell_count / 1000)
 
     def start_interval(self, events, *largs):
+        self.update_time = time()
         self.should_draw = False
         if len(events) > 0:
             events[-1].cancel()
