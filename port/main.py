@@ -1579,6 +1579,7 @@ class GameApp(App):
             'Crowded': 4,
             'Born': 3,
             'Color': 'White',
+            'Music': 'On',
             })
         config_file = self.get_application_config()
         config.read(config_file)
