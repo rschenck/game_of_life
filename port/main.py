@@ -1345,7 +1345,7 @@ class Cells(Widget):
         popup.open()
 
     def music_control(self, track, switch, on, *largs):
-    	select = {'options':'options_track.wav','main':'main_track.wav','score':None}
+    	select = {'options':'options_track.wav','main':'main_track.wav','score':'score_track.wav'}
 
     	if on == True and switch == False:
     		sound = SoundLoader.load(select[track])
@@ -1418,11 +1418,15 @@ class GameApp(App):
         adratval.text = str(cells.a_d_ratio)
         num = cells.a_d_ratio if cells.a_d_ratio > 0 else 0
         placeval.text = str(num)
+
     def update_game(self,cells,label,game_end,*largs):
         label.text = str(cells.generations)
         if cells.generations == 0 or cells.game_over:
             cells.stop_interval(self.events)
+            cells.music_control('score', True, True)
             game_end.open()
+            
+
 
     def reset_labels(self, adratval, csval, genval, placeval, *largs):
         adratval.text = "--"
