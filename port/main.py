@@ -1207,25 +1207,25 @@ class Cells(Widget):
     # Our start/step scheduled function
     def update_cells(self,*largs):
         # self.update_count += 1
+        then = time()
         if self.cellcol == 'Random':
             self.set_canvas_color(on_request=True)
         self.get_cell_changes()
         self.update_canvas_objects()
         self.update_counters()
-
+        print "Update Cells Complete Runtime: ",time() - then
     def add_spawns(self, *largs):
         print "Adding Spawns: all_activate:", self.all_activated,"; spawn_count:", self.spawn_count
         self.spawn_count += 10
 
     def update_counters(self,*largs):
-        then = time()
         if self.game_mode:
             self.generations -= 1
         if self.active_cell_count < 1000:
             self.bonus_multiplier = 1
         elif self.active_cell_count >= 1000:
             self.bonus_multiplier = 1 + (self.active_cell_count / 1000)
-        print "Update Counters Runtime: ",time() - then
+
 
     def start_interval(self, events, *largs):
         self.should_draw = False
