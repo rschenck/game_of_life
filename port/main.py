@@ -1,3 +1,4 @@
+# coding: latin-1
 from collections import defaultdict
 from functools import partial
 from kivy.app import App
@@ -1170,21 +1171,24 @@ class Cells(Widget):
                         pass
     # loops through changes from ^^ and adds the rectangles
     def update_canvas_objects(self,*largs):
+        plus, minus = 0,0
         for x_y in self.changes_dict:
             if self.changes_dict[x_y]:
                 if self.on_board[x_y]['was']:
                     self.was_cell_instructions.remove(self.rectangles_dict[x_y])
                 self.alive_cell_instructions.add(self.rectangles_dict[x_y])
                 self.on_board[x_y]['alive'] = 1
-                self.all_activated += 1
+                plus += 1
                 self.active_cell_count += 1
             else:
                 self.alive_cell_instructions.remove(self.rectangles_dict[x_y])
                 self.was_cell_instructions.add(self.rectangles_dict[x_y])
                 self.on_board[x_y] = {'alive':0,'was':1}
-                self.all_died += 1
+                minus += 1
                 self.active_cell_count -= 1
         self.changes_dict.clear()
+        self.all_activated += plus
+        self.all_died += minus
     # Our start/step scheduled function
     def update_cells(self,*largs):
         # self.update_count += 1
@@ -1391,25 +1395,27 @@ class GameApp(App):
     # seconds = 0
     # def update_score(self,cells,adrat, cs, place, *largs):
     def update_game(self, cells, adrat, cs, place, gen, game_end, *largs):
-        gen.text = str(cells.generations)
+        gen.text = str(cells.generations) if cells.game_mode else '∞'
         cs.text = str(cells.all_activated)
         adrat.text = str(cells.all_activated - cells.all_died)
-        place.text = str(cells.spawn_count)
+        place.text = str(cells.spawn_count) if cells.game_mode else '∞'
         if cells.generations == 0 or cells.game_over:
             cells.stop_interval(self.events)
             game_end.open()
 
-    def reset_labels(self, adratval, csval, genval, placeval, *largs):
+    def reset_labels(self, adratval, csval, genval, placeval, cells,*largs):
         adratval.text = "--"
         csval.text = "--"
-        genval.text = "500"
-        placeval.text = "100"
+        genval.text = "500" if cells.game_mode else '∞'
+        placeval.text = "100" if cells.game_mode else '∞'
 
     def update_final_score_label(self, label, cells, *largs):
         label.text = "Final Score: " + str(cells.all_activated)
 
-    def trigger_playground_mode(self, main_menu, start_patterns, grid, cells, *largs):
-        main_menu.dismiss()
+    def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, genval, *largs):
+        popup.dismiss()
+        placeval.text = '∞'
+        genval.text = '∞'
         cells.reset_interval(self.events,grid, start_patterns)
 
     def close_modals(self, start_patterns, restart_game, *largs):
@@ -1517,10 +1523,7 @@ class GameApp(App):
         button_container.add_widget(r_main_menu_button)
         restart_game_layout.add_widget(button_container)
         restart_game.add_widget(restart_game_layout)
-# setup main menu buttons
-        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns,grid, cells))
 
-        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid))
 
 # game buttons
         btn_start = Button(text='START', font_name='joystix' ,on_press=partial(cells.start_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
@@ -1582,21 +1585,25 @@ class GameApp(App):
         for btn in btns_top:
             top_buttons.add_widget(btn)
 
-        game_end = Popup(title="Game Over", title_font='joystix', separator_height=0, size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
+        game_end = Popup(title="Game Over", title_font='joystix', separator_height=0, size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95},auto_dismiss=False)
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
         high_score_label = Label(text="High Score: 1000000", font_name='Roboto', font_size=24)
         final_score_label = Label(text=("Final Score: " + str(cells.all_activated)), font_name='Roboto', font_size=24)
-        play_again = Button(text="Play Again", font_name='joystix', on_press=partial(cells.reset_interval, self.events, grid, self.restart_menu, game_end))
+        play_again = Button(text="Play Again", font_name='joystix', on_press=partial(self.trigger_game_mode, game_end, self.events, grid))
 
         end_layout.add_widget(high_score_label)
         end_layout.add_widget(final_score_label)
         end_layout.add_widget(play_again)
         game_end.add_widget(end_layout)
+        # setup main menu buttons
+        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns,grid, cells,placeval,genval))
 
+        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid))
         # cells.bind(a_d_ratio=partial(self.update_score, cells, adrat, cs,place))
         cells.bind(generations=partial(self.update_game, cells, adratval, csval,placeval,genval, game_end))
         cells.bind(spawn_count=partial(self.update_game, cells, adratval, csval, placeval, genval, game_end))
-        start_patterns.bind(on_open=partial(self.reset_labels, adratval, csval, genval, placeval))
+        cells.bind(all_activated=partial(self.update_game, cells, adratval, csval, placeval, genval, game_end))
+        start_patterns.bind(on_open=partial(self.reset_labels, adratval, csval, genval, placeval,cells))
 
         game_end.bind(on_open=partial(self.update_final_score_label, final_score_label, cells))
 
