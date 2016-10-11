@@ -28,6 +28,7 @@ from os.path import join
 from random import randint
 from random import uniform
 from settings_options import settings_json
+from time import time
 
 
 
@@ -60,12 +61,12 @@ class Grid(Widget):
 
 class Cells(Widget):
     allcols = {
-    'White': Color(1,1,1,mode="rgb"),
-    'Grey': Color(0.5,0.5,0.5,mode="rgb"),
-    'Blue': Color(0,0,1,mode="rgb"),
-    'Green': Color(0,1,0,mode="rgb"),
-    'Red': Color(1,0,0,mode="rgb"),
-    'Random': Color(0,0,0,mode="rgb")
+    'White': (0,0,1),
+    'Grey': (0,0,0.25),
+    'Blue': (0.6666,1,1),
+    'Green': (0.3333,1,1),
+    'Black':(0,0,0),
+    'Red': (1,1,1)
     }
     # speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
     # update_count = 0
@@ -79,10 +80,10 @@ class Cells(Widget):
     mouse_positions = []
     should_draw = False # allows touches to add rectangles
     accept_touches = False # Avoid sticky cell from intial click/move
-    alive_cell_instructions = InstructionGroup()
-    alive_color_instruction = InstructionGroup()
-    was_cell_instructions = InstructionGroup()
-    was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
+    # alive_cell_instructions = InstructionGroup()
+    # alive_color_instruction = InstructionGroup()
+    # was_cell_instructions = InstructionGroup()
+    # was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
     all_activated = NumericProperty(0)
     score = NumericProperty(0)
     bonus_multiplier = 1
@@ -93,6 +94,7 @@ class Cells(Widget):
     active_cell_count = NumericProperty(0)
     game_mode = False
     spawn_adder = NumericProperty(0)
+    cell_color = (0,0,0)
 # Starting Patterns
 # Each will:
 # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -1129,13 +1131,18 @@ class Cells(Widget):
         for x in range(0,self.dimensions[0]/10):
             for y in range(0,self.dimensions[1]/10):
                 rect = Rectangle(pos=(self.x + x * 10, self.y + y *10), size=(9,9))
-                self.rectangles_dict[x,y] = rect
+                color = Color(0,0,0,mode="hsv")
+                self.rectangles_dict[x,y] = {"rect":rect,"color":color}
 
-    def add_instruction_groups(self, *largs):
-        # self.canvas.add(self.alive_color_instruction)
-        self.canvas.add(self.alive_cell_instructions)
-        self.canvas.add(self.was_cell_instructions)
-
+    # def add_instruction_groups(self, *largs):
+    #     # self.canvas.add(self.alive_color_instruction)
+    #     self.canvas.add(self.alive_cell_instructions)
+    #     self.canvas.add(self.was_cell_instructions)
+    def draw_rectangles(self, *largs):
+        for x_y in self.rectangles_dict:
+            self.rectangles_dict[x_y]["color"].hsv = (0,0,0)
+            self.canvas.add(self.rectangles_dict[x_y]["color"])
+            self.canvas.add(self.rectangles_dict[x_y]["rect"])
     # set canvas_color, self.pos and cells midpoint
     def setup_cells(self, *largs):
         self.set_canvas_color()
@@ -1143,21 +1150,22 @@ class Cells(Widget):
         self.mid_x,self.mid_y = self.dimensions[0]/20, self.dimensions[1]/20
     # assigns color instruction to canvas.before
     def set_canvas_color(self, on_request=False, *largs):
-        self.canvas.before.clear()
         if self.cellcol == 'Random':
-            self.canvas.before.add(Color(uniform(0.0,1.0),1,1,mode="hsv"))
+            self.cell_color = (uniform(0.0,1.0),1,1)
         else:
-            self.canvas.before.add(self.allcols[self.cellcol])
+            self.cell_color = self.allcols[self.cellcol]
         if on_request:
             self.canvas.ask_update()
     # add the starting rectangles to the board
     def starting_cells(self, *largs):
+        self.draw_rectangles()
         for x_y in self.on_board:
-            self.alive_cell_instructions.add(self.rectangles_dict[x_y])
+            self.rectangles_dict[x_y]["color"].hsv = self.cell_color
         self.should_draw = True
         self.accept_touches = True # Only first time matters
     # game logic for each iteration
     def get_cell_changes(self, *largs):
+        then = time()
         for x in range(0,int(self.dimensions[0]/10)):
             for y in range(0,int(self.dimensions[1]/10)):
                 over_x,over_y = (x + 1) % (self.dimensions[0]/10), (y + 1) % (self.dimensions[1]/10)
@@ -1174,28 +1182,28 @@ class Cells(Widget):
                         self.changes_dict[x,y] = 1
                     else:
                         pass
+        print "Get Cell Changes Runtime: ", time() - then
     # loops through changes from ^^ and adds the rectangles
     def update_canvas_objects(self,*largs):
+        then = time()
         plus, minus = 0,0
         for x_y in self.changes_dict:
             if self.changes_dict[x_y]:
-                if self.on_board[x_y]['was']:
-                    self.was_cell_instructions.remove(self.rectangles_dict[x_y])
-                self.alive_cell_instructions.add(self.rectangles_dict[x_y])
+                self.rectangles_dict[x_y]["color"].hsv = self.cell_color
                 self.on_board[x_y]['alive'] = 1
                 plus += 1
                 self.active_cell_count += 1
             else:
-                self.alive_cell_instructions.remove(self.rectangles_dict[x_y])
-                self.was_cell_instructions.add(self.rectangles_dict[x_y])
+                self.rectangles_dict[x_y]["color"].hsv = self.allcols["Grey"]
                 self.on_board[x_y] = {'alive':0,'was':1}
                 minus += 1
                 self.active_cell_count -= 1
         self.changes_dict.clear()
         self.all_activated += plus
-        self.spawn_adder = self.all_activated / 10000
+        self.spawn_adder = self.all_activated / 1000
         self.score += (plus * self.bonus_multiplier)
         self.all_died += minus
+        print "Update Canvas Objects Runtime: ", time() - then
     # Our start/step scheduled function
     def update_cells(self,*largs):
         # self.update_count += 1
@@ -1206,16 +1214,18 @@ class Cells(Widget):
         self.update_counters()
 
     def add_spawns(self, *largs):
-        print self.all_activated, self.score, self.spawn_count
-        self.spawn_count += 50
+        print "Adding Spawns: all_activate:", self.all_activated,"; spawn_count:", self.spawn_count
+        self.spawn_count += 10
 
     def update_counters(self,*largs):
+        then = time()
         if self.game_mode:
             self.generations -= 1
         if self.active_cell_count < 1000:
             self.bonus_multiplier = 1
         elif self.active_cell_count >= 1000:
             self.bonus_multiplier = 1 + (self.active_cell_count / 1000)
+        print "Update Counters Runtime: ",time() - then
 
     def start_interval(self, events, *largs):
         self.should_draw = False
@@ -1248,9 +1258,10 @@ class Cells(Widget):
         self.on_board.clear()
         self.changes_dict.clear()
         grid.canvas.clear()
-        self.alive_cell_instructions.clear()
-        self.was_cell_instructions.clear()
-        self.was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
+        # self.alive_cell_instructions.clear()
+        # self.was_cell_instructions.clear()
+        # self.was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
+        self.canvas.clear()
         self.setup_cells()
         self.game_over = False
         # self.reset_counters()
@@ -1268,7 +1279,7 @@ class Cells(Widget):
         self.all_died = 0
         self.generations = 500
         self.active_cell_count = 0
-        self.spawn_count = 50
+        self.spawn_count = 100
         self.score = 0
         self.bonus_multiplier = 1
 
@@ -1290,9 +1301,7 @@ class Cells(Widget):
                 if not self.on_board[pos_x,pos_y]['alive']:
                     if self.should_draw:
                         self.on_board[pos_x,pos_y]['alive'] = 1
-                        if self.on_board[pos_x,pos_y]['was']:
-                            self.was_cell_instructions.remove(self.rectangles_dict[pos_x,pos_y])
-                        self.alive_cell_instructions.add(self.rectangles_dict[pos_x,pos_y])
+                        self.rectangles_dict[pos_x,pos_y]["color"].hsv = self.cell_color
                     else:
                         self.changes_dict[(pos_x,pos_y)] = 1
                     if self.game_mode:
@@ -1322,9 +1331,7 @@ class Cells(Widget):
                     if not self.on_board[pos_x,pos_y]['alive']:
                         if self.should_draw:
                             self.on_board[pos_x,pos_y]['alive'] = 1
-                            if self.on_board[pos_x,pos_y]['was']:
-                                self.was_cell_instructions.remove(self.rectangles_dict[pos_x,pos_y])
-                            self.alive_cell_instructions.add(self.rectangles_dict[pos_x,pos_y])
+                            self.rectangles_dict[pos_x,pos_y]["color"].hsv = self.cell_color
                         else:
                             self.changes_dict[(pos_x,pos_y)] = 1
                         if self.game_mode:
@@ -1436,7 +1443,7 @@ class GameApp(App):
         hsval.text = str(self.highscore)
         if cells.game_mode:
             genval.text = "500"
-            placeval.text = "50"
+            placeval.text = "100"
         else:
             genval.text = '∞'
             placeval.text = '∞'
@@ -1514,7 +1521,8 @@ class GameApp(App):
         board.add_widget(grid)
         board.add_widget(cells)
         cells.create_rectangles()
-        cells.add_instruction_groups()
+        # cells.draw_rectangles()
+        # cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
 
         main_menu = Popup(title="Main Menu", size_hint=(0.3,0.35), pos_hint={'x':0.35,'top':0.80}, title_align="center",auto_dismiss=False)
@@ -1630,7 +1638,7 @@ class GameApp(App):
         adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         adratval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         place = Button(text='Spawns:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        placeval = Button(text='50', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
 
