@@ -10,6 +10,7 @@ from kivy.graphics import *
 from kivy.graphics.instructions import InstructionGroup
 from kivy.metrics import dp
 from kivy.properties import NumericProperty,BooleanProperty
+from kivy.storage.jsonstore import JsonStore
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
@@ -23,6 +24,7 @@ from kivy.uix.settings import SettingsWithSpinner, SettingOptions
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.widget import Widget
 import math
+from os.path import join
 from random import randint
 from random import uniform
 from settings_options import settings_json
@@ -84,7 +86,7 @@ class Cells(Widget):
     all_activated = NumericProperty(0)
     score = NumericProperty(0)
     bonus_multiplier = 1
-    spawn_count = NumericProperty(100)
+    spawn_count = NumericProperty(50)
     generations = NumericProperty(500)
     all_died = NumericProperty(0)
     game_over = False
@@ -1191,7 +1193,7 @@ class Cells(Widget):
                 self.active_cell_count -= 1
         self.changes_dict.clear()
         self.all_activated += plus
-        self.spawn_adder = self.all_activated / 1000
+        self.spawn_adder = self.all_activated / 10000
         self.score += (plus * self.bonus_multiplier)
         self.all_died += minus
     # Our start/step scheduled function
@@ -1204,7 +1206,8 @@ class Cells(Widget):
         self.update_counters()
 
     def add_spawns(self, *largs):
-        self.spawn_count += 15
+        print self.all_activated, self.score, self.spawn_count
+        self.spawn_count += 50
 
     def update_counters(self,*largs):
         if self.game_mode:
@@ -1265,7 +1268,7 @@ class Cells(Widget):
         self.all_died = 0
         self.generations = 500
         self.active_cell_count = 0
-        self.spawn_count = 100
+        self.spawn_count = 50
         self.score = 0
         self.bonus_multiplier = 1
 
@@ -1409,7 +1412,8 @@ class SettingScrollOptions(SettingOptions):
 class GameApp(App):
     events = []
     game_cells = None
-    restart_menu = None
+    # restart_menu = None
+    highscore = 0
     # seconds = 0
     # def update_score(self,cells,adrat, cs, place, *largs):
     def update_game(self, cells, adrat, cs, place, gen, game_end, *largs):
@@ -1426,18 +1430,30 @@ class GameApp(App):
             cells.stop_interval(self.events)
             game_end.open()
 
-    def reset_labels(self, adratval, csval, genval, placeval, cells,*largs):
+    def reset_labels(self, adratval, csval, genval, placeval, hsval, cells,*largs):
         adratval.text = "--"
         csval.text = "--"
+        hsval.text = str(self.highscore)
         if cells.game_mode:
             genval.text = "500"
-            placeval.text = "100"
+            placeval.text = "50"
         else:
             genval.text = '∞'
             placeval.text = '∞'
 
-    def update_final_score_label(self, label, cells, *largs):
-        label.text = "Final Score: " + str(cells.all_activated)
+
+    def update_score_labels(self, final_score_label, high_score_label,cells, *largs):
+        if cells.score > self.highscore:
+            self.highscore = cells.score
+            self.highscorejson.put('highscore', best=cells.score)
+            high_score_display = "New Record!!"
+        else:
+            high_score_display = str(self.highscore)
+        high_score_label.text = "High Score: " + high_score_display
+        final_score_label.text = "Final Score: " + str(cells.score)
+# REMOVE THIS LINE TO GET RID OF HIGH SCORE = 0
+        self.highscorejson.put('highscore', best=0)
+        self.highscore = 0
 
     def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, genval, *largs):
         cells.reset_counters()
@@ -1456,18 +1472,18 @@ class GameApp(App):
         except:
             pass
 
-    def trigger_game_mode(self, main_menu, cells, grid, adratval, csval, genval, placeval, *largs):
+    def trigger_game_mode(self, main_menu, cells, grid, adratval, csval, genval, placeval, hsval,*largs):
         main_menu.dismiss()
         cells.reset_counters()
         cells.game_mode = True
-        self.reset_labels(adratval, csval, genval, placeval, cells)
+        self.reset_labels(adratval, csval, genval, placeval, hsval, cells)
         cells.reset_interval(self.events, grid, None)
 
 
-    def restart_btn_action(self, grid, start_patterns, cells, restart_game, adratval, csval, genval, placeval,*largs):
+    def restart_btn_action(self, grid, start_patterns, cells, restart_game, adratval, csval, genval, placeval,hsval,*largs):
         restart_game.dismiss()
         cells.reset_counters()
-        self.reset_labels(adratval, csval, genval, placeval, cells)
+        self.reset_labels(adratval, csval, genval, placeval, hsval, cells)
         if cells.game_mode:
             cells.reset_interval(self.events,grid,None)
         else:
@@ -1480,7 +1496,10 @@ class GameApp(App):
         self.settings_cls = SettingsWithSpinner
         self.config.items('initiate')
         self.use_kivy_settings = False
-
+        data_dir = getattr(self, 'user_data_dir')
+        self.highscorejson = JsonStore(join(data_dir, 'highscore.json'))
+        if self.highscorejson.exists('highscore'):
+            self.highscore = int(self.highscorejson.get('highscore')['best'])
         # Delete this once finalized
         if Window.width < 1334 and Window.height < 750:
             Window.size = (1334,750)
@@ -1509,7 +1528,7 @@ class GameApp(App):
         main_menu.add_widget(main_menu_layout)
 
 # Set start patterns and internal scrolling layout
-        self.restart_menu = start_patterns = Popup(title="Select Pattern", title_font='joystix', separator_height=0 ,size_hint=(0.3,0.6),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
+        start_patterns = Popup(title="Select Pattern", title_font='joystix', separator_height=0 ,size_hint=(0.3,0.6),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
         start_layout = GridLayout(cols=1, spacing='5dp')
         scroll_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
@@ -1575,7 +1594,7 @@ class GameApp(App):
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
 
         board.bind(size=cells.create_rectangles)
-        board.bind(size=partial(cells.reset_interval,self.events,grid,self.restart_menu))
+        board.bind(size=partial(cells.reset_interval,self.events,grid,main_menu))
 
         controls =[btn_start,btn_stop,btn_step,btn_reset,btn_sett,btn_info]
         for btn in controls:
@@ -1611,7 +1630,7 @@ class GameApp(App):
         adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         adratval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         place = Button(text='Spawns:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        placeval = Button(text='50', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
 
@@ -1623,7 +1642,7 @@ class GameApp(App):
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
         high_score_label = Label(text="High Score: 1000000", font_name='Roboto', font_size=24)
         final_score_label = Label(text=("Final Score: " + str(cells.all_activated)), font_name='Roboto', font_size=24)
-        play_again = Button(text="Play Again", font_name='joystix', on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval))
+        play_again = Button(text="Play Again", font_name='joystix', on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval, hsval))
 
         end_layout.add_widget(high_score_label)
         end_layout.add_widget(final_score_label)
@@ -1632,16 +1651,16 @@ class GameApp(App):
         # setup main menu buttons
         playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns,grid, cells,placeval,genval))
 
-        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid,adratval, csval, genval, placeval))
+        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid,adratval, csval, genval, placeval, hsval))
         # cells.bind(a_d_ratio=partial(self.update_score, cells, adrat, cs,place))
         cells.bind(generations=partial(self.update_game, cells, adratval, csval,placeval,genval, game_end))
         cells.bind(spawn_count=partial(self.update_game, cells, adratval, csval, placeval, genval, game_end))
         cells.bind(all_activated=partial(self.update_game, cells, adratval, csval, placeval, genval, game_end))
         cells.bind(spawn_adder=cells.add_spawns)
-        start_patterns.bind(on_open=partial(self.reset_labels, adratval, csval, genval, placeval,cells))
-        restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game,adratval, csval, genval, placeval))
+        start_patterns.bind(on_open=partial(self.reset_labels, adratval, csval, genval, placeval, hsval,cells))
+        restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game,adratval, csval, genval, placeval,hsval))
 
-        game_end.bind(on_open=partial(self.update_final_score_label, final_score_label, cells))
+        game_end.bind(on_open=partial(self.update_score_labels, final_score_label,high_score_label, cells))
 
         # board.add_widget(hs)
         # board.add_widget(cs)
