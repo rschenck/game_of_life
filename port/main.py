@@ -105,6 +105,15 @@ class Cells(Widget):
     # 1) call self.setup_cells() to make sure color, and midpoint are set
     # 2) Then assign values to self.on_board using midpoint value to center the patterns
     # 3) call modal.dismiss() --> triggers calls to grid.draw_grid and cells.starting_cells
+    def assign_blank(self, modal, *largs):
+        self.setup_cells()
+        if modal:
+            self.music_control('main', True, True)
+            modal.dismiss()
+        else:
+            self.music_control('main', True, True)
+            pass
+
     def place_pattern(self, modal, selection, *largs):
         self.setup_cells()
 
@@ -123,6 +132,7 @@ class Cells(Widget):
             for coor in presets[selection]:
                 self.on_board[( self.mid_x + int(coor[0]), self.mid_y + int(coor[1]) )] = {'alive':1, 'was':0}
 
+        self.music_control('main', True, True)
         modal.dismiss()
 
 
@@ -413,6 +423,8 @@ class Cells(Widget):
         popup = Popup(title="John Conway's Game of Life", separator_height=0, title_size=titlesize,
             content=Label(text=''.join([info1,info2,info3]),font_size=mysize),
             size_hint=(.8, .8),title_align='center',)
+        popup.bind(on_dismiss=partial(self.music_control, 'main', True, True))
+        self.music_control('options', True, True)
         popup.open()
 
     def loadimg(self, events, *largs):
@@ -424,6 +436,30 @@ class Cells(Widget):
               background_color=[0,0,0,1])
         content.bind(on_touch_down=popup.dismiss)
         popup.open()
+
+
+    def music_control(self, track, switch, on, *largs):
+        select = {'options':'options_track.wav','main':'main_track.wav','score':'score_track.wav'}
+
+        if on == True and switch == False:
+            sound = SoundLoader.load(select[track])
+            global sound
+            sound.loop = True
+            sound.volume = 0.5
+            sound.play()
+        elif on == False and switch == False:
+            sound.stop()
+
+        if switch == True:
+            sound.stop()
+            sound.unload()
+            sound = None
+            sound = SoundLoader.load(select[track])
+            global sound
+            sound.loop = True
+            sound.volume = 0.5
+            sound.play()
+
 
 class score_frame(Widget):
     def draw_scorepad(self, *largs):
@@ -482,6 +518,7 @@ class GameApp(App):
 
         if cells.generations == 0 or cells.game_over:
             cells.stop_interval(self.events)
+            cells.music_control('score', True, True)
             game_end.open()
 
     def reset_labels(self, adratval, csval, genval, placeval, hsval, cells,*largs):
@@ -571,6 +608,7 @@ class GameApp(App):
         # cells.draw_rectangles()
         # cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
+        cells.music_control('options', False, True)
 
         main_menu = Popup(title="Main Menu", size_hint=(0.3,0.35), pos_hint={'x':0.35,'top':0.80}, title_align="center",auto_dismiss=False)
         main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=1)
@@ -611,6 +649,7 @@ class GameApp(App):
         start_layout.add_widget(pattern_scroll)
         start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
         sp_main_menu_button = Button(text="Main Menu",on_press=main_menu.open, size_hint=(1,None), height=dp(45))
+        sp_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
         start_layout.add_widget(sp_main_menu_button)
         start_patterns.add_widget(start_layout)
 # setup restart game mode popup
@@ -623,6 +662,7 @@ class GameApp(App):
         cancel_main_box = BoxLayout(size_hint=(1,None), height=dp(55), orientation='horizontal')
         cancel_restart_button = Button(text="Cancel",on_press=restart_game.dismiss,size_hint=(1,None), height=dp(50))
         r_main_menu_button = Button(text="Main Menu", on_press=main_menu.open,size_hint=(1,None), height=dp(45))
+        r_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
 
         restart_game_layout.add_widget(restart_game_label)
         cancel_main_box.add_widget(restart_btn)
