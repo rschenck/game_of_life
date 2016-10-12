@@ -95,6 +95,7 @@ class Cells(Widget):
     game_mode = False
     spawn_adder = NumericProperty(0)
     cell_color = (0,0,0)
+
     # update_time = 0
     
 
@@ -437,6 +438,8 @@ class Cells(Widget):
         content.bind(on_touch_down=popup.dismiss)
         popup.open()
 
+    def stop(self, *largs):
+        sound.stop()
 
     def music_control(self, track, switch, on, *largs):
         select = {'options':'options_track.wav','main':'main_track.wav','score':'score_track.wav'}
@@ -505,6 +508,17 @@ class GameApp(App):
     # restart_menu = None
     highscore = 0
     # seconds = 0
+    def intWithCommas(self, x, *largs):
+        # if type(x) not in [type(0), type(0L)]:
+        #     raise TypeError("Parameter must be an integer.")
+        if x < 0:
+            return '-' + intWithCommas(-x)
+        result = ''
+        while x >= 1000:
+            x, r = divmod(x, 1000)
+            result = ",%03d%s" % (r, result)
+        return "%d%s" % (x, result)
+
     # def update_score(self,cells,adrat, cs, place, *largs):
     def update_game(self, cells, adrat, cs, place, gen, game_end, *largs):
         if cells.game_mode:
@@ -513,7 +527,7 @@ class GameApp(App):
         else:
             gen.text = '∞'
             place.text = '∞'
-        cs.text = str(cells.score)
+        cs.text = self.intWithCommas(cells.score)
         adrat.text = str(cells.all_activated - cells.all_died)
 
         if cells.generations == 0 or cells.game_over:
@@ -524,7 +538,7 @@ class GameApp(App):
     def reset_labels(self, adratval, csval, genval, placeval, hsval, cells,*largs):
         adratval.text = "--"
         csval.text = "--"
-        hsval.text = str(self.highscore)
+        hsval.text = str(self.intWithCommas(self.highscore))
         if cells.game_mode:
             genval.text = "500"
             placeval.text = "100"
@@ -537,11 +551,11 @@ class GameApp(App):
         if cells.score > self.highscore:
             self.highscore = cells.score
             self.highscorejson.put('highscore', best=cells.score)
-            high_score_display = str(self.highscore) + " New Record!!"
+            high_score_display = str(self.intWithCommas(self.highscore)) + " New Record!!"
         else:
             high_score_display = "You've done better!"
         high_score_label.text = high_score_display
-        final_score_label.text = "Final Score: " + str(cells.score)
+        final_score_label.text = "Final Score: " + str(self.intWithCommas(cells.score))
 # REMOVE THIS LINE TO GET RID OF HIGH SCORE = 0
         # self.highscorejson.put('highscore', best=0)
         # self.highscore = 0
@@ -591,8 +605,6 @@ class GameApp(App):
         self.highscorejson = JsonStore(join(data_dir, 'highscore.json'))
         if self.highscorejson.exists('highscore'):
             self.highscore = int(self.highscorejson.get('highscore')['best'])
-        else:
-            self.highscore = 0
         # Delete this once finalized
         if Window.width < 1334 and Window.height < 750:
             Window.size = (1334,750)
@@ -721,7 +733,7 @@ class GameApp(App):
         # Score Label Widgets
         top_buttons = BoxLayout(size_hint=(1,None), height=50, pos_hint={'x':0, 'y': 0}, padding=[0,0,0,Window.height-25], pos=[0,Window.height-50])
         hs = Button(text='High Score:', font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        hsval = Button(text=str(self.highscore), font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        hsval = Button(text=self.intWithCommas(int(self.highscore)), font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         cs = Button(text='Score:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         csval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
@@ -738,7 +750,6 @@ class GameApp(App):
         game_end = Popup(title="Game Over", title_font='joystix', separator_height=0, size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95},auto_dismiss=False)
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
         high_score_label = Label(text="", font_name='Roboto', font_size=30, color=[1,.25,0,1])
-        dump(high_score_label)
         final_score_label = Label(text=(""), font_name='Roboto', font_size=30)
         play_again = Button(text="Play Again", font_name='joystix', on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval, hsval))
 
@@ -781,6 +792,7 @@ class GameApp(App):
             'Crowded': 4,
             'Born': 3,
             'Color': 'White',
+            'Music': 1,
             })
         config_file = self.get_application_config()
         config.read(config_file)
@@ -796,6 +808,8 @@ class GameApp(App):
                     Cells.lonely = config._sections[item][x]
                 if x == 'crowded':
                     Cells.crowded = config._sections[item][x]
+                if x == 'music':
+                    Cells.music = config._sections[item][x]
 
     def build_settings(self, settings):
         settings.register_type('scrolloptions', SettingScrollOptions)
@@ -813,6 +827,9 @@ class GameApp(App):
             self.game_cells.lonely = int(value)
         if key == 'Crowded':
             self.game_cells.crowded = int(value)
+        if key == 'Music':
+            self.game_cells.music = int(value)
+            # partial(Cells.music_control, 'main', True, True)
         else:
             pass
         print config, section, key, value

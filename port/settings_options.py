@@ -43,13 +43,13 @@ settings_json = json.dumps([
     'key': 'Color',
     'options': ['White','Red','Blue','Green','Random']
     },
-    # {
-    # 'type': 'bool',
-    # 'title': 'Music',
-    # 'desc': '',
-    # 'section': 'initiate',
-    # 'key': 'Music',
-    # },
+    {
+    'type': 'bool',
+    'title': 'Music',
+    'desc': '',
+    'section': 'initiate',
+    'key': 'Music',
+    }
     # {
     # 'type': 'bool',
     # 'title': 'Sound',
