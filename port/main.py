@@ -547,7 +547,9 @@ class GameApp(App):
             placeval.text = '∞'
 
 
-    def update_score_labels(self, final_score_label, high_score_label,cells, *largs):
+    def update_score_labels(self, myobject, final_score_label, high_score_label,cells, *largs):
+        blinky = Clock.schedule_interval(lambda a:self.colorit(myobject),0.3)
+        global blinky
         if cells.score > self.highscore:
             self.highscore = cells.score
             self.highscorejson.put('highscore', best=cells.score)
@@ -593,6 +595,13 @@ class GameApp(App):
             cells.reset_interval(self.events,grid,None)
         else:
             cells.reset_interval(self.events, grid, start_patterns)
+    
+    def colorit(self, myobject, *largs):
+        myobject.color = [randint(0,1),randint(0,1),randint(0,1),1]
+        print myobject.color
+
+    def unscheduleit(self, myobject, *largs):
+        Clock.unschedule(blinky)
 
     def settings(self, events, *largs):
         self.open_settings()
@@ -747,7 +756,8 @@ class GameApp(App):
         for btn in btns_top:
             top_buttons.add_widget(btn)
 
-        game_end = Popup(title="Game Over", title_font='joystix', separator_height=0, size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95},auto_dismiss=False)
+        game_end = Popup(title="Game Over", title_size = 30, title_font='joystix', separator_height=0, size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95},auto_dismiss=False)
+
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
         high_score_label = Label(text="", font_name='Roboto', font_size=30, color=[1,.25,0,1])
         final_score_label = Label(text=(""), font_name='Roboto', font_size=30)
@@ -769,7 +779,8 @@ class GameApp(App):
         start_patterns.bind(on_open=partial(self.reset_labels, adratval, csval, genval, placeval, hsval,cells))
         restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game,adratval, csval, genval, placeval,hsval))
 
-        game_end.bind(on_open=partial(self.update_score_labels, final_score_label,high_score_label, cells))
+        game_end.bind(on_open=partial(self.update_score_labels, play_again, final_score_label,high_score_label, cells))
+        game_end.bind(on_dismiss=partial(self.unscheduleit, play_again))
 
         # board.add_widget(hs)
         # board.add_widget(cs)
