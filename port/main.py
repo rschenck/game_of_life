@@ -96,12 +96,15 @@ class Cells(Widget):
     spawn_adder = NumericProperty(0)
     cell_color = (0,0,0)
     # update_time = 0
-# Starting Patterns
-# Each will:
-# 1) call self.setup_cells() to make sure color, and midpoint are set
-# 2) Then assign values to self.on_board using midpoint value to center the patterns
-# 3) call modal.dismiss() --> triggers calls to grid.draw_grid and cells.starting_cells
+    
 
+
+
+    # Starting Patterns
+    # Each will:
+    # 1) call self.setup_cells() to make sure color, and midpoint are set
+    # 2) Then assign values to self.on_board using midpoint value to center the patterns
+    # 3) call modal.dismiss() --> triggers calls to grid.draw_grid and cells.starting_cells
     def place_pattern(self, modal, selection, *largs):
         self.setup_cells()
 
@@ -122,7 +125,10 @@ class Cells(Widget):
 
         modal.dismiss()
 
-# Setup functions
+
+
+
+    # Setup functions
     # Create all possible rectangles for the given window size
     def create_rectangles(self, *largs):
         self.rectangles_dict.clear()
@@ -134,6 +140,8 @@ class Cells(Widget):
                 color = Color(0,0,0,mode="hsv")
                 self.rectangles_dict[x,y] = {"rect":rect,"color":color}
 
+
+
     # def add_instruction_groups(self, *largs):
     #     # self.canvas.add(self.alive_color_instruction)
     #     self.canvas.add(self.alive_cell_instructions)
@@ -143,11 +151,18 @@ class Cells(Widget):
             self.rectangles_dict[x_y]["color"].hsv = (0,0,0)
             self.canvas.add(self.rectangles_dict[x_y]["color"])
             self.canvas.add(self.rectangles_dict[x_y]["rect"])
+    
+
+
     # set canvas_color, self.pos and cells midpoint
     def setup_cells(self, *largs):
         self.set_canvas_color()
         self.pos = (11,61)
         self.mid_x,self.mid_y = self.dimensions[0]/20, self.dimensions[1]/20
+    
+
+
+
     # assigns color instruction to canvas.before
     def set_canvas_color(self, on_request=False, *largs):
         if self.cellcol == 'Random':
@@ -156,6 +171,9 @@ class Cells(Widget):
             self.cell_color = self.allcols[self.cellcol]
         if on_request:
             self.canvas.ask_update()
+    
+
+
     # add the starting rectangles to the board
     def starting_cells(self, *largs):
         # self.draw_rectangles()
@@ -165,6 +183,9 @@ class Cells(Widget):
             self.canvas.add(self.rectangles_dict[x_y]["rect"])
         self.should_draw = True
         self.accept_touches = True # Only first time matters
+    
+
+
     # game logic for each iteration
     def get_cell_changes(self, *largs):
         then = time()
@@ -186,6 +207,8 @@ class Cells(Widget):
                         pass
         # print "Get Cell Changes Runtime: ", time() - then
     
+    
+
     # loops through changes from ^^ and adds the rectangles
     def update_canvas_objects(self,*largs):
         # print "time since last call: ", time() - self.update_time
@@ -212,6 +235,10 @@ class Cells(Widget):
         self.score += (plus * self.bonus_multiplier)
         self.all_died += minus
         # print "Update Canvas Objects Runtime: ", time() - then
+    
+
+
+
     # Our start/step scheduled function
     def update_cells(self,*largs):
         # print "Time since last update: ", time() - self.update_time
@@ -296,6 +323,7 @@ class Cells(Widget):
         self.score = 0
         self.bonus_multiplier = 1
 
+    
     # Touch Handlers
     # Add rectangles and positive values to on_board when the animation is stopped.
     # Add values to changes_dict otherwise, rects added on next iteration
