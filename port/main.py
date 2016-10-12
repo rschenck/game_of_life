@@ -610,7 +610,7 @@ class GameApp(App):
         Clock.schedule_once(cells.loadimg, 0)
         cells.music_control('options', False, True)
 
-        main_menu = Popup(title="Main Menu", size_hint=(0.3,0.35), pos_hint={'x':0.35,'top':0.80}, title_align="center",auto_dismiss=False)
+        main_menu = Popup(title="Main Menu", title_font='joystix', separator_height=0, size_hint=(0.3,0.4), pos_hint={'x':0.35,'top':0.80}, title_align="center",auto_dismiss=False)
         main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=1)
         playground_btn = Button(text="Playground Mode", size_hint=(1,None), height=dp(50))
         game_btn = Button(text="Game Mode",size_hint=(1,None), height=dp(50))
@@ -653,7 +653,7 @@ class GameApp(App):
         start_layout.add_widget(sp_main_menu_button)
         start_patterns.add_widget(start_layout)
 # setup restart game mode popup
-        restart_game = Popup(title="Restart", title_font='joystix', separator_height=0 ,size_hint=(0.3,0.4),title_align='center' ,pos_hint={'x':0.35,'top':0.8})
+        restart_game = Popup(title="Restart", title_font='joystix', separator_height=0 ,size_hint=(0.4,0.45),title_align='center' ,pos_hint={'x':0.35,'top':0.8})
         restart_game_layout = BoxLayout(size_hint=(1,1),orientation='vertical')
         restart_game_label = Label(text="Are you sure you want to restart?")
 
