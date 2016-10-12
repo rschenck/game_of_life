@@ -633,10 +633,10 @@ class GameApp(App):
         Clock.schedule_once(cells.loadimg, 0)
         cells.music_control('options', False, True)
 
-        main_menu = Popup(title="Main Menu", title_font='joystix', separator_height=0, size_hint=(0.3,0.4), pos_hint={'x':0.35,'top':0.80}, title_align="center",auto_dismiss=False)
+        main_menu = Popup(title="Main Menu", title_font='joystix', separator_height=0, size_hint=(0.4,0.4), pos_hint={'x':0.3,'top':0.80}, title_align="center",auto_dismiss=False)
         main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=1)
-        playground_btn = Button(text="Playground Mode", size_hint=(1,None), height=dp(50))
-        game_btn = Button(text="Game Mode",size_hint=(1,None), height=dp(50))
+        playground_btn = Button(text="Playground Mode",font_name='joystix', size_hint=(1,None), height=dp(50))
+        game_btn = Button(text="Game Mode", font_name='joystix', size_hint=(1,None), height=dp(50))
         main_menu_layout.add_widget(Widget(size_hint_y=None, height=dp(25)))
         main_menu_layout.add_widget(playground_btn)
         main_menu_layout.add_widget(Widget(size_hint_y=None, height=dp(25)))
@@ -649,7 +649,7 @@ class GameApp(App):
         scroll_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
 # Set up buttons to go inside the scrolling portion
-        patt_blank = Button(text='THE GAME', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.place_pattern, start_patterns, 'blank'))
+        patt_blank = Button(text='BLANK', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.place_pattern, start_patterns, 'blank'))
         patt_random = Button(text='RANDOM', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.place_pattern, start_patterns, 'random'))
         patt_gun = Button(text='GUN', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.place_pattern, start_patterns, 'gun'))
         patt_ten = Button(text='TEN', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.place_pattern, start_patterns, 'ten'))
@@ -681,10 +681,10 @@ class GameApp(App):
         restart_game_label = Label(text="Are you sure you want to restart?")
 
         button_container = GridLayout(cols=1, spacing='5dp')
-        restart_btn = Button(text="Restart", size_hint=(1,None),height=dp(50))
+        restart_btn = Button(text="Restart", font_name='joystix', size_hint=(1,None),height=dp(50))
         cancel_main_box = BoxLayout(size_hint=(1,None), height=dp(55), orientation='horizontal')
-        cancel_restart_button = Button(text="Cancel",on_press=restart_game.dismiss,size_hint=(1,None), height=dp(50))
-        r_main_menu_button = Button(text="Main Menu", on_press=main_menu.open,size_hint=(1,None), height=dp(45))
+        cancel_restart_button = Button(text="Cancel", font_name='joystix',on_press=restart_game.dismiss,size_hint=(1,None), height=dp(50))
+        r_main_menu_button = Button(text="Main Menu", font_name='joystix',on_press=main_menu.open,size_hint=(1,None), height=dp(45))
         r_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
 
         restart_game_layout.add_widget(restart_game_label)
