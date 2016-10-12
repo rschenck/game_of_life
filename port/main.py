@@ -1315,8 +1315,8 @@ class Cells(Widget):
                         self.on_board[pos_x,pos_y]['alive'] = 1
                         self.rectangles_dict[pos_x,pos_y]["color"].hsv = self.cell_color
                         if not self.on_board[pos_x,pos_y]['was']:
-                            self.canvas.add(self.rectangles_dict[x_y]["color"])
-                            self.canvas.add(self.rectangles_dict[x_y]["rect"])
+                            self.canvas.add(self.rectangles_dict[pos_x,pos_y]["color"])
+                            self.canvas.add(self.rectangles_dict[pos_x,pos_y]["rect"])
                     else:
                         self.changes_dict[(pos_x,pos_y)] = 1
                     if self.game_mode:
@@ -1348,8 +1348,8 @@ class Cells(Widget):
                             self.on_board[pos_x,pos_y]['alive'] = 1
                             self.rectangles_dict[pos_x,pos_y]["color"].hsv = self.cell_color
                             if not self.on_board[pos_x,pos_y]['was']:
-                                self.canvas.add(self.rectangles_dict[x_y]["color"])
-                                self.canvas.add(self.rectangles_dict[x_y]["rect"])
+                                self.canvas.add(self.rectangles_dict[pos_x,pos_y]["color"])
+                                self.canvas.add(self.rectangles_dict[pos_x,pos_y]["rect"])
                         else:
                             self.changes_dict[(pos_x,pos_y)] = 1
                         if self.game_mode:
