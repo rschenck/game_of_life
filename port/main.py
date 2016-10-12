@@ -537,14 +537,14 @@ class GameApp(App):
         if cells.score > self.highscore:
             self.highscore = cells.score
             self.highscorejson.put('highscore', best=cells.score)
-            high_score_display = "New Record!!"
+            high_score_display = str(self.highscore) + " New Record!!"
         else:
-            high_score_display = str(self.highscore)
-        high_score_label.text = "High Score: " + high_score_display
+            high_score_display = "You've done better!"
+        high_score_label.text = high_score_display
         final_score_label.text = "Final Score: " + str(cells.score)
 # REMOVE THIS LINE TO GET RID OF HIGH SCORE = 0
-        self.highscorejson.put('highscore', best=0)
-        self.highscore = 0
+        # self.highscorejson.put('highscore', best=0)
+        # self.highscore = 0
 
     def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, genval, *largs):
         cells.reset_counters()
@@ -591,6 +591,8 @@ class GameApp(App):
         self.highscorejson = JsonStore(join(data_dir, 'highscore.json'))
         if self.highscorejson.exists('highscore'):
             self.highscore = int(self.highscorejson.get('highscore')['best'])
+        else:
+            self.highscore = 0
         # Delete this once finalized
         if Window.width < 1334 and Window.height < 750:
             Window.size = (1334,750)
@@ -719,7 +721,7 @@ class GameApp(App):
         # Score Label Widgets
         top_buttons = BoxLayout(size_hint=(1,None), height=50, pos_hint={'x':0, 'y': 0}, padding=[0,0,0,Window.height-25], pos=[0,Window.height-50])
         hs = Button(text='High Score:', font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        hsval = Button(text='--', font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        hsval = Button(text=str(self.highscore), font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         cs = Button(text='Score:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         csval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
@@ -735,8 +737,9 @@ class GameApp(App):
 
         game_end = Popup(title="Game Over", title_font='joystix', separator_height=0, size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95},auto_dismiss=False)
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
-        high_score_label = Label(text="High Score: 1000000", font_name='Roboto', font_size=24)
-        final_score_label = Label(text=("Final Score: " + str(cells.all_activated)), font_name='Roboto', font_size=24)
+        high_score_label = Label(text="", font_name='Roboto', font_size=30, color=[1,.25,0,1])
+        dump(high_score_label)
+        final_score_label = Label(text=(""), font_name='Roboto', font_size=30)
         play_again = Button(text="Play Again", font_name='joystix', on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval, hsval))
 
         end_layout.add_widget(high_score_label)
