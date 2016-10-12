@@ -1184,7 +1184,8 @@ class Cells(Widget):
                         self.changes_dict[x,y] = 1
                     else:
                         pass
-        print "Get Cell Changes Runtime: ", time() - then
+        # print "Get Cell Changes Runtime: ", time() - then
+    
     # loops through changes from ^^ and adds the rectangles
     def update_canvas_objects(self,*largs):
         # print "time since last call: ", time() - self.update_time
