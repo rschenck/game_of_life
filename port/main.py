@@ -447,7 +447,7 @@ class Cells(Widget):
     def music_control(self, track, switch, on, *largs):
         select = {'options':'options_track.wav','main':'main_track.wav','score':'score_track.wav'}
 
-        if self.music:
+        if bool(int(self.music)):
             if on == True and switch == False:
                 sound = SoundLoader.load(select[track])
                 global sound
@@ -458,8 +458,11 @@ class Cells(Widget):
                 sound.stop()
 
             if switch == True:
-                sound.stop()
-                sound.unload()
+                try:
+                    sound.stop()
+                    sound.unload()
+                except NameError:
+                    pass
                 sound = None
                 sound = SoundLoader.load(select[track])
                 global sound
@@ -635,7 +638,11 @@ class GameApp(App):
         # cells.draw_rectangles()
         # cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
-        cells.music_control('options', False, True)
+        if bool(int(self.game_cells.music)):
+            cells.music_control('options', False, True)
+            print "Fuck"
+        else:
+            pass
 
         main_menu = Popup(title="Main Menu", title_font='joystix', separator_height=0, size_hint=(0.4,0.4), pos_hint={'x':0.3,'top':0.80}, title_align="center",auto_dismiss=False)
         main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=1)
