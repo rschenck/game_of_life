@@ -88,7 +88,7 @@ class Cells(Widget):
     score = NumericProperty(0)
     bonus_multiplier = 1
     spawn_count = NumericProperty(50)
-    generations = NumericProperty(500)
+    generations = NumericProperty(10)
     all_died = NumericProperty(0)
     game_over = False
     active_cell_count = NumericProperty(0)
@@ -328,7 +328,7 @@ class Cells(Widget):
     def reset_counters(self):
         self.all_activated = 0
         self.all_died = 0
-        self.generations = 500
+        self.generations = 10
         self.active_cell_count = 0
         self.spawn_count = 50
         self.score = 0
@@ -624,7 +624,7 @@ class GameApp(App):
 
     def colorit(self, myobject, *largs):
         myobject.color = [randint(0,1),randint(0,1),randint(0,1),1]
-        print myobject.color
+        # print myobject.color
 
     def unscheduleit(self, myobject, *largs):
         Clock.unschedule(blinky)
@@ -790,13 +790,12 @@ class GameApp(App):
         for btn in btns_top:
             top_buttons.add_widget(btn)
 
-        game_end = Popup(title="Game Over", title_size = 30, title_font='joystix', separator_height=0, size_hint=(0.3,0.8),title_align='center' ,pos_hint={'x':0.35,'top':0.95},auto_dismiss=False)
-
+        game_end = Popup(title="Game Over", title_size = 42, title_color=[0,0,0], title_font='joystix', background='game_end.png', separator_height=0, size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0.5},auto_dismiss=False)
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
-        high_score_label = Label(text="", font_name='Roboto', font_size=30, color=[1,.25,0,1])
-        final_score_label = Label(text=(""), font_name='Roboto', font_size=30)
-        play_again = Button(text="Play Again", font_name='joystix', on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval, hsval, btn_sett))
-
+        high_score_label = Label(text="", font_name='Roboto', bold=True, font_size=36, color=[1,.25,0,1])
+        final_score_label = Label(text=(""), font_name='Roboto', bold=True, font_size=36)
+        play_again = Button(text="Play Again", font_size=42,font_name='joystix', size_hint_y=.5, on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval, hsval, btn_sett))
+        dump(play_again)
         end_layout.add_widget(high_score_label)
         end_layout.add_widget(final_score_label)
         end_layout.add_widget(play_again)
