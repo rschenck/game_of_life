@@ -330,7 +330,7 @@ class Cells(Widget):
         self.all_died = 0
         self.generations = 500
         self.active_cell_count = 0
-        self.spawn_count = 50
+        self.spawn_count = 100
         self.score = 0
         self.bonus_multiplier = 1
 
@@ -548,7 +548,7 @@ class GameApp(App):
         hsval.text = str(self.intWithCommas(self.highscore))
         if cells.game_mode:
             genval.text = "500"
-            placeval.text = "50"
+            placeval.text = "100"
         else:
             genval.text = '∞'
             placeval.text = '∞'
@@ -782,7 +782,7 @@ class GameApp(App):
         adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         adratval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         place = Button(text='Spawns:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        placeval = Button(text='50', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
 
