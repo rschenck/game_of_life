@@ -88,7 +88,7 @@ class Cells(Widget):
     score = NumericProperty(0)
     bonus_multiplier = 1
     spawn_count = NumericProperty(50)
-    generations = NumericProperty(10)
+    generations = NumericProperty(500)
     all_died = NumericProperty(0)
     game_over = False
     active_cell_count = NumericProperty(0)
@@ -266,7 +266,7 @@ class Cells(Widget):
 
     def add_spawns(self, *largs):
         print "Adding Spawns: all_activate:", self.all_activated,"; spawn_count:", self.spawn_count
-        self.spawn_count += 10
+        self.spawn_count += 5
 
     def update_counters(self,*largs):
         if self.game_mode:
@@ -328,7 +328,7 @@ class Cells(Widget):
     def reset_counters(self):
         self.all_activated = 0
         self.all_died = 0
-        self.generations = 10
+        self.generations = 500
         self.active_cell_count = 0
         self.spawn_count = 50
         self.score = 0
