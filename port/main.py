@@ -330,7 +330,7 @@ class Cells(Widget):
         self.all_died = 0
         self.generations = 500
         self.active_cell_count = 0
-        self.spawn_count = 100
+        self.spawn_count = 50
         self.score = 0
         self.bonus_multiplier = 1
 
@@ -548,7 +548,7 @@ class GameApp(App):
         hsval.text = str(self.intWithCommas(self.highscore))
         if cells.game_mode:
             genval.text = "500"
-            placeval.text = "100"
+            placeval.text = "50"
         else:
             genval.text = '∞'
             placeval.text = '∞'
@@ -667,10 +667,10 @@ class GameApp(App):
         else:
             pass
 
-        main_menu = Popup(title="Main Menu", title_font='joystix', separator_height=0, size_hint=(0.4,0.4), pos_hint={'x':0.3,'top':0.80}, title_align="center",auto_dismiss=False)
-        main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=1)
-        playground_btn = Button(text="Playground Mode",font_name='joystix', size_hint=(1,None), height=dp(50))
-        game_btn = Button(text="Game Mode", font_name='joystix', size_hint=(1,None), height=dp(50))
+        main_menu = Popup(title="Main Menu", background='popup.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(0.6,0.6), pos_hint={'center':0.5,'center':0.50}, title_align="center",auto_dismiss=False)
+        main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=.9, size_hint_x=.5)
+        playground_btn = Button(text="Playground Mode",font_name='joystix', size_hint=(.5,None), height=dp(50))
+        game_btn = Button(text="Game Mode", font_name='joystix', size_hint=(.5,None), height=dp(50))
         main_menu_layout.add_widget(Widget(size_hint_y=None, height=dp(25)))
         main_menu_layout.add_widget(playground_btn)
         main_menu_layout.add_widget(Widget(size_hint_y=None, height=dp(25)))
@@ -678,7 +678,7 @@ class GameApp(App):
         main_menu.add_widget(main_menu_layout)
 
 # Set start patterns and internal scrolling layout
-        start_patterns = Popup(title="Select Pattern", title_font='joystix', separator_height=0 ,size_hint=(0.3,0.6),title_align='center' ,pos_hint={'x':0.35,'top':0.95})
+        start_patterns = Popup(title="Select Pattern", title_size=32, background='popup.png', title_font='joystix', separator_height=0 ,size_hint=(0.3,0.6),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
         start_layout = GridLayout(cols=1, spacing='5dp')
         scroll_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
@@ -705,14 +705,14 @@ class GameApp(App):
         start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
         start_layout.add_widget(pattern_scroll)
         start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
-        sp_main_menu_button = Button(text="Main Menu",on_press=main_menu.open, size_hint=(1,None), height=dp(45))
+        sp_main_menu_button = Button(text="Main Menu", font_name='joystix', on_press=main_menu.open, size_hint=(1,None), height=dp(45))
         sp_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
         start_layout.add_widget(sp_main_menu_button)
         start_patterns.add_widget(start_layout)
 # setup restart game mode popup
-        restart_game = Popup(title="Restart", title_font='joystix', separator_height=0 ,size_hint=(0.4,0.45),title_align='center' ,pos_hint={'x':0.35,'top':0.8})
+        restart_game = Popup(title="Restart", title_font='joystix', title_size=56, background='popup.png', separator_height=0 ,size_hint=(0.4,0.4),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
         restart_game_layout = BoxLayout(size_hint=(1,1),orientation='vertical')
-        restart_game_label = Label(text="Are you sure you want to restart?")
+        # restart_game_label = Label(text="Are you sure you want to restart?")
 
         button_container = GridLayout(cols=1, spacing='5dp')
         restart_btn = Button(text="Restart", font_name='joystix', size_hint=(1,None),height=dp(50))
@@ -721,7 +721,7 @@ class GameApp(App):
         r_main_menu_button = Button(text="Main Menu", font_name='joystix',on_press=main_menu.open,size_hint=(1,None), height=dp(45))
         r_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
 
-        restart_game_layout.add_widget(restart_game_label)
+        # restart_game_layout.add_widget(restart_game_label)
         cancel_main_box.add_widget(restart_btn)
         cancel_main_box.add_widget(cancel_restart_button)
         button_container.add_widget(cancel_main_box)
@@ -734,7 +734,7 @@ class GameApp(App):
         btn_start = Button(text='START', font_name='joystix' ,on_press=partial(cells.start_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_stop = Button(text='Stop', font_name='joystix' ,on_press=partial(cells.stop_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_reset = Button(text='Reset', font_name='joystix' ,
+        btn_reset = Button(text='Restart', font_name='joystix' ,
                            on_press=restart_game.open, background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
         btn_reset.bind(on_press=partial(cells.stop_interval, self.events))
         btn_place = Button(text='Place', font_name='joystix' , on_press=partial(cells.place_option, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
@@ -782,7 +782,7 @@ class GameApp(App):
         adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         adratval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         place = Button(text='Spawns:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        placeval = Button(text='50', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
 
