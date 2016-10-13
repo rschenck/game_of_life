@@ -439,29 +439,36 @@ class Cells(Widget):
         popup.open()
 
     def stop(self, *largs):
-        sound.stop()
+        try:
+            sound.stop()
+        except:
+            pass
 
     def music_control(self, track, switch, on, *largs):
         select = {'options':'options_track.wav','main':'main_track.wav','score':'score_track.wav'}
 
-        if on == True and switch == False:
-            sound = SoundLoader.load(select[track])
-            global sound
-            sound.loop = True
-            sound.volume = 0.5
-            sound.play()
-        elif on == False and switch == False:
-            sound.stop()
+        if bool(int(self.music)):
+            if on == True and switch == False:
+                sound = SoundLoader.load(select[track])
+                global sound
+                sound.loop = True
+                sound.volume = 0.5
+                sound.play()
+            elif on == False and switch == False:
+                sound.stop()
 
-        if switch == True:
-            sound.stop()
-            sound.unload()
-            sound = None
-            sound = SoundLoader.load(select[track])
-            global sound
-            sound.loop = True
-            sound.volume = 0.5
-            sound.play()
+            if switch == True:
+                try:
+                    sound.stop()
+                    sound.unload()
+                except NameError:
+                    pass
+                sound = None
+                sound = SoundLoader.load(select[track])
+                global sound
+                sound.loop = True
+                sound.volume = 0.5
+                sound.play()
 
 
 class score_frame(Widget):
@@ -654,7 +661,11 @@ class GameApp(App):
         # cells.draw_rectangles()
         # cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
-        cells.music_control('options', False, True)
+        if bool(int(self.game_cells.music)):
+            cells.music_control('options', False, True)
+            print "Fuck"
+        else:
+            pass
 
         main_menu = Popup(title="Main Menu", title_font='joystix', separator_height=0, size_hint=(0.4,0.4), pos_hint={'x':0.3,'top':0.80}, title_align="center",auto_dismiss=False)
         main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=1)
@@ -845,6 +856,7 @@ class GameApp(App):
                 if x == 'music':
                     Cells.music = config._sections[item][x]
 
+
     def build_settings(self, settings):
         settings.register_type('scrolloptions', SettingScrollOptions)
         settings.add_json_panel('Game Settings', self.config, data=settings_json)
@@ -864,7 +876,10 @@ class GameApp(App):
             self.game_cells.crowded = int(value)
         if key == 'Music':
             self.game_cells.music = int(value)
-            # partial(Cells.music_control, 'main', True, True)
+            if self.game_cells.music == 1:
+                self.game_cells.music_control('main', True, True)
+            else:
+                self.game_cells.stop()
         else:
             pass
         print config, section, key, value
