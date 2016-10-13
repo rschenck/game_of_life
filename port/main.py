@@ -439,29 +439,33 @@ class Cells(Widget):
         popup.open()
 
     def stop(self, *largs):
-        sound.stop()
+        try:
+            sound.stop()
+        except:
+            pass
 
     def music_control(self, track, switch, on, *largs):
         select = {'options':'options_track.wav','main':'main_track.wav','score':'score_track.wav'}
 
-        if on == True and switch == False:
-            sound = SoundLoader.load(select[track])
-            global sound
-            sound.loop = True
-            sound.volume = 0.5
-            sound.play()
-        elif on == False and switch == False:
-            sound.stop()
+        if self.music:
+            if on == True and switch == False:
+                sound = SoundLoader.load(select[track])
+                global sound
+                sound.loop = True
+                sound.volume = 0.5
+                sound.play()
+            elif on == False and switch == False:
+                sound.stop()
 
-        if switch == True:
-            sound.stop()
-            sound.unload()
-            sound = None
-            sound = SoundLoader.load(select[track])
-            global sound
-            sound.loop = True
-            sound.volume = 0.5
-            sound.play()
+            if switch == True:
+                sound.stop()
+                sound.unload()
+                sound = None
+                sound = SoundLoader.load(select[track])
+                global sound
+                sound.loop = True
+                sound.volume = 0.5
+                sound.play()
 
 
 class score_frame(Widget):
@@ -822,6 +826,7 @@ class GameApp(App):
                 if x == 'music':
                     Cells.music = config._sections[item][x]
 
+
     def build_settings(self, settings):
         settings.register_type('scrolloptions', SettingScrollOptions)
         settings.add_json_panel('Game Settings', self.config, data=settings_json)
@@ -840,7 +845,10 @@ class GameApp(App):
             self.game_cells.crowded = int(value)
         if key == 'Music':
             self.game_cells.music = int(value)
-            # partial(Cells.music_control, 'main', True, True)
+            if self.game_cells.music == 1:
+                self.game_cells.music_control('main', True, True)
+            else:
+                self.game_cells.stop()
         else:
             pass
         print config, section, key, value
