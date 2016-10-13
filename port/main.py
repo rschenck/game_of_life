@@ -97,7 +97,7 @@ class Cells(Widget):
     cell_color = (0,0,0)
 
     # update_time = 0
-    
+
 
 
 
@@ -162,7 +162,7 @@ class Cells(Widget):
             self.rectangles_dict[x_y]["color"].hsv = (0,0,0)
             self.canvas.add(self.rectangles_dict[x_y]["color"])
             self.canvas.add(self.rectangles_dict[x_y]["rect"])
-    
+
 
 
     # set canvas_color, self.pos and cells midpoint
@@ -170,7 +170,7 @@ class Cells(Widget):
         self.set_canvas_color()
         self.pos = (11,61)
         self.mid_x,self.mid_y = self.dimensions[0]/20, self.dimensions[1]/20
-    
+
 
 
 
@@ -182,7 +182,7 @@ class Cells(Widget):
             self.cell_color = self.allcols[self.cellcol]
         if on_request:
             self.canvas.ask_update()
-    
+
 
 
     # add the starting rectangles to the board
@@ -194,7 +194,7 @@ class Cells(Widget):
             self.canvas.add(self.rectangles_dict[x_y]["rect"])
         self.should_draw = True
         self.accept_touches = True # Only first time matters
-    
+
 
 
     # game logic for each iteration
@@ -217,8 +217,8 @@ class Cells(Widget):
                     else:
                         pass
         # print "Get Cell Changes Runtime: ", time() - then
-    
-    
+
+
 
     # loops through changes from ^^ and adds the rectangles
     def update_canvas_objects(self,*largs):
@@ -246,7 +246,7 @@ class Cells(Widget):
         self.score += (plus * self.bonus_multiplier)
         self.all_died += minus
         # print "Update Canvas Objects Runtime: ", time() - then
-    
+
 
 
 
@@ -334,7 +334,7 @@ class Cells(Widget):
         self.score = 0
         self.bonus_multiplier = 1
 
-    
+
     # Touch Handlers
     # Add rectangles and positive values to on_board when the animation is stopped.
     # Add values to changes_dict otherwise, rects added on next iteration
@@ -562,12 +562,7 @@ class GameApp(App):
         # self.highscorejson.put('highscore', best=0)
         # self.highscore = 0
 
-    def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, genval, *largs):
-        cells.reset_counters()
-        popup.dismiss()
-        placeval.text = '∞'
-        genval.text = '∞'
-        cells.reset_interval(self.events,grid, start_patterns)
+
 
     def close_modals(self, start_patterns, restart_game, *largs):
         try:
@@ -578,15 +573,39 @@ class GameApp(App):
             restart_game.dismiss()
         except:
             pass
-
-    def trigger_game_mode(self, main_menu, cells, grid, adratval, csval, genval, placeval, hsval,*largs):
+    def nothing(self,*largs):
+        pass
+    def trigger_game_mode(self, main_menu, cells, grid, adratval, csval, genval, placeval, hsval,btn_sett,*largs):
+        btn_sett.background_down = 'btn_solid.png'
+        btn_sett.text = "---"
+        self.game_cells.lonely = 1
+        self.game_cells.crowded = 4
+        self.game_cells.birth = 3
+        self.game_cells.speed = 0.05
         main_menu.dismiss()
         cells.reset_counters()
         cells.game_mode = True
         self.reset_labels(adratval, csval, genval, placeval, hsval, cells)
         cells.reset_interval(self.events, grid, None)
 
-
+    def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, genval,btn_sett, *largs):
+        btn_sett.background_down = 'bttn_dn.png'
+        btn_sett.text = "Options"
+        cells.reset_counters()
+        for item in self.config._sections:
+            for x in self.config._sections[item]:
+                if x == 'speed':
+                    self.game_cells.speed = self.config._sections[item][x]
+                if x == 'born':
+                    self.game_cells.birth = self.config._sections[item][x]
+                if x == 'lonely':
+                    self.game_cells.lonely = self.config._sections[item][x]
+                if x == 'crowded':
+                    self.game_cells.crowded = self.config._sections[item][x]
+        popup.dismiss()
+        placeval.text = '∞'
+        genval.text = '∞'
+        cells.reset_interval(self.events,grid, start_patterns)
     def restart_btn_action(self, grid, start_patterns, cells, restart_game, adratval, csval, genval, placeval,hsval,*largs):
         restart_game.dismiss()
         cells.reset_counters()
@@ -595,7 +614,7 @@ class GameApp(App):
             cells.reset_interval(self.events,grid,None)
         else:
             cells.reset_interval(self.events, grid, start_patterns)
-    
+
     def colorit(self, myobject, *largs):
         myobject.color = [randint(0,1),randint(0,1),randint(0,1),1]
         print myobject.color
@@ -604,10 +623,14 @@ class GameApp(App):
         Clock.unschedule(blinky)
 
     def settings(self, events, *largs):
-        self.open_settings()
+        if self.game_cells.game_mode:
+            pass
+        else:
+            self.open_settings()
 
     def build(self):
         self.settings_cls = SettingsWithSpinner
+        # dump(self.settings_cls)
         self.config.items('initiate')
         self.use_kivy_settings = False
         data_dir = getattr(self, 'user_data_dir')
@@ -761,16 +784,16 @@ class GameApp(App):
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
         high_score_label = Label(text="", font_name='Roboto', font_size=30, color=[1,.25,0,1])
         final_score_label = Label(text=(""), font_name='Roboto', font_size=30)
-        play_again = Button(text="Play Again", font_name='joystix', on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval, hsval))
+        play_again = Button(text="Play Again", font_name='joystix', on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval, hsval, btn_sett))
 
         end_layout.add_widget(high_score_label)
         end_layout.add_widget(final_score_label)
         end_layout.add_widget(play_again)
         game_end.add_widget(end_layout)
         # setup main menu buttons
-        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns,grid, cells,placeval,genval))
+        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns,grid, cells,placeval,genval,btn_sett))
 
-        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid,adratval, csval, genval, placeval, hsval))
+        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid,adratval, csval, genval, placeval, hsval,btn_sett))
         # cells.bind(a_d_ratio=partial(self.update_score, cells, adrat, cs,place))
         cells.bind(generations=partial(self.update_game, cells, adratval, csval,placeval,genval, game_end))
         cells.bind(spawn_count=partial(self.update_game, cells, adratval, csval, placeval, genval, game_end))
@@ -825,6 +848,7 @@ class GameApp(App):
     def build_settings(self, settings):
         settings.register_type('scrolloptions', SettingScrollOptions)
         settings.add_json_panel('Game Settings', self.config, data=settings_json)
+
 
     def on_config_change(self, config, section, key, value):
         if key == 'Speed':
