@@ -471,6 +471,7 @@ class Cells(Widget):
                 sound.play()
 
 
+
 class score_frame(Widget):
     def draw_scorepad(self, *largs):
         # self.size = (Window.width/2., 50)
@@ -662,26 +663,28 @@ class GameApp(App):
         # cells.draw_rectangles()
         # cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
+        
         if bool(int(self.game_cells.music)):
             cells.music_control('options', False, True)
         else:
             pass
 
-        main_menu = Popup(title="Main Menu", background='popup.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(0.6,0.6), pos_hint={'center':0.5,'center':0.50}, title_align="center",auto_dismiss=False)
-        main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=.9, size_hint_x=.5)
-        playground_btn = Button(text="Playground Mode",font_name='joystix', size_hint=(.5,None), height=dp(50))
-        game_btn = Button(text="Game Mode", font_name='joystix', size_hint=(.5,None), height=dp(50))
-        main_menu_layout.add_widget(Widget(size_hint_y=None, height=dp(25)))
+        main_menu = Popup(title="Main Menu", background='black_thing.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(.5,.5), pos_hint={'center':0.5,'center':0.50}, title_align="center",auto_dismiss=False)
+        main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=.9, size_hint_x=.1)
+        playground_btn = Button(text="Playground Mode",font_name='joystix', size_hint_x=.5)
+        game_btn = Button(text="Game Mode", font_name='joystix', size_hint_x=.5)
+        # main_menu_layout.add_widget(Widget(size_hint_y=None, height=dp(25)))
         main_menu_layout.add_widget(playground_btn)
-        main_menu_layout.add_widget(Widget(size_hint_y=None, height=dp(25)))
+        # main_menu_layout.add_widget(Widget(size_hint_y=None, height=dp(25)))
         main_menu_layout.add_widget(game_btn)
         main_menu.add_widget(main_menu_layout)
 
 # Set start patterns and internal scrolling layout
-        start_patterns = Popup(title="Select Pattern", title_size=32, background='popup.png', title_font='joystix', separator_height=0 ,size_hint=(0.3,0.6),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
+        start_patterns = Popup(title="Select Pattern", title_size=32, background='popup.png', title_font='joystix', separator_height=0 ,size_hint=(0.5,0.8),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
         start_layout = GridLayout(cols=1, spacing='5dp')
         scroll_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
+
 # Set up buttons to go inside the scrolling portion
         patt_blank = Button(text='BLANK', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.place_pattern, start_patterns, 'blank'))
         patt_random = Button(text='RANDOM', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(cells.place_pattern, start_patterns, 'random'))
@@ -716,7 +719,7 @@ class GameApp(App):
 
         button_container = GridLayout(cols=1, spacing='5dp')
         restart_btn = Button(text="Restart", font_name='joystix', size_hint=(1,None),height=dp(50))
-        cancel_main_box = BoxLayout(size_hint=(1,None), height=dp(55), orientation='horizontal')
+        cancel_main_box = BoxLayout(size_hint=(0.5,0.5), height=dp(55), orientation='horizontal')
         cancel_restart_button = Button(text="Cancel", font_name='joystix',on_press=restart_game.dismiss,size_hint=(1,None), height=dp(50))
         r_main_menu_button = Button(text="Main Menu", font_name='joystix',on_press=main_menu.open,size_hint=(1,None), height=dp(45))
         r_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
@@ -751,26 +754,13 @@ class GameApp(App):
         controls =[btn_start,btn_stop,btn_step,btn_reset,btn_sett,btn_info]
         for btn in controls:
             buttons.add_widget(btn)
-
-        # top_buttons = BoxLayout(size_hint=(.3,None), height=50, #pos_hint={'x':0, 'y': 0}, padding=[0,0,0,Window.height-25]
-        #     pos=[0,Window.height-50])
-        #
-        # top_controls =[btn_sett,btn_info]
-        # for btn in top_controls:
-        #     top_buttons.add_widget(btn)
-
-        # start_patterns.attach_on = board
-        main_menu.open()
+        
+        Clock.schedule_once(main_menu.open,0)
+        
         main_menu.bind(on_open=partial(self.close_modals, start_patterns, restart_game))
         start_patterns.bind(on_open=partial(self.close_modals, None, restart_game))
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
-
-        #attach the scorepad
-        # scorepad = score_frame()
-        # start_patterns.bind(on_dismiss=scorepad.draw_scorepad)
-        # # Clock.schedule_once(scorepad.draw_scorepad, 0)
-        # board.add_widget(scorepad)
 
 
         # Score Label Widgets
@@ -816,12 +806,6 @@ class GameApp(App):
 
         game_end.bind(on_open=partial(self.update_score_labels, play_again, final_score_label,high_score_label, cells))
         game_end.bind(on_dismiss=partial(self.unscheduleit, play_again))
-
-        # board.add_widget(hs)
-        # board.add_widget(cs)
-        # board.add_widget(adrat)
-        # board.add_widget(place)
-        # board.add_widget(gen)
 
 
         board.add_widget(top_buttons)
