@@ -265,7 +265,7 @@ class Cells(Widget):
         # print "Update Cells Complete Runtime: ", time() - then
 
     def add_spawns(self, *largs):
-        print "Adding Spawns: all_activate:", self.all_activated,"; spawn_count:", self.spawn_count
+        # print "Adding Spawns: all_activate:", self.all_activated,"; spawn_count:", self.spawn_count
         self.spawn_count += 5
 
     def update_counters(self,*largs):
@@ -645,10 +645,11 @@ class GameApp(App):
         if self.highscorejson.exists('highscore'):
             self.highscore = int(self.highscorejson.get('highscore')['best'])
         # Delete this once finalized
-        if Window.width < 1334 and Window.height < 750:
-            Window.size = (1334,750)
+        # if Window.width < 1334 and Window.height < 750:
+        #     Window.size = (1334,750)
 
-
+        Window.size = (667*2,267*2)
+        usrgridnum = Window.system_size[0]*Window.system_size[1]/100000.
 
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
@@ -663,7 +664,6 @@ class GameApp(App):
         Clock.schedule_once(cells.loadimg, 0)
         if bool(int(self.game_cells.music)):
             cells.music_control('options', False, True)
-            print "Fuck"
         else:
             pass
 
@@ -710,7 +710,7 @@ class GameApp(App):
         start_layout.add_widget(sp_main_menu_button)
         start_patterns.add_widget(start_layout)
 # setup restart game mode popup
-        restart_game = Popup(title="Restart", title_font='joystix', title_size=56, background='popup.png', separator_height=0 ,size_hint=(0.4,0.4),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
+        restart_game = Popup(title="Reset", title_font='joystix', title_size=56, background='popup.png', separator_height=0 ,size_hint=(0.4,0.4),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
         restart_game_layout = BoxLayout(size_hint=(1,1),orientation='vertical')
         # restart_game_label = Label(text="Are you sure you want to restart?")
 
@@ -731,16 +731,16 @@ class GameApp(App):
 
 
 # game buttons
-        btn_start = Button(text='START', font_name='joystix' ,on_press=partial(cells.start_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_stop = Button(text='Stop', font_name='joystix' ,on_press=partial(cells.stop_interval, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_reset = Button(text='Restart', font_name='joystix' ,
-                           on_press=restart_game.open, background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_start = Button(text='START', font_name='joystix' ,on_press=partial(cells.start_interval, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_stop = Button(text='Stop', font_name='joystix' ,on_press=partial(cells.stop_interval, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_reset = Button(text='Reset', font_name='joystix' ,
+                           on_press=restart_game.open, background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_reset.bind(on_press=partial(cells.stop_interval, self.events))
-        btn_place = Button(text='Place', font_name='joystix' , on_press=partial(cells.place_option, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_place = Button(text='Place', font_name='joystix' , on_press=partial(cells.place_option, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='test.png')
         # dump(btn_place)
-        btn_sett = Button(text='Options', font_name='joystix' ,on_press=partial(self.settings, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
-        btn_info = Button(text='Info', font_name='joystix' ,on_press=partial(cells.info, self.events), background_down='bttn_dn.png', background_normal='btn_solid.png', border=[0,0,0,0], background_disabled_down='test_dn.png', background_disabled_normal='test.png')
+        btn_sett = Button(text='Options', font_name='joystix' ,on_press=partial(self.settings, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_info = Button(text='Info', font_name='joystix' ,on_press=partial(cells.info, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
@@ -774,7 +774,8 @@ class GameApp(App):
 
 
         # Score Label Widgets
-        top_buttons = BoxLayout(size_hint=(1,None), height=50, pos_hint={'x':0, 'y': 0}, padding=[0,0,0,Window.height-25], pos=[0,Window.height-50])
+        top_buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'top':1})
+
         hs = Button(text='High Score:', font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         hsval = Button(text=self.intWithCommas(int(self.highscore)), font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         cs = Button(text='Score:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
@@ -785,17 +786,18 @@ class GameApp(App):
         placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
         genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        usrgrid = Button(text='Grid: ', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        gridnum = Button(text=str(usrgridnum), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
 
-        btns_top = [place, placeval, gen, genval, adrat, adratval, cs, csval, hs, hsval]
+        btns_top = [place, placeval, gen, genval, adrat, adratval, usrgrid, gridnum, cs, csval, hs, hsval]
         for btn in btns_top:
             top_buttons.add_widget(btn)
 
-        game_end = Popup(title="Game Over", title_size = 42, title_color=[0,0,0], title_font='joystix', background='game_end.png', separator_height=0, size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0.5},auto_dismiss=False)
+        game_end = Popup(title="Game Over", title_size = 42, title_color=[0,0,0], title_font='joystix', background='black_thing.png', separator_height=0, size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0.5},auto_dismiss=False)
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
         high_score_label = Label(text="", font_name='Roboto', bold=True, font_size=36, color=[1,.25,0,1])
         final_score_label = Label(text=(""), font_name='Roboto', bold=True, font_size=36)
         play_again = Button(text="Play Again", font_size=42,font_name='joystix', size_hint_y=.5, on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval, hsval, btn_sett))
-        dump(play_again)
         end_layout.add_widget(high_score_label)
         end_layout.add_widget(final_score_label)
         end_layout.add_widget(play_again)
@@ -881,7 +883,7 @@ class GameApp(App):
                 self.game_cells.stop()
         else:
             pass
-        print config, section, key, value
+        # print config, section, key, value
 
 if __name__ == '__main__':
     GameApp().run()
