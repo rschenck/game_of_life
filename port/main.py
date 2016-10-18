@@ -509,6 +509,7 @@ class GameApp(App):
     # restart_menu = None
     highscore = 0
     blinky = None
+
     # seconds = 0
     def intWithCommas(self, x, *largs):
         # if type(x) not in [type(0), type(0L)]:
@@ -640,6 +641,13 @@ class GameApp(App):
         # if Window.width < 1334 and Window.height < 750:
         #     Window.size = (1334,750)
 
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*4
+            mysize = Window.size[1]/100.*3.4
+
         Window.size = (667*2,267*2)
         usrgridnum = Window.system_size[0]*Window.system_size[1]/100000.
 
@@ -661,22 +669,19 @@ class GameApp(App):
             pass
 
 # Main Menu Components
-        main_menu = Popup(title="Main Menu", background='black_thing.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.50}, title_align="center",auto_dismiss=False)
+        main_menu = Popup(title="Main Menu", background='black_thing.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center",auto_dismiss=False)
         main_menu_layout = GridLayout(cols=3, spacing=20, size_hint_y=.9, size_hint_x=.1)
         holda = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
         holdb = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
         holdc = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
         hold1 = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        playground_btn = Button(text="Playground Mode",font_name='joystix')
+        playground_btn = Button(text="Playground Mode",font_size=mysize, font_name='joystix')
         hold2 = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
         hold3 = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        game_btn = Button(text="Game Mode", font_name='joystix', size_hint_x=.5)
+        game_btn = Button(text="Game Mode", font_name='joystix', font_size=mysize, size_hint_x=.5)
         hold4 = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        holdd = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        holde = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        holdf = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        
-        main_men_btns = [holda,holdb,holdc,hold1,playground_btn,hold2,hold3,game_btn,hold4, holdd,holde,holdf]
+
+        main_men_btns = [holda,holdb,holdc,hold1,playground_btn,hold2,hold3,game_btn,hold4]
         for btn in main_men_btns:
             main_menu_layout.add_widget(btn)
         main_menu.add_widget(main_menu_layout)
@@ -716,14 +721,14 @@ class GameApp(App):
         start_patterns.add_widget(start_layout)
 # setup restart game mode popup
 
-        restart_game = Popup(title="Reset", title_font='joystix', title_size=56, background='black_thing.png', separator_height=0 ,size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
+        restart_game = Popup(title="Reset", title_font='joystix', title_size=56, background='black_thing.png', separator_height=0 ,size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0})
         restart_game_layout = BoxLayout(orientation='vertical')
         
         button_container = GridLayout(cols=3, spacing='5dp', size=(50,50))
-        restart_btn = Button(text="Restart", font_size=40, font_name='joystix', size_hint=(1,None),height=dp(100))
-        cancel_main_box = BoxLayout(size_hint=(0.5,0.5), height=dp(55), orientation='horizontal')
-        cancel_restart_button = Button(text="Cancel", font_size=40, font_name='joystix',on_press=restart_game.dismiss,size_hint=(1,None), height=dp(100))
-        r_main_menu_button = Button(text="Main Menu", font_size=40, font_name='joystix',on_press=main_menu.open,size_hint=(1,None), height=dp(45))
+        restart_btn = Button(text="Restart", font_size=mysize, font_name='joystix', size_hint=(1,None),height=dp(100))
+        cancel_main_box = BoxLayout(size_hint=(0.5,0.1), height=dp(55), pos_hint={'center':.5, 'center':.1}, orientation='horizontal')
+        cancel_restart_button = Button(text="Cancel", font_size=mysize, font_name='joystix',on_press=restart_game.dismiss,size_hint=(1,None), height=dp(100))
+        r_main_menu_button = Button(text="Main Menu", font_size=mysize, font_name='joystix',on_press=main_menu.open,size_hint=(1,None), height=dp(45))
         r_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
 
         # restart_game_layout.add_widget(restart_game_label)
@@ -735,7 +740,13 @@ class GameApp(App):
         r2 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
         r3 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
         r4 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        bc = [r1, cancel_main_box, r2, r3, r_main_menu_button, r4]
+        ra = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        rb = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        rc = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        rd = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        re = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        rf = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        bc = [ra, rb, rc, rd, re, rf, r1, cancel_main_box, r2, r3, r_main_menu_button, r4]
         for btn in bc:
             button_container.add_widget(btn)
         
@@ -767,7 +778,6 @@ class GameApp(App):
         
         # Clock.schedule_once(main_menu.open,0.5)
         event = Clock.schedule_once(main_menu.open)
-        global event
         
         main_menu.bind(on_open=partial(self.close_modals, start_patterns, restart_game))
         start_patterns.bind(on_open=partial(self.close_modals, None, restart_game))
