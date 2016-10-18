@@ -680,7 +680,7 @@ class GameApp(App):
         main_menu.add_widget(main_menu_layout)
 
 # Set start patterns and internal scrolling layout
-        start_patterns = Popup(title="Select Pattern", title_size=32, background='popup.png', title_font='joystix', separator_height=0 ,size_hint=(0.5,0.8),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
+        start_patterns = Popup(title="Select Pattern", title_size=32, background='black_thing.png', title_font='joystix', separator_height=0 ,size_hint=(0.5,0.8),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
         start_layout = GridLayout(cols=1, spacing='5dp')
         scroll_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
@@ -713,11 +713,10 @@ class GameApp(App):
         start_layout.add_widget(sp_main_menu_button)
         start_patterns.add_widget(start_layout)
 # setup restart game mode popup
-        restart_game = Popup(title="Reset", title_font='joystix', title_size=56, background='popup.png', separator_height=0 ,size_hint=(0.4,0.4),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
-        restart_game_layout = BoxLayout(size_hint=(1,1),orientation='vertical')
-        # restart_game_label = Label(text="Are you sure you want to restart?")
-
-        button_container = GridLayout(cols=1, spacing='5dp')
+        restart_game = Popup(title="Reset", title_font='joystix', title_size=56, background='black_thing.png', separator_height=0 ,size_hint=(0.9,0.9),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
+        restart_game_layout = BoxLayout(orientation='vertical', pos=(Window.system_size[0]/2.,0))
+        dump(restart_game_layout)
+        button_container = GridLayout(cols=1, spacing='5dp', size_hint=(.5,.5))
         restart_btn = Button(text="Restart", font_name='joystix', size_hint=(1,None),height=dp(50))
         cancel_main_box = BoxLayout(size_hint=(0.5,0.5), height=dp(55), orientation='horizontal')
         cancel_restart_button = Button(text="Cancel", font_name='joystix',on_press=restart_game.dismiss,size_hint=(1,None), height=dp(50))
@@ -755,7 +754,9 @@ class GameApp(App):
         for btn in controls:
             buttons.add_widget(btn)
         
-        Clock.schedule_once(main_menu.open,0)
+        # Clock.schedule_once(main_menu.open,0.5)
+        event = Clock.schedule_once(main_menu.open)
+        event()
         
         main_menu.bind(on_open=partial(self.close_modals, start_patterns, restart_game))
         start_patterns.bind(on_open=partial(self.close_modals, None, restart_game))
