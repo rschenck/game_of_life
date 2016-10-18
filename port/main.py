@@ -31,12 +31,6 @@ from settings_options import settings_json
 from time import time
 from presets import presets
 
-# def song(music):
-#     sound = SoundLoader.load('img/emotion.wav')
-#     if sound and music:
-#         sound.loop = True
-#         sound.play()
-#
 def dump(obj):
     for attr in dir(obj):
         print "obj.%s = %s" % (attr, getattr(obj, attr))
@@ -95,7 +89,6 @@ class Cells(Widget):
     game_mode = False
     spawn_adder = NumericProperty(0)
     cell_color = (0,0,0)
-
     # update_time = 0
 
 
@@ -470,8 +463,6 @@ class Cells(Widget):
                 sound.volume = 0.5
                 sound.play()
 
-
-
 class score_frame(Widget):
     def draw_scorepad(self, *largs):
         # self.size = (Window.width/2., 50)
@@ -515,6 +506,7 @@ class GameApp(App):
     game_cells = None
     # restart_menu = None
     highscore = 0
+    blinky = None
     # seconds = 0
     def intWithCommas(self, x, *largs):
         # if type(x) not in [type(0), type(0L)]:
@@ -556,8 +548,8 @@ class GameApp(App):
 
 
     def update_score_labels(self, myobject, final_score_label, high_score_label,cells, *largs):
-        blinky = Clock.schedule_interval(lambda a:self.colorit(myobject),0.3)
-        global blinky
+        self.blinky = Clock.schedule_interval(lambda a:self.colorit(myobject),0.3)
+        # global blinky
         if cells.score > self.highscore:
             self.highscore = cells.score
             self.highscorejson.put('highscore', best=cells.score)
@@ -570,8 +562,6 @@ class GameApp(App):
         # self.highscorejson.put('highscore', best=0)
         # self.highscore = 0
 
-
-
     def close_modals(self, start_patterns, restart_game, *largs):
         try:
             start_patterns.dismiss()
@@ -581,8 +571,7 @@ class GameApp(App):
             restart_game.dismiss()
         except:
             pass
-    def nothing(self,*largs):
-        pass
+
     def trigger_game_mode(self, main_menu, cells, grid, adratval, csval, genval, placeval, hsval,btn_sett,*largs):
         btn_sett.background_down = 'btn_solid.png'
         btn_sett.text = "---"
@@ -628,7 +617,7 @@ class GameApp(App):
         # print myobject.color
 
     def unscheduleit(self, myobject, *largs):
-        Clock.unschedule(blinky)
+        Clock.unschedule(self.blinky)
 
     def settings(self, events, *largs):
         if self.game_cells.game_mode:
@@ -669,7 +658,7 @@ class GameApp(App):
         else:
             pass
 
-        main_menu = Popup(title="Main Menu", background='black_thing.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(.5,.5), pos_hint={'center':0.5,'center':0.50}, title_align="center",auto_dismiss=False)
+        main_menu = Popup(title="Main Menu", background='black_thing.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.50}, title_align="center",auto_dismiss=False)
         main_menu_layout = GridLayout(cols=1, spacing=10, size_hint_y=.9, size_hint_x=.1)
         playground_btn = Button(text="Playground Mode",font_name='joystix', size_hint_x=.5)
         game_btn = Button(text="Game Mode", font_name='joystix', size_hint_x=.5)
@@ -713,10 +702,11 @@ class GameApp(App):
         start_layout.add_widget(sp_main_menu_button)
         start_patterns.add_widget(start_layout)
 # setup restart game mode popup
-        restart_game = Popup(title="Reset", title_font='joystix', title_size=56, background='black_thing.png', separator_height=0 ,size_hint=(0.9,0.9),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
-        restart_game_layout = BoxLayout(orientation='vertical', pos=(Window.system_size[0]/2.,0))
-        dump(restart_game_layout)
-        button_container = GridLayout(cols=1, spacing='5dp', size_hint=(.5,.5))
+
+        restart_game = Popup(title="Reset", title_font='joystix', title_size=56, background='black_thing.png', separator_height=0 ,size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
+        restart_game_layout = BoxLayout(orientation='vertical')
+        
+        button_container = GridLayout(cols=1, spacing='5dp', size=(50,50))
         restart_btn = Button(text="Restart", font_name='joystix', size_hint=(1,None),height=dp(50))
         cancel_main_box = BoxLayout(size_hint=(0.5,0.5), height=dp(55), orientation='horizontal')
         cancel_restart_button = Button(text="Cancel", font_name='joystix',on_press=restart_game.dismiss,size_hint=(1,None), height=dp(50))
