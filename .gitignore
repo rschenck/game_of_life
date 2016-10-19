@@ -3,6 +3,7 @@
 port/igroupexample.py
 port/scrollview_example.py
 *.xcuserdatad
+*.ini
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
