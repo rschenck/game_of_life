@@ -56,7 +56,7 @@ class Grid(Widget):
 
     def determine_grid(self,width,height,*largs):
         global v_border, h_border, cellsize
-        w_mult, h_mult = 100.,50.
+        w_mult, h_mult = 80.,30.
         cellsize = int(width / w_mult)
 
         while (height / cellsize) < h_mult:
@@ -107,6 +107,7 @@ class Cells(Widget):
     cell_color = (0,0,0)
     # update_time = 0
     main_menu = None
+    cellcount = 0
 
     # Starting Patterns
     # Each will:
@@ -131,11 +132,10 @@ class Cells(Widget):
             else:
                 pass
         elif selection == 'random':
-            for x in range(0,self.dimensions[0]/10):
-                for y in range(0,self.dimensions[1]/10):
-                    # assign 25% chance of life
-                    if randint(0,3) == 1:
-                        self.on_board[x,y] = {'alive':1, 'was':0}
+            for x_y in self.rectangles_dict:
+                # assign 25% chance of life
+                if randint(0,3) == 1:
+                    self.on_board[x_y] = {'alive':1, 'was':0}
         else:
             for coor in presets[selection]:
                 self.on_board[( self.mid_x + int(coor[0]), self.mid_y + int(coor[1]) )] = {'alive':1, 'was':0}
@@ -150,7 +150,7 @@ class Cells(Widget):
     def determine_borders(self,*largs):
         width,height = Window.width, Window.height - 100
         global v_border, h_border, cellsize
-        w_mult, h_mult = 100.,50.
+        w_mult, h_mult = 80.,30.
         cellsize = int(width / w_mult)
         while (height / cellsize) < h_mult:
             cellsize -= 1
@@ -173,6 +173,7 @@ class Cells(Widget):
                 rect = Rectangle(pos=(self.x + x * cellsize, self.y + y *cellsize), size=(cell_side,cell_side))
                 color = Color(0,0,0,mode="hsv")
                 self.rectangles_dict[x,y] = {"rect":rect,"color":color}
+                self.cellcount += 1
 
 
     # def add_instruction_groups(self, *largs):
@@ -693,9 +694,6 @@ class GameApp(App):
             titlesize = Window.size[1]/100.*4
             mysize = Window.size[1]/100.*3.4
 
-        # Window.size = (1136,640)
-        usrgridnum = Window.system_size[0]*Window.system_size[1]/100000.
-
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
         grid = Grid(size=(Window.width, Window.height - 100), pos=(0,50))
@@ -707,6 +705,9 @@ class GameApp(App):
         # cells.draw_rectangles()
         # cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
+
+        usrgridnum = cells.cellcount / 1000.0
+
 
         if bool(int(self.game_cells.music)):
             cells.music_control('options', False, True)
@@ -843,10 +844,10 @@ class GameApp(App):
         placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-        usrgrid = Button(text='Grid: ', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-        gridnum = Button(text=str(usrgridnum), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        usrgrid = Button(text='Grid: '+ str(round(usrgridnum,1)), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
 
-        btns_top = [place, placeval, gen, genval, usrgrid, gridnum, cs, csval, hs, hsval]
+
+        btns_top = [place, placeval, gen, genval, usrgrid, cs, csval, hs, hsval]
         for btn in btns_top:
             top_buttons.add_widget(btn)
 
@@ -888,7 +889,7 @@ class GameApp(App):
             'Lonely': 1,
             'Crowded': 4,
             'Born': 3,
-            'Color': 'White',
+            'Color': 'Random',
             'Music': 1,
             })
         config_file = self.get_application_config()
