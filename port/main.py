@@ -35,21 +35,53 @@ from presets import presets
 #     for attr in dir(obj):
 #         print "obj.%s = %s" % (attr, getattr(obj, attr))
 #         pass
+horiz_bord_width = (0,0)
+vert_bord_width = (0,0)
+cellsize = 10
+def determine_border_size():
+    global horiz_bord_width, vert_bord_width
+    double_vert = ((Window.width -20) % cellsize) / 2. + 20
+    double_horiz = ((Window.height - 120) % cellsize) / 2. + 20
+    single_vert = int(double_vert / 2)
+    single_horiz = int(double_horiz / 2)
+    if double_vert % 1 > 0:
+        vert_bord_width = (single_vert,single_vert + 1)
+    else:
+        vert_bord_width = (single_vert, single_vert)
+    if double_horiz % 1 > 0:
+        horiz_bord_width = (single_horiz,single_horiz + 1)
+    else:
+        horiz_bord_width = (single_horiz, single_horiz)
+
 
 class Grid(Widget):
+    global cellsize
+    if Window.size[0] > 0 and Window.size[0] < 1250:
+            cellsize = 10
+    elif Window.size[0] >= 1250 and Window.size[0] <= 1550:
+        cellsize = 20
+    else:
+        cellsize = 30
+
     def draw_grid(self, *largs):
         self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
         self.pos = (0,50)
+        determine_border_size()
         with self.canvas:
             Color(0.5,0.5,0.5, mode='rgb')
-            for x in range(10,self.width,10):
+            for x in range(horiz_bord_width[0],self.width,cellsize):
                 Rectangle(pos=(x,self.y),size=(1,self.height))
-            for y in range(self.y,self.height+self.y,10):
+            for y in range(self.y + vert_bord_width[0],self.height+self.y,cellsize):
                 Rectangle(pos=(self.x,y),size=(self.width,1))
-            Rectangle(pos=(self.x,self.y),size=(10,self.height))
-            Rectangle(pos=(self.x,self.y),size=(self.width,10))
-            Rectangle(pos=(self.width-10,self.y),size=(10,self.height))
-            Rectangle(pos=(self.x,self.y+self.height-10),size=(self.width,10))
+            Rectangle(pos=(self.x,self.y),size=(vert_bord_width[0],self.height))
+            Rectangle(pos=(self.x,self.y),size=(self.width,horiz_bord_width[0]))
+            Rectangle(pos=(self.width-vert_bord_width[1],self.y),size=(vert_bord_width[1],self.height))
+            Rectangle(pos=(self.x,self.y+self.height-horiz_bord_width[1]),size=(self.width,horiz_bord_width[1]))
+
+   
+
+
+
 
 class Cells(Widget):
     allcols = {
@@ -90,6 +122,21 @@ class Cells(Widget):
     cell_color = (0,0,0)
     # update_time = 0
     main_menu = None
+    global cellsize
+    if Window.size[0] > 0 and Window.size[0] < 1250:
+        cellsize = 10
+    elif Window.size[0] >= 1250 and Window.size[0] <= 1550:
+        cellsize = 20
+    else:
+        cellsize = 30
+
+    # if Window.system_size[0] > 0 and Window.system_size[0] < n:
+    #     cellsize = 10
+    # elif Window.system_size[0] > n and Window.system_size[0] < n:
+    #     cellsize = 20
+    # else:
+    #     cellsize = 40
+
 
     # Starting Patterns
     # Each will:
@@ -114,8 +161,8 @@ class Cells(Widget):
             else:
                 pass
         elif selection == 'random':
-            for x in range(0,self.dimensions[0]/10):
-                for y in range(0,self.dimensions[1]/10):
+            for x in range(0,self.dimensions[0]/cellsize):
+                for y in range(0,self.dimensions[1]/cellsize):
                     # assign 25% chance of life
                     if randint(0,3) == 1:
                         self.on_board[x,y] = {'alive':1, 'was':0}
@@ -133,11 +180,14 @@ class Cells(Widget):
     # Create all possible rectangles for the given window size
     def create_rectangles(self, *largs):
         self.rectangles_dict.clear()
-        self.dimensions = (Window.width - 20, Window.height - 120)
-        self.pos = (11,61)
-        for x in range(0,self.dimensions[0]/10):
-            for y in range(0,self.dimensions[1]/10):
-                rect = Rectangle(pos=(self.x + x * 10, self.y + y *10), size=(9,9))
+        determine_border_size()
+        self.dimensions = (Window.width - (vert_bord_width[0] + vert_bord_width[1]), Window.height - 100 - (horiz_bord_width[0] + horiz_bord_width[1]))
+        self.pos = (vert_bord_width[0] + 1, horiz_bord_width[0] + 51)
+        cell_dimension = cellsize - 1
+        print self.x, self.y
+        for x in range(0,self.dimensions[0]/cellsize):
+            for y in range(0,self.dimensions[1]/cellsize):
+                rect = Rectangle(pos=(self.x + x * cellsize, self.y + y *cellsize), size=(cell_dimension,cell_dimension))
                 color = Color(0,0,0,mode="hsv")
                 self.rectangles_dict[x,y] = {"rect":rect,"color":color}
 
@@ -157,9 +207,8 @@ class Cells(Widget):
     # set canvas_color, self.pos and cells midpoint
     def setup_cells(self, *largs):
         self.set_canvas_color()
-        self.pos = (11,61)
-        self.mid_x,self.mid_y = self.dimensions[0]/20, self.dimensions[1]/20
-
+        self.pos = (vert_bord_width[0] + 1,horiz_bord_width[0] + 51)
+        self.mid_x,self.mid_y = self.dimensions[0]/(cellsize*2), self.dimensions[1]/(cellsize*2)
 
 
 
@@ -189,10 +238,10 @@ class Cells(Widget):
     # game logic for each iteration
     def get_cell_changes(self, *largs):
         then = time()
-        for x in range(0,int(self.dimensions[0]/10)):
-            for y in range(0,int(self.dimensions[1]/10)):
-                over_x,over_y = (x + 1) % (self.dimensions[0]/10), (y + 1) % (self.dimensions[1]/10)
-                bel_x, bel_y = (x - 1) % (self.dimensions[0]/10), (y - 1) % (self.dimensions[1]/10)
+        for x in range(0,int(self.dimensions[0]/cellsize)):
+            for y in range(0,int(self.dimensions[1]/cellsize)):
+                over_x,over_y = (x + 1) % (self.dimensions[0]/cellsize), (y + 1) % (self.dimensions[1]/cellsize)
+                bel_x, bel_y = (x - 1) % (self.dimensions[0]/cellsize), (y - 1) % (self.dimensions[1]/cellsize)
                 alive_neighbors = self.on_board[bel_x,bel_y]['alive'] + self.on_board[bel_x,y]['alive'] + self.on_board[bel_x,over_y]['alive'] + self.on_board[x,bel_y]['alive'] + self.on_board[x,over_y]['alive'] + self.on_board[over_x,bel_y]['alive'] + self.on_board[over_x,y]['alive'] + self.on_board[over_x,over_y]['alive']
 
                 if self.on_board[x,y]['alive']:
@@ -330,9 +379,9 @@ class Cells(Widget):
     def on_touch_down(self, touch):
         pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
         # print (touch.pos), self.accept_touches
-        pos_x = int(math.floor(pos_x / 10.0))
-        pos_y = int(math.floor(pos_y / 10.0))
-        in_bounds = (0 <= pos_x < (self.dimensions[0] / 10)) and (0 <= pos_y < (self.dimensions[1] / 10))
+        pos_x = int(pos_x / float(cellsize))
+        pos_y = int(pos_y / float(cellsize))
+        in_bounds = (0 <= pos_x < (self.dimensions[0] / cellsize)) and (0 <= pos_y < (self.dimensions[1] / cellsize))
         # sign_x = "+" if pos_x - self.mid_x >= 0 else ""
         # sign_y = "+" if pos_y - self.mid_y >= 0 else ""
         # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")] = {'alive':1, 'was':0}"
@@ -360,10 +409,10 @@ class Cells(Widget):
         # print(touch.pos), self.accept_touches
         for pos in self.mouse_positions:
             pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
-            pos_x = int(math.floor(pos_x / 10.0))
-            pos_y = int(math.floor(pos_y / 10.0))
+            pos_x = int(math.floor(pos_x / float(cellsize)))
+            pos_y = int(math.floor(pos_y / float(cellsize)))
 
-            in_bounds = (0 <= pos_x < (self.dimensions[0] / 10)) and (0 <= pos_y < (self.dimensions[1] / 10))
+            in_bounds = (0 <= pos_x < (self.dimensions[0] / cellsize)) and (0 <= pos_y < (self.dimensions[1] / cellsize))
 
             # print "touch_move in bounds?", in_bounds
             # print "pos_x, pos_y", pos_x ,",",pos_y
@@ -463,6 +512,9 @@ class Cells(Widget):
                 sound.loop = True
                 sound.volume = 0.5
                 sound.play()
+
+    def tutorial(self, *largs):
+        pass
 
 
 
@@ -659,7 +711,8 @@ class GameApp(App):
             titlesize = Window.size[1]/100.*4
             mysize = Window.size[1]/100.*3.4
 
-        # Window.size = (1136,640)
+
+        Window.size = (2732,2048)
         usrgridnum = Window.system_size[0]*Window.system_size[1]/100000.
 
         # make layout and additional widgets
