@@ -31,12 +31,12 @@ from settings_options import settings_json
 from time import time
 from presets import presets
 
-def dump(obj):
-    for attr in dir(obj):
-        print "obj.%s = %s" % (attr, getattr(obj, attr))
-        pass
+# def dump(obj):
+#     for attr in dir(obj):
+#         print "obj.%s = %s" % (attr, getattr(obj, attr))
+#         pass
 
-
+sound = None
 class Grid(Widget):
     def draw_grid(self, *largs):
         self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
@@ -433,18 +433,18 @@ class Cells(Widget):
         Clock.schedule_once(self.main_menu.open,0)
 
     def stop(self, *largs):
-        try:
+        if sound:
             sound.stop()
-        except:
-            pass
+
 
     def music_control(self, track, switch, on, *largs):
         select = {'options':'options_track.ogg','main':'main_track.ogg','score':'score_track.ogg'}
 
         if bool(int(self.music)):
+            global sound
             if on == True and switch == False:
                 sound = SoundLoader.load(select[track])
-                global sound
+
                 sound.loop = True
                 sound.volume = 0.5
                 sound.play()
@@ -452,14 +452,13 @@ class Cells(Widget):
                 sound.stop()
 
             if switch == True:
-                try:
+                if sound:
                     sound.stop()
                     sound.unload()
-                except NameError:
-                    pass
+
                 sound = None
                 sound = SoundLoader.load(select[track])
-                global sound
+
                 sound.loop = True
                 sound.volume = 0.5
                 sound.play()
@@ -671,7 +670,7 @@ class GameApp(App):
         # cells.draw_rectangles()
         # cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
-        
+
         if bool(int(self.game_cells.music)):
             cells.music_control('options', False, True)
         else:
@@ -732,7 +731,7 @@ class GameApp(App):
 
         restart_game = Popup(title="Reset", title_font='joystix', title_size=56, background='black_thing.png', separator_height=0 ,size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0})
         restart_game_layout = BoxLayout(orientation='vertical')
-        
+
         button_container = GridLayout(cols=3, spacing='5dp', size=(50,50))
         restart_btn = Button(text="Restart", font_size=mysize, font_name='joystix', size_hint=(1,None),height=dp(100))
         cancel_main_box = BoxLayout(size_hint=(0.5,0.1), height=dp(55), pos_hint={'center':.5, 'center':.1}, orientation='horizontal')
@@ -744,7 +743,7 @@ class GameApp(App):
         cmb = [restart_btn, cancel_restart_button]
         for btn in cmb:
             cancel_main_box.add_widget(btn)
-        
+
         r1 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
         r2 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
         r3 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
@@ -758,7 +757,7 @@ class GameApp(App):
         bc = [ra, rb, rc, rd, re, rf, r1, cancel_main_box, r2, r3, r_main_menu_button, r4]
         for btn in bc:
             button_container.add_widget(btn)
-        
+
         restart_game_layout.add_widget(button_container)
         restart_game.add_widget(restart_game_layout)
 
@@ -784,10 +783,10 @@ class GameApp(App):
         controls =[btn_start,btn_stop,btn_step,btn_reset,btn_sett,btn_info]
         for btn in controls:
             buttons.add_widget(btn)
-        
+
         # Clock.schedule_once(main_menu.open,0.5)
         # event = Clock.schedule_once(main_menu.open)
-        
+
         main_menu.bind(on_open=partial(self.close_modals, start_patterns, restart_game))
         start_patterns.bind(on_open=partial(self.close_modals, None, restart_game))
         start_patterns.bind(on_dismiss=grid.draw_grid)
