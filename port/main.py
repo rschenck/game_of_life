@@ -36,7 +36,6 @@ from presets import presets
 #         print "obj.%s = %s" % (attr, getattr(obj, attr))
 #         pass
 
-sound = None
 class Grid(Widget):
     def draw_grid(self, *largs):
         self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
@@ -408,6 +407,7 @@ class Cells(Widget):
             titlesize = Window.size[1]/100.*3.4
             mysize = Window.size[1]/100.*3
 
+        # info0 = '''Game modes:\n   Select Playground Mode or Game Mode.\n    The playground has unlimited cells!\n    Change the colors!\n    Change the rules!\n'''
         info1 = '''Rules:\n      If a cell has 0-1 neighbors, it dies.\n      If a cell has 4 or more neighbors, it dies.\n      If a cell has 2-3 neighbors, it survives.\n      If a space is surrounded by 3 neighbors, a cell is born.\n\n'''
         info2 = '''Controls:\n      Click or draw to add cells.\n       Modify the default rules and more in settings.\n'''
         info3 = '''\nCreated by:\n      Steven Lee-Kramer\n      Ryan O Schenck'''
@@ -433,18 +433,18 @@ class Cells(Widget):
         Clock.schedule_once(self.main_menu.open,0)
 
     def stop(self, *largs):
-        if sound:
+        try:
             sound.stop()
-
+        except:
+            pass
 
     def music_control(self, track, switch, on, *largs):
-        select = {'options':'options_track.ogg','main':'main_track.ogg','score':'score_track.ogg'}
+        select = {'options':'options_track.wav','main':'main_track.wav','score':'score_track.wav'}
 
         if bool(int(self.music)):
-            global sound
             if on == True and switch == False:
                 sound = SoundLoader.load(select[track])
-
+                global sound
                 sound.loop = True
                 sound.volume = 0.5
                 sound.play()
@@ -452,13 +452,14 @@ class Cells(Widget):
                 sound.stop()
 
             if switch == True:
-                if sound:
+                try:
                     sound.stop()
                     sound.unload()
-
+                except:
+                    pass
                 sound = None
                 sound = SoundLoader.load(select[track])
-
+                global sound
                 sound.loop = True
                 sound.volume = 0.5
                 sound.play()
@@ -563,7 +564,7 @@ class GameApp(App):
         # global blinky
         if self.game_cells.score > self.highscore:
             self.highscore = cells.score
-            self.highscorejson.put('highscore', best=thescore)
+            self.highscorejson.put('highscore', best=self.game_cells.score)
             high_score_display = str(self.intWithCommas(self.highscore)) + " New Record!!"
         else:
             high_score_display = "You've done better!"
