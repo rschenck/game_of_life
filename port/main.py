@@ -35,21 +35,38 @@ from presets import presets
 #     for attr in dir(obj):
 #         print "obj.%s = %s" % (attr, getattr(obj, attr))
 #         pass
-
+cellsize = 10
+v_border = (0,0)
+h_border = (0,0)
 class Grid(Widget):
     def draw_grid(self, *largs):
         self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
+        self.determine_grid(self.width,self.height)
         self.pos = (0,50)
         with self.canvas:
             Color(0.5,0.5,0.5, mode='rgb')
-            for x in range(10,self.width,10):
+            for x in range(v_border[0],self.width,cellsize):
                 Rectangle(pos=(x,self.y),size=(1,self.height))
-            for y in range(self.y,self.height+self.y,10):
+            for y in range(self.y+h_border[0],self.height+self.y,cellsize):
                 Rectangle(pos=(self.x,y),size=(self.width,1))
-            Rectangle(pos=(self.x,self.y),size=(10,self.height))
-            Rectangle(pos=(self.x,self.y),size=(self.width,10))
-            Rectangle(pos=(self.width-10,self.y),size=(10,self.height))
-            Rectangle(pos=(self.x,self.y+self.height-10),size=(self.width,10))
+            Rectangle(pos=(self.x,self.y),size=(v_border[0],self.height))
+            Rectangle(pos=(self.x,self.y),size=(self.width,h_border[0]))
+            Rectangle(pos=(self.width-v_border[1],self.y),size=(v_border[1],self.height))
+            Rectangle(pos=(self.x,self.y+self.height-h_border[1]),size=(self.width,h_border[1]))
+
+    def determine_grid(self,width,height,*largs):
+        global v_border, h_border, cellsize
+        w_mult, h_mult = 100.,50.
+        cellsize = int(width / w_mult)
+
+        while (height / cellsize) < h_mult:
+            cellsize -= 1
+        cellsize = 10 if cellsize < 10 else cellsize
+        v_w = (width - 20) % cellsize + 20
+        h_w = (height - 20) % cellsize + 20
+        v_border = (int(v_w / 2.),int((v_w + 1 ) / 2.))
+        h_border = (int(h_w / 2.), int((h_w + 1) / 2.))
+
 
 class Cells(Widget):
     allcols = {
@@ -130,14 +147,30 @@ class Cells(Widget):
 
 
     # Setup functions
+    def determine_borders(self,*largs):
+        width,height = Window.width, Window.height - 100
+        global v_border, h_border, cellsize
+        w_mult, h_mult = 100.,50.
+        cellsize = int(width / w_mult)
+        while (height / cellsize) < h_mult:
+            cellsize -= 1
+        cellsize = 10 if cellsize < 10 else cellsize
+        v_w = (width - 20) % cellsize + 20
+        h_w = (height - 20) % cellsize + 20
+        v_border = (int(v_w / 2.),int((v_w + 1 )/ 2.))
+        h_border = (int(h_w / 2.), int((h_w + 1)/2.))
     # Create all possible rectangles for the given window size
     def create_rectangles(self, *largs):
+        self.determine_borders()
+        v_borders = v_border[0] + v_border[1]
+        h_borders = h_border[0] + h_border[1]
         self.rectangles_dict.clear()
-        self.dimensions = (Window.width - 20, Window.height - 120)
-        self.pos = (11,61)
-        for x in range(0,self.dimensions[0]/10):
-            for y in range(0,self.dimensions[1]/10):
-                rect = Rectangle(pos=(self.x + x * 10, self.y + y *10), size=(9,9))
+        self.dimensions = (Window.width - v_borders, Window.height - 100 - h_borders)
+        self.pos = (v_border[0] + 1, h_border[0] + 51)
+        cell_side = cellsize - 1
+        for x in range(0,self.dimensions[0]/cellsize):
+            for y in range(0,self.dimensions[1]/cellsize):
+                rect = Rectangle(pos=(self.x + x * cellsize, self.y + y *cellsize), size=(cell_side,cell_side))
                 color = Color(0,0,0,mode="hsv")
                 self.rectangles_dict[x,y] = {"rect":rect,"color":color}
 
@@ -157,8 +190,8 @@ class Cells(Widget):
     # set canvas_color, self.pos and cells midpoint
     def setup_cells(self, *largs):
         self.set_canvas_color()
-        self.pos = (11,61)
-        self.mid_x,self.mid_y = self.dimensions[0]/20, self.dimensions[1]/20
+        self.pos = (v_border[0] +1,h_border[0] +51)
+        self.mid_x,self.mid_y = self.dimensions[0]/(2 * cellsize), self.dimensions[1]/(2 * cellsize)
 
 
 
@@ -189,10 +222,10 @@ class Cells(Widget):
     # game logic for each iteration
     def get_cell_changes(self, *largs):
         then = time()
-        for x in range(0,int(self.dimensions[0]/10)):
-            for y in range(0,int(self.dimensions[1]/10)):
-                over_x,over_y = (x + 1) % (self.dimensions[0]/10), (y + 1) % (self.dimensions[1]/10)
-                bel_x, bel_y = (x - 1) % (self.dimensions[0]/10), (y - 1) % (self.dimensions[1]/10)
+        for x in range(0,int(self.dimensions[0]/cellsize)):
+            for y in range(0,int(self.dimensions[1]/cellsize)):
+                over_x,over_y = (x + 1) % (self.dimensions[0]/cellsize), (y + 1) % (self.dimensions[1]/cellsize)
+                bel_x, bel_y = (x - 1) % (self.dimensions[0]/cellsize), (y - 1) % (self.dimensions[1]/cellsize)
                 alive_neighbors = self.on_board[bel_x,bel_y]['alive'] + self.on_board[bel_x,y]['alive'] + self.on_board[bel_x,over_y]['alive'] + self.on_board[x,bel_y]['alive'] + self.on_board[x,over_y]['alive'] + self.on_board[over_x,bel_y]['alive'] + self.on_board[over_x,y]['alive'] + self.on_board[over_x,over_y]['alive']
 
                 if self.on_board[x,y]['alive']:
@@ -330,9 +363,9 @@ class Cells(Widget):
     def on_touch_down(self, touch):
         pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
         # print (touch.pos), self.accept_touches
-        pos_x = int(math.floor(pos_x / 10.0))
-        pos_y = int(math.floor(pos_y / 10.0))
-        in_bounds = (0 <= pos_x < (self.dimensions[0] / 10)) and (0 <= pos_y < (self.dimensions[1] / 10))
+        pos_x = int(pos_x / cellsize)
+        pos_y = int(pos_y / cellsize)
+        in_bounds = (0 <= pos_x < (self.dimensions[0] / cellsize)) and (0 <= pos_y < (self.dimensions[1] / cellsize))
         # sign_x = "+" if pos_x - self.mid_x >= 0 else ""
         # sign_y = "+" if pos_y - self.mid_y >= 0 else ""
         # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")] = {'alive':1, 'was':0}"
@@ -360,10 +393,10 @@ class Cells(Widget):
         # print(touch.pos), self.accept_touches
         for pos in self.mouse_positions:
             pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
-            pos_x = int(math.floor(pos_x / 10.0))
-            pos_y = int(math.floor(pos_y / 10.0))
+            pos_x = int(pos_x / cellsize)
+            pos_y = int(pos_y / cellsize)
 
-            in_bounds = (0 <= pos_x < (self.dimensions[0] / 10)) and (0 <= pos_y < (self.dimensions[1] / 10))
+            in_bounds = (0 <= pos_x < (self.dimensions[0] / cellsize)) and (0 <= pos_y < (self.dimensions[1] / cellsize))
 
             # print "touch_move in bounds?", in_bounds
             # print "pos_x, pos_y", pos_x ,",",pos_y
@@ -640,6 +673,7 @@ class GameApp(App):
             self.open_settings()
 
     def build(self):
+        global cellsize
         self.settings_cls = SettingsWithSpinner
         # dump(self.settings_cls)
         self.config.items('initiate')
