@@ -90,9 +90,7 @@ class Cells(Widget):
     spawn_adder = NumericProperty(0)
     cell_color = (0,0,0)
     # update_time = 0
-
-
-
+    main_menu = None
 
     # Starting Patterns
     # Each will:
@@ -143,7 +141,6 @@ class Cells(Widget):
                 rect = Rectangle(pos=(self.x + x * 10, self.y + y *10), size=(9,9))
                 color = Color(0,0,0,mode="hsv")
                 self.rectangles_dict[x,y] = {"rect":rect,"color":color}
-
 
 
     # def add_instruction_groups(self, *largs):
@@ -429,7 +426,11 @@ class Cells(Widget):
               background='black_thing.png',
               background_color=[0,0,0,1])
         content.bind(on_touch_down=popup.dismiss)
+        popup.bind(on_dismiss=self.open_main_menu)
         popup.open()
+
+    def open_main_menu(self,*largs):
+        Clock.schedule_once(self.main_menu.open,0)
 
     def stop(self, *largs):
         try:
@@ -438,7 +439,7 @@ class Cells(Widget):
             pass
 
     def music_control(self, track, switch, on, *largs):
-        select = {'options':'options_track.wav','main':'main_track.wav','score':'score_track.wav'}
+        select = {'options':'options_track.ogg','main':'main_track.ogg','score':'score_track.ogg'}
 
         if bool(int(self.music)):
             if on == True and switch == False:
@@ -510,6 +511,13 @@ class GameApp(App):
     highscore = 0
     blinky = None
 
+    def on_pause(self, *largs):
+        return True
+
+    def on_resume(self, *largs):
+        self.game_cells.reset_interval
+        pass
+
     # seconds = 0
     def intWithCommas(self, x, *largs):
         # if type(x) not in [type(0), type(0L)]:
@@ -530,7 +538,7 @@ class GameApp(App):
         else:
             gen.text = '∞'
             place.text = '∞'
-        cs.text = self.intWithCommas(cells.score)
+        cs.text = self.intWithCommas(self.game_cells.score)
         adrat.text = str(cells.all_activated - cells.all_died)
 
         if cells.generations == 0 or cells.game_over:
@@ -552,15 +560,16 @@ class GameApp(App):
 
     def update_score_labels(self, myobject, final_score_label, high_score_label,cells, *largs):
         self.blinky = Clock.schedule_interval(lambda a:self.colorit(myobject),0.3)
+
         # global blinky
-        if cells.score > self.highscore:
+        if self.game_cells.score > self.highscore:
             self.highscore = cells.score
-            self.highscorejson.put('highscore', best=cells.score)
+            self.highscorejson.put('highscore', best=thescore)
             high_score_display = str(self.intWithCommas(self.highscore)) + " New Record!!"
         else:
             high_score_display = "You've done better!"
         high_score_label.text = high_score_display
-        final_score_label.text = "Final Score: " + str(self.intWithCommas(cells.score))
+        final_score_label.text = "Final Score: " + str(self.intWithCommas(self.game_cells.score))
 # REMOVE THIS LINE TO GET RID OF HIGH SCORE = 0
         # self.highscorejson.put('highscore', best=0)
         # self.highscore = 0
@@ -648,7 +657,7 @@ class GameApp(App):
             titlesize = Window.size[1]/100.*4
             mysize = Window.size[1]/100.*3.4
 
-        Window.size = (667*2,267*2)
+        # Window.size = (1136,640)
         usrgridnum = Window.system_size[0]*Window.system_size[1]/100000.
 
         # make layout and additional widgets
@@ -669,7 +678,7 @@ class GameApp(App):
             pass
 
 # Main Menu Components
-        main_menu = Popup(title="Main Menu", background='black_thing.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center",auto_dismiss=False)
+        main_menu = cells.main_menu = Popup(title="Main Menu", background='black_thing.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center",auto_dismiss=False)
         main_menu_layout = GridLayout(cols=3, spacing=20, size_hint_y=.9, size_hint_x=.1)
         holda = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
         holdb = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
@@ -777,7 +786,7 @@ class GameApp(App):
             buttons.add_widget(btn)
         
         # Clock.schedule_once(main_menu.open,0.5)
-        event = Clock.schedule_once(main_menu.open)
+        # event = Clock.schedule_once(main_menu.open)
         
         main_menu.bind(on_open=partial(self.close_modals, start_patterns, restart_game))
         start_patterns.bind(on_open=partial(self.close_modals, None, restart_game))
@@ -788,18 +797,18 @@ class GameApp(App):
         # Score Label Widgets
         top_buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'top':1})
 
-        hs = Button(text='High Score:', font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        hsval = Button(text=self.intWithCommas(int(self.highscore)), font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        cs = Button(text='Score:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        csval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        adratval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        place = Button(text='Spawns:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        usrgrid = Button(text='Grid: ', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
-        gridnum = Button(text=str(usrgridnum), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', border=[0,0,0,0])
+        hs = Button(text='High Score:', font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png', border=[0,0,0,0])
+        hsval = Button(text=self.intWithCommas(int(self.highscore)), font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        cs = Button(text='Score:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        csval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        adratval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        place = Button(text='Spawns:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        usrgrid = Button(text='Grid: ', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        gridnum = Button(text=str(usrgridnum), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
 
         btns_top = [place, placeval, gen, genval, usrgrid, gridnum, cs, csval, hs, hsval]
         for btn in btns_top:
