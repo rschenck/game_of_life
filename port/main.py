@@ -587,6 +587,7 @@ class GameApp(App):
     def trigger_game_mode(self, main_menu, cells, grid, adratval, csval, genval, placeval, hsval,btn_sett,*largs):
         btn_sett.background_down = 'btn_solid.png'
         btn_sett.text = "---"
+        btn_sett.disabled = True
         self.game_cells.lonely = 1
         self.game_cells.crowded = 4
         self.game_cells.birth = 3
@@ -600,6 +601,7 @@ class GameApp(App):
     def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, genval,btn_sett, *largs):
         btn_sett.background_down = 'bttn_dn.png'
         btn_sett.text = "Options"
+        btn_sett.disabled = False
         cells.reset_counters()
         for item in self.config._sections:
             for x in self.config._sections[item]:
