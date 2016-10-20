@@ -266,7 +266,7 @@ class Cells(Widget):
         self.score += (plus * self.bonus_multiplier)
         self.all_died += minus
         if not self.active_cell_count and self.game_mode:
-            if self.spawn_count != 100:
+            if self.spawn_count != 100 and self.generations > 0:
                 self.game_over = True
                 self.game_over_message = "                  Everything is dead!\n" + "Try placing cells in groups of 3 or more."
 
