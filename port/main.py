@@ -240,8 +240,7 @@ class Cells(Widget):
     def update_canvas_objects(self,*largs):
         if self.game_mode:
             if not bool(self.changes_dict) and not self.spawn_count:
-                beg_part = "         Out of moves!\n" if self.active_cell_count else "     Everything is dead!\n"
-                self.game_over_message = beg_part + "Use your spawns wisely."
+                self.game_over_message = "         Out of moves!\n" + "Use your spawns wisely."
                 self.game_over = True
 
 
@@ -265,8 +264,10 @@ class Cells(Widget):
         self.spawn_adder = self.all_activated / (1000)
         self.score += (plus * self.bonus_multiplier)
         self.all_died += minus
-
-
+        if not self.active_cell_count and self.game_mode:
+            if self.spawn_count != 100:
+                self.game_over = True
+                self.game_over_message = "                  Everything is dead!\n" + "Try placing cells in groups of 3 or more."
 
     # Our start/step scheduled function
     def update_cells(self,*largs):
