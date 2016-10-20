@@ -345,6 +345,7 @@ class Cells(Widget):
         self.spawn_count = 100
         self.score = 0
         self.bonus_multiplier = 1
+        self.game_over_message = "You've done better!"
 
 
     # Touch Handlers
@@ -597,6 +598,8 @@ class GameApp(App):
 # REMOVE THIS LINE TO GET RID OF HIGH SCORE = 0
         # self.highscorejson.put('highscore', best=0)
         # self.highscore = 0
+    def clear_text(self, high_score_label, *largs):
+        high_score_label.text = ""
 
     def close_modals(self, start_patterns, restart_game, *largs):
         try:
@@ -863,6 +866,7 @@ class GameApp(App):
 
         game_end.bind(on_open=partial(self.update_score_labels, play_again, final_score_label,high_score_label, cells))
         game_end.bind(on_dismiss=partial(self.unscheduleit, play_again))
+        game_end.bind(on_dismiss=partial(self.clear_text, high_score_label))
 
 
         board.add_widget(top_buttons)
