@@ -28,28 +28,44 @@ from os.path import join
 from random import randint
 from random import uniform
 from settings_options import settings_json
-from time import time
 from presets import presets
 
 # def dump(obj):
 #     for attr in dir(obj):
 #         print "obj.%s = %s" % (attr, getattr(obj, attr))
 #         pass
-
+cellsize = 10
+v_border = (0,0)
+h_border = (0,0)
 class Grid(Widget):
     def draw_grid(self, *largs):
         self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
+        self.determine_grid(self.width,self.height)
         self.pos = (0,50)
         with self.canvas:
             Color(0.5,0.5,0.5, mode='rgb')
-            for x in range(10,self.width,10):
+            for x in range(v_border[0],self.width,cellsize):
                 Rectangle(pos=(x,self.y),size=(1,self.height))
-            for y in range(self.y,self.height+self.y,10):
+            for y in range(self.y+h_border[0],self.height+self.y,cellsize):
                 Rectangle(pos=(self.x,y),size=(self.width,1))
-            Rectangle(pos=(self.x,self.y),size=(10,self.height))
-            Rectangle(pos=(self.x,self.y),size=(self.width,10))
-            Rectangle(pos=(self.width-10,self.y),size=(10,self.height))
-            Rectangle(pos=(self.x,self.y+self.height-10),size=(self.width,10))
+            Rectangle(pos=(self.x,self.y),size=(v_border[0],self.height))
+            Rectangle(pos=(self.x,self.y),size=(self.width,h_border[0]))
+            Rectangle(pos=(self.width-v_border[1],self.y),size=(v_border[1],self.height))
+            Rectangle(pos=(self.x,self.y+self.height-h_border[1]),size=(self.width,h_border[1]))
+
+    def determine_grid(self,width,height,*largs):
+        global v_border, h_border, cellsize
+        w_mult, h_mult = 80.,30.
+        cellsize = int(width / w_mult)
+
+        while (height / cellsize) < h_mult:
+            cellsize -= 1
+        cellsize = 10 if cellsize < 10 else cellsize
+        v_w = (width - 20) % cellsize + 20
+        h_w = (height - 20) % cellsize + 20
+        v_border = (int(v_w / 2.),int((v_w + 1 ) / 2.))
+        h_border = (int(h_w / 2.), int((h_w + 1) / 2.))
+
 
 class Cells(Widget):
     allcols = {
@@ -60,9 +76,7 @@ class Cells(Widget):
     'Black':(0,0,0),
     'Red': (1,1,1)
     }
-    # speed, cellcol, birth, lonely, crowded = .1, 'White', 3, 1, 4
-    # update_count = 0
-    update_time = 0
+
     dimensions = None # Use this instead of self.size, which resets each frame
     rectangles_dict = {}
     def default_cells():
@@ -73,14 +87,10 @@ class Cells(Widget):
     mouse_positions = []
     should_draw = False # allows touches to add rectangles
     accept_touches = False # Avoid sticky cell from intial click/move
-    # alive_cell_instructions = InstructionGroup()
-    # alive_color_instruction = InstructionGroup()
-    # was_cell_instructions = InstructionGroup()
-    # was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
     all_activated = NumericProperty(0)
     score = NumericProperty(0)
     bonus_multiplier = 1
-    spawn_count = NumericProperty(50)
+    spawn_count = NumericProperty(100)
     generations = NumericProperty(500)
     all_died = NumericProperty(0)
     game_over = False
@@ -88,8 +98,9 @@ class Cells(Widget):
     game_mode = False
     spawn_adder = NumericProperty(0)
     cell_color = (0,0,0)
-    # update_time = 0
     main_menu = None
+    cellcount = 0
+    game_over_message = "You've done better!"
 
     # Starting Patterns
     # Each will:
@@ -114,14 +125,15 @@ class Cells(Widget):
             else:
                 pass
         elif selection == 'random':
-            for x in range(0,self.dimensions[0]/10):
-                for y in range(0,self.dimensions[1]/10):
-                    # assign 25% chance of life
-                    if randint(0,3) == 1:
-                        self.on_board[x,y] = {'alive':1, 'was':0}
+            for x_y in self.rectangles_dict:
+                # assign 25% chance of life
+                if randint(0,3) == 1:
+                    self.on_board[x_y] = {'alive':1, 'was':0}
+                    self.active_cell_count += 1
         else:
             for coor in presets[selection]:
                 self.on_board[( self.mid_x + int(coor[0]), self.mid_y + int(coor[1]) )] = {'alive':1, 'was':0}
+                self.active_cell_count += 1
 
         self.music_control('main', True, True)
         modal.dismiss()
@@ -130,17 +142,34 @@ class Cells(Widget):
 
 
     # Setup functions
+    def determine_borders(self,*largs):
+        width,height = Window.width, Window.height - 100
+        global v_border, h_border, cellsize
+        w_mult, h_mult = 80.,30.
+        cellsize = int(width / w_mult)
+        while (height / cellsize) < h_mult:
+            cellsize -= 1
+        cellsize = 10 if cellsize < 10 else cellsize
+        v_w = (width - 20) % cellsize + 20
+        h_w = (height - 20) % cellsize + 20
+        v_border = (int(v_w / 2.),int((v_w + 1 )/ 2.))
+        h_border = (int(h_w / 2.), int((h_w + 1)/2.))
     # Create all possible rectangles for the given window size
     def create_rectangles(self, *largs):
+        self.cellcount = 0
+        self.determine_borders()
+        v_borders = v_border[0] + v_border[1]
+        h_borders = h_border[0] + h_border[1]
         self.rectangles_dict.clear()
-        self.dimensions = (Window.width - 20, Window.height - 120)
-        self.pos = (11,61)
-        for x in range(0,self.dimensions[0]/10):
-            for y in range(0,self.dimensions[1]/10):
-                rect = Rectangle(pos=(self.x + x * 10, self.y + y *10), size=(9,9))
+        self.dimensions = (Window.width - v_borders, Window.height - 100 - h_borders)
+        self.pos = (v_border[0] + 1, h_border[0] + 51)
+        cell_side = cellsize - 1
+        for x in range(0,self.dimensions[0]/cellsize):
+            for y in range(0,self.dimensions[1]/cellsize):
+                rect = Rectangle(pos=(self.x + x * cellsize, self.y + y *cellsize), size=(cell_side,cell_side))
                 color = Color(0,0,0,mode="hsv")
                 self.rectangles_dict[x,y] = {"rect":rect,"color":color}
-
+                self.cellcount += 1
 
     # def add_instruction_groups(self, *largs):
     #     # self.canvas.add(self.alive_color_instruction)
@@ -157,8 +186,8 @@ class Cells(Widget):
     # set canvas_color, self.pos and cells midpoint
     def setup_cells(self, *largs):
         self.set_canvas_color()
-        self.pos = (11,61)
-        self.mid_x,self.mid_y = self.dimensions[0]/20, self.dimensions[1]/20
+        self.pos = (v_border[0] +1,h_border[0] +51)
+        self.mid_x,self.mid_y = self.dimensions[0]/(2 * cellsize), self.dimensions[1]/(2 * cellsize)
 
 
 
@@ -188,11 +217,10 @@ class Cells(Widget):
 
     # game logic for each iteration
     def get_cell_changes(self, *largs):
-        then = time()
-        for x in range(0,int(self.dimensions[0]/10)):
-            for y in range(0,int(self.dimensions[1]/10)):
-                over_x,over_y = (x + 1) % (self.dimensions[0]/10), (y + 1) % (self.dimensions[1]/10)
-                bel_x, bel_y = (x - 1) % (self.dimensions[0]/10), (y - 1) % (self.dimensions[1]/10)
+        for x in range(0,int(self.dimensions[0]/cellsize)):
+            for y in range(0,int(self.dimensions[1]/cellsize)):
+                over_x,over_y = (x + 1) % (self.dimensions[0]/cellsize), (y + 1) % (self.dimensions[1]/cellsize)
+                bel_x, bel_y = (x - 1) % (self.dimensions[0]/cellsize), (y - 1) % (self.dimensions[1]/cellsize)
                 alive_neighbors = self.on_board[bel_x,bel_y]['alive'] + self.on_board[bel_x,y]['alive'] + self.on_board[bel_x,over_y]['alive'] + self.on_board[x,bel_y]['alive'] + self.on_board[x,over_y]['alive'] + self.on_board[over_x,bel_y]['alive'] + self.on_board[over_x,y]['alive'] + self.on_board[over_x,over_y]['alive']
 
                 if self.on_board[x,y]['alive']:
@@ -205,15 +233,18 @@ class Cells(Widget):
                         self.changes_dict[x,y] = 1
                     else:
                         pass
-        # print "Get Cell Changes Runtime: ", time() - then
 
 
 
     # loops through changes from ^^ and adds the rectangles
     def update_canvas_objects(self,*largs):
-        # print "time since last call: ", time() - self.update_time
-        # self.update_time = time()
-        then = time()
+        if self.game_mode:
+            if not bool(self.changes_dict) and not self.spawn_count:
+                if self.generations > 0:
+                    self.game_over_message = "         Out of moves!\n" + "Use your spawns wisely."
+                    self.game_over = True
+
+
         plus, minus = 0,0
         for x_y in self.changes_dict:
             if self.changes_dict[x_y]:
@@ -231,43 +262,35 @@ class Cells(Widget):
                 self.active_cell_count -= 1
         self.changes_dict.clear()
         self.all_activated += plus
-        self.spawn_adder = self.all_activated / 1000
+        self.spawn_adder = self.all_activated / (1000)
         self.score += (plus * self.bonus_multiplier)
         self.all_died += minus
-        # print "Update Canvas Objects Runtime: ", time() - then
-
-
-
+        if not self.active_cell_count and self.game_mode:
+            if self.spawn_count != 100:
+                self.game_over = True
+                self.game_over_message = "                  Everything is dead!\n" + "Try placing cells in groups of 3 or more."
 
     # Our start/step scheduled function
     def update_cells(self,*largs):
-        # print "Time since last update: ", time() - self.update_time
-        self.update_time = time()
-        then = time()
-        # self.update_count += 1
-        then = time()
         if self.cellcol == 'Random':
             self.set_canvas_color(on_request=True)
         self.get_cell_changes()
         self.update_canvas_objects()
         self.update_counters()
-        # print "Update Cells Complete Runtime: ", time() - then
+
 
     def add_spawns(self, *largs):
-        # print "Adding Spawns: all_activate:", self.all_activated,"; spawn_count:", self.spawn_count
         self.spawn_count += 5
 
     def update_counters(self,*largs):
         if self.game_mode:
             self.generations -= 1
-        if self.active_cell_count < 1000:
-            self.bonus_multiplier = 1
-        elif self.active_cell_count >= 1000:
-            self.bonus_multiplier = 1 + (self.active_cell_count / 1000)
+
+        self.bonus_multiplier = 1 + (self.active_cell_count * 30000 / pow(self.cellcount,2))
+
 
 
     def start_interval(self, events, *largs):
-        # self.update_time = time()
         self.should_draw = False
         if len(events) > 0:
             events[-1].cancel()
@@ -330,9 +353,9 @@ class Cells(Widget):
     def on_touch_down(self, touch):
         pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
         # print (touch.pos), self.accept_touches
-        pos_x = int(math.floor(pos_x / 10.0))
-        pos_y = int(math.floor(pos_y / 10.0))
-        in_bounds = (0 <= pos_x < (self.dimensions[0] / 10)) and (0 <= pos_y < (self.dimensions[1] / 10))
+        pos_x = int(pos_x / cellsize)
+        pos_y = int(pos_y / cellsize)
+        in_bounds = (0 <= pos_x < (self.dimensions[0] / cellsize)) and (0 <= pos_y < (self.dimensions[1] / cellsize))
         # sign_x = "+" if pos_x - self.mid_x >= 0 else ""
         # sign_y = "+" if pos_y - self.mid_y >= 0 else ""
         # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")] = {'alive':1, 'was':0}"
@@ -343,6 +366,7 @@ class Cells(Widget):
                     if self.should_draw:
                         self.on_board[pos_x,pos_y]['alive'] = 1
                         self.rectangles_dict[pos_x,pos_y]["color"].hsv = self.cell_color
+                        self.active_cell_count += 1
                         if not self.on_board[pos_x,pos_y]['was']:
                             self.canvas.add(self.rectangles_dict[pos_x,pos_y]["color"])
                             self.canvas.add(self.rectangles_dict[pos_x,pos_y]["rect"])
@@ -360,10 +384,10 @@ class Cells(Widget):
         # print(touch.pos), self.accept_touches
         for pos in self.mouse_positions:
             pos_x, pos_y = touch.pos[0] - self.x, touch.pos[1] - self.y
-            pos_x = int(math.floor(pos_x / 10.0))
-            pos_y = int(math.floor(pos_y / 10.0))
+            pos_x = int(pos_x / cellsize)
+            pos_y = int(pos_y / cellsize)
 
-            in_bounds = (0 <= pos_x < (self.dimensions[0] / 10)) and (0 <= pos_y < (self.dimensions[1] / 10))
+            in_bounds = (0 <= pos_x < (self.dimensions[0] / cellsize)) and (0 <= pos_y < (self.dimensions[1] / cellsize))
 
             # print "touch_move in bounds?", in_bounds
             # print "pos_x, pos_y", pos_x ,",",pos_y
@@ -376,6 +400,7 @@ class Cells(Widget):
                         if self.should_draw:
                             self.on_board[pos_x,pos_y]['alive'] = 1
                             self.rectangles_dict[pos_x,pos_y]["color"].hsv = self.cell_color
+                            self.active_cell_count += 1
                             if not self.on_board[pos_x,pos_y]['was']:
                                 self.canvas.add(self.rectangles_dict[pos_x,pos_y]["color"])
                                 self.canvas.add(self.rectangles_dict[pos_x,pos_y]["rect"])
@@ -530,8 +555,8 @@ class GameApp(App):
             result = ",%03d%s" % (r, result)
         return "%d%s" % (x, result)
 
-    # def update_score(self,cells,adrat, cs, place, *largs):
-    def update_game(self, cells, adrat, cs, place, gen, game_end, *largs):
+    # def update_score(self,cells, cs, place, *largs):
+    def update_game(self, cells, cs, place, gen, game_end, *largs):
         if cells.game_mode:
             gen.text = str(cells.generations)
             place.text = str(cells.spawn_count)
@@ -539,15 +564,14 @@ class GameApp(App):
             gen.text = '∞'
             place.text = '∞'
         cs.text = self.intWithCommas(self.game_cells.score)
-        adrat.text = str(cells.all_activated - cells.all_died)
+
 
         if cells.generations == 0 or cells.game_over:
             cells.stop_interval(self.events)
             cells.music_control('score', True, True)
             game_end.open()
 
-    def reset_labels(self, adratval, csval, genval, placeval, hsval, cells,*largs):
-        adratval.text = "--"
+    def reset_labels(self, csval, genval, placeval, hsval, cells,*largs):
         csval.text = "--"
         hsval.text = str(self.intWithCommas(self.highscore))
         if cells.game_mode:
@@ -567,7 +591,7 @@ class GameApp(App):
             self.highscorejson.put('highscore', best=self.game_cells.score)
             high_score_display = str(self.intWithCommas(self.highscore)) + " New Record!!"
         else:
-            high_score_display = "You've done better!"
+            high_score_display = cells.game_over_message
         high_score_label.text = high_score_display
         final_score_label.text = "Final Score: " + str(self.intWithCommas(self.game_cells.score))
 # REMOVE THIS LINE TO GET RID OF HIGH SCORE = 0
@@ -584,9 +608,10 @@ class GameApp(App):
         except:
             pass
 
-    def trigger_game_mode(self, main_menu, cells, grid, adratval, csval, genval, placeval, hsval,btn_sett,*largs):
+    def trigger_game_mode(self, main_menu, cells, grid, csval, genval, placeval, hsval,btn_sett,*largs):
         btn_sett.background_down = 'btn_solid.png'
         btn_sett.text = "---"
+        btn_sett.disabled = True
         self.game_cells.lonely = 1
         self.game_cells.crowded = 4
         self.game_cells.birth = 3
@@ -594,12 +619,13 @@ class GameApp(App):
         main_menu.dismiss()
         cells.reset_counters()
         cells.game_mode = True
-        self.reset_labels(adratval, csval, genval, placeval, hsval, cells)
+        self.reset_labels(csval, genval, placeval, hsval, cells)
         cells.reset_interval(self.events, grid, None)
 
     def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, genval,btn_sett, *largs):
         btn_sett.background_down = 'bttn_dn.png'
         btn_sett.text = "Options"
+        btn_sett.disabled = False
         cells.reset_counters()
         for item in self.config._sections:
             for x in self.config._sections[item]:
@@ -615,10 +641,10 @@ class GameApp(App):
         placeval.text = '∞'
         genval.text = '∞'
         cells.reset_interval(self.events,grid, start_patterns)
-    def restart_btn_action(self, grid, start_patterns, cells, restart_game, adratval, csval, genval, placeval,hsval,*largs):
+    def restart_btn_action(self, grid, start_patterns, cells, restart_game, csval, genval, placeval,hsval,*largs):
         restart_game.dismiss()
         cells.reset_counters()
-        self.reset_labels(adratval, csval, genval, placeval, hsval, cells)
+        self.reset_labels(csval, genval, placeval, hsval, cells)
         if cells.game_mode:
             cells.reset_interval(self.events,grid,None)
         else:
@@ -638,6 +664,7 @@ class GameApp(App):
             self.open_settings()
 
     def build(self):
+        global cellsize
         self.settings_cls = SettingsWithSpinner
         # dump(self.settings_cls)
         self.config.items('initiate')
@@ -657,9 +684,6 @@ class GameApp(App):
             titlesize = Window.size[1]/100.*4
             mysize = Window.size[1]/100.*3.4
 
-        # Window.size = (1136,640)
-        usrgridnum = Window.system_size[0]*Window.system_size[1]/100000.
-
         # make layout and additional widgets
         board = FloatLayout(size=(Window.width, Window.height))
         grid = Grid(size=(Window.width, Window.height - 100), pos=(0,50))
@@ -671,6 +695,9 @@ class GameApp(App):
         # cells.draw_rectangles()
         # cells.add_instruction_groups()
         Clock.schedule_once(cells.loadimg, 0)
+
+        usrgridnum = cells.cellcount / 1000.0
+
 
         if bool(int(self.game_cells.music)):
             cells.music_control('options', False, True)
@@ -801,16 +828,15 @@ class GameApp(App):
         hsval = Button(text=self.intWithCommas(int(self.highscore)), font_name='Roboto',  font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         cs = Button(text='Score:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         csval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-        adrat = Button(text='A/D (+/-):', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-        adratval = Button(text='--', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+
         place = Button(text='Spawns:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-        usrgrid = Button(text='Grid: ', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-        gridnum = Button(text=str(usrgridnum), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        usrgrid = Button(text='Grid: '+ str(round(usrgridnum,1)), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
 
-        btns_top = [place, placeval, gen, genval, usrgrid, gridnum, cs, csval, hs, hsval]
+
+        btns_top = [place, placeval, gen, genval, usrgrid, cs, csval, hs, hsval]
         for btn in btns_top:
             top_buttons.add_widget(btn)
 
@@ -818,7 +844,7 @@ class GameApp(App):
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
         high_score_label = Label(text="", font_name='Roboto', bold=True, font_size=36, color=[1,.25,0,1])
         final_score_label = Label(text=(""), font_name='Roboto', bold=True, font_size=36)
-        play_again = Button(text="Play Again", font_size=42,font_name='joystix', size_hint_y=.5, on_press=partial(self.trigger_game_mode, game_end,cells, grid,adratval, csval, genval, placeval, hsval, btn_sett))
+        play_again = Button(text="Play Again", font_size=42,font_name='joystix', size_hint_y=.5, on_press=partial(self.trigger_game_mode, game_end,cells, grid, csval, genval, placeval, hsval, btn_sett))
         end_layout.add_widget(high_score_label)
         end_layout.add_widget(final_score_label)
         end_layout.add_widget(play_again)
@@ -826,14 +852,14 @@ class GameApp(App):
         # setup main menu buttons
         playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns,grid, cells,placeval,genval,btn_sett))
 
-        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid,adratval, csval, genval, placeval, hsval,btn_sett))
-        # cells.bind(a_d_ratio=partial(self.update_score, cells, adrat, cs,place))
-        cells.bind(generations=partial(self.update_game, cells, adratval, csval,placeval,genval, game_end))
-        cells.bind(spawn_count=partial(self.update_game, cells, adratval, csval, placeval, genval, game_end))
-        cells.bind(all_activated=partial(self.update_game, cells, adratval, csval, placeval, genval, game_end))
+        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid, csval, genval, placeval, hsval,btn_sett))
+        # cells.bind(a_d_ratio=partial(self.update_score, cells, cs,place))
+        cells.bind(generations=partial(self.update_game, cells, csval,placeval,genval, game_end))
+        cells.bind(spawn_count=partial(self.update_game, cells, csval, placeval, genval, game_end))
+        cells.bind(all_activated=partial(self.update_game, cells, csval, placeval, genval, game_end))
         cells.bind(spawn_adder=cells.add_spawns)
-        start_patterns.bind(on_open=partial(self.reset_labels, adratval, csval, genval, placeval, hsval,cells))
-        restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game,adratval, csval, genval, placeval,hsval))
+        start_patterns.bind(on_open=partial(self.reset_labels, csval, genval, placeval, hsval,cells))
+        restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game, csval, genval, placeval,hsval))
 
         game_end.bind(on_open=partial(self.update_score_labels, play_again, final_score_label,high_score_label, cells))
         game_end.bind(on_dismiss=partial(self.unscheduleit, play_again))
@@ -852,7 +878,7 @@ class GameApp(App):
             'Lonely': 1,
             'Crowded': 4,
             'Born': 3,
-            'Color': 'White',
+            'Color': 'Random',
             'Music': 1,
             })
         config_file = self.get_application_config()
