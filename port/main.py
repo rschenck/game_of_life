@@ -240,8 +240,9 @@ class Cells(Widget):
     def update_canvas_objects(self,*largs):
         if self.game_mode:
             if not bool(self.changes_dict) and not self.spawn_count:
-                self.game_over_message = "         Out of moves!\n" + "Use your spawns wisely."
-                self.game_over = True
+                if self.generations > 0:
+                    self.game_over_message = "         Out of moves!\n" + "Use your spawns wisely."
+                    self.game_over = True
 
 
         plus, minus = 0,0
