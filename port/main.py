@@ -30,10 +30,10 @@ from random import uniform
 from settings_options import settings_json
 from presets import presets
 
-# def dump(obj):
-#     for attr in dir(obj):
-#         print "obj.%s = %s" % (attr, getattr(obj, attr))
-#         pass
+def dump(obj):
+    for attr in dir(obj):
+        print "obj.%s = %s" % (attr, getattr(obj, attr))
+        pass
 cellsize = 10
 v_border = (0,0)
 h_border = (0,0)
@@ -437,11 +437,111 @@ class Cells(Widget):
         info1 = '''Rules:\n      If a cell has 0-1 neighbors, it dies.\n      If a cell has 4 or more neighbors, it dies.\n      If a cell has 2-3 neighbors, it survives.\n      If a space is surrounded by 3 neighbors, a cell is born.\n\n'''
         info2 = '''Controls:\n      Click or draw to add cells.\n       Modify the default rules and more in settings.\n'''
         info3 = '''\nCreated by:\n      Steven Lee-Kramer\n      Ryan O Schenck'''
+        text_info = Label(text=''.join([info1,info2,info3]),font_size=mysize)
+
+        content = BoxLayout()
+        content.add_widget(Label(text=''.join([info1,info2,info3]),font_size=mysize))
+        
+        tutorial_btn = Button(text='Tutorial', size_hint_x=.2, size_hint_y=.1)
+        # tutorial_btn.bind(on_press=self.tutorial_main)
+        content.add_widget(tutorial_btn)
+
         popup = Popup(title="John Conway's Game of Life", separator_height=0, title_size=titlesize,
-            content=Label(text=''.join([info1,info2,info3]),font_size=mysize),
-            size_hint=(.8, .8),title_align='center',)
+            content=content, size_hint=(.8, .8),title_align='center',)
+        tutorial_btn.bind(on_press=partial(self.tutorial_main, popup))
         popup.bind(on_dismiss=partial(self.music_control, 'main', True, True))
         self.music_control('options', True, True)
+        popup.open()
+
+    def tutorial_main(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+        self.main_menu.open()
+
+        playground = '''Playground mode lets you change the game!\n\nCompete in game mode against yourself or others on twitter!\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout(pos_hint={'center':1,'center':1})
+        content.add_widget(choose_mode)
+        
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.2)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Main Menu", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.9, .3),title_align='center', auto_dismiss=False, background_color=[0,0,0,.2])
+        next_btn.bind(on_press=self.main_menu.dismiss)
+        next_btn.bind(on_release=partial(self.tutorial_bottom, popup))
+        popup.open()
+
+    def tutorial_bottom(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+        playground = '''Here you have the main controls\n\nStop, Start, Step, Reset\n\nYou can only change the rules in playground mode!\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout()
+        content.add_widget(choose_mode)
+        
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.1)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Bottom Bar", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.7, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+        # next_btn.bind(on_press=self.main_menu.dismiss)
+        next_btn.bind(on_release=partial(popup.dismiss, popup))
+        next_btn.bind(on_release=partial(self.tutorial_grid, popup))
+        popup.open()
+
+    def tutorial_grid(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+        playground = '''Click to add a single spawn.\n\nDrag your finger to add multiple spawns.\n\nYou can do this before or during play.\n\nBe aware that a cell by itself will die!\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout()
+        content.add_widget(choose_mode)
+        
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.1)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Main play area", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.7, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+        # next_btn.bind(on_press=self.main_menu.dismiss)
+        next_btn.bind(on_release=partial(popup.dismiss, popup))
+        next_btn.bind(on_release=partial(self.tutorial_grid, popup))
         popup.open()
 
     def loadimg(self, events, *largs):
