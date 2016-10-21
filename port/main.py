@@ -139,8 +139,6 @@ class Cells(Widget):
         modal.dismiss()
 
 
-
-
     # Setup functions
     def determine_borders(self,*largs):
         width,height = Window.width, Window.height - 100
@@ -636,7 +634,7 @@ class Cells(Widget):
         next_btn.bind(on_press=partial(self.main_menu.open, popup))
         popup.open()
 
-    def loadimg(self, events, *largs):
+    def loadimg(self, events, first_timer, *largs):
         
         content = Image(source='IMO_GOL2.png')
         popup = Popup(title='', content=content,
@@ -646,11 +644,16 @@ class Cells(Widget):
               background_color=[0,0,0,1])
         content.bind(on_touch_down=popup.dismiss)
         
-        popup.bind(on_dismiss=self.open_main_menu)
+
+        popup.bind(on_dismiss=partial(self.open_main_menu, first_timer))
         popup.open()
 
-    def open_main_menu(self,*largs):
-        Clock.schedule_once(self.main_menu.open,0)
+    def open_main_menu(self, first_timer ,*largs):
+        if first_timer.exists('tutorial'):
+            Clock.schedule_once(self.main_menu.open,0)
+        else:
+            first_timer.put('tutorial', done=True)
+            Clock.schedule_once(self.tutorial_main,0)
 
     def stop(self, *largs):
         try:
@@ -869,11 +872,11 @@ class GameApp(App):
         data_dir = getattr(self, 'user_data_dir')
         self.highscorejson = JsonStore(join(data_dir, 'highscore.json'))
         self.firsttimer = JsonStore(join(data_dir, 'tutorial.json'))
-        if self.firsttimer.exists('tutorial'):
-            runtutorial = bool(self.firsttimer.get('tutorial')['done'])
-        else:
-            self.firsttimer.put('tutorial', done=True)
-            runtutorial = False
+        # if self.firsttimer.exists('tutorial'):
+        #     runtutorial = bool(self.firsttimer.get('tutorial')['done'])
+        # else:
+        #     self.firsttimer.put('tutorial', done=True)
+        #     runtutorial = False
         if self.highscorejson.exists('highscore'):
             self.highscore = int(self.highscorejson.get('highscore')['best'])
         # Delete this once finalized
@@ -897,7 +900,7 @@ class GameApp(App):
         cells.create_rectangles()
         # cells.draw_rectangles()
         # cells.add_instruction_groups()
-        Clock.schedule_once(partial(cells.loadimg), 0)
+        Clock.schedule_once(partial(cells.loadimg, self.events, self.firsttimer), 0)
 
         usrgridnum = cells.cellcount / 1000.0
 
