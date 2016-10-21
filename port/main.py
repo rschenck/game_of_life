@@ -247,7 +247,8 @@ class Cells(Widget):
                     self.game_over_message = "         Out of moves!\n" + "Use your spawns wisely."
                     self.game_over = True
 
-        
+        last_active_cell_count = self.active_cell_count
+
         plus, minus = 0,0
         for x_y in self.changes_dict:
             if self.changes_dict[x_y]:
@@ -267,6 +268,8 @@ class Cells(Widget):
         self.all_activated += plus
         self.spawn_adder = self.all_activated / (1000)
         self.score += (plus * self.bonus_multiplier)
+        # self.score += max(self.active_cell_count - last_active_cell_count,0) * self.bonus_multiplier
+        # print max(self.active_cell_count - last_active_cell_count,0)
         self.all_died += minus
         if not self.active_cell_count and self.game_mode:
             if self.spawn_count != 100 and self.generations > 0:
