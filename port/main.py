@@ -541,7 +541,97 @@ class Cells(Widget):
             content=content, size_hint=(.7, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
         # next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(popup.dismiss, popup))
-        next_btn.bind(on_release=partial(self.tutorial_grid, popup))
+        next_btn.bind(on_release=partial(self.tutorial_top, popup))
+        popup.open()
+
+    def tutorial_top(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+        playground = '''This area is important in game mode.\n\nStart off with 100 spawns.\n\nGain more spawns by scoring!\n\nYou have 500 generations to score\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout()
+        content.add_widget(choose_mode)
+        
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.1)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Top Bar", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.7, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+        # next_btn.bind(on_press=self.main_menu.dismiss)
+        next_btn.bind(on_release=partial(popup.dismiss, popup))
+        next_btn.bind(on_release=partial(self.tutorial_score, popup))
+        popup.open()
+
+    def tutorial_score(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+        playground = '''Earn points with the more cells you have!\n\nFind the best patterns to get the highest score.\n\nTake a screenshot when you're done and upload to twitter using #GOLapp\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout()
+        content.add_widget(choose_mode)
+        
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.1)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Your Score", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.95, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+        # next_btn.bind(on_press=self.main_menu.dismiss)
+        next_btn.bind(on_release=partial(popup.dismiss, popup))
+        next_btn.bind(on_release=partial(self.tutorial_end, popup))
+        popup.open()
+
+    def tutorial_end(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+        playground = '''If you like it, go give us a 5 star rating!\n\nGo back through the tutorial by clicking info.\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout()
+        content.add_widget(choose_mode)
+        
+        next_btn = Button(text='Play', size_hint_x=.2, size_hint_y=.1)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Have Fun!", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.7, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+        # next_btn.bind(on_press=self.main_menu.dismiss)
+        next_btn.bind(on_release=partial(popup.dismiss, popup))
+        next_btn.bind(on_press=partial(self.main_menu.open, popup))
         popup.open()
 
     def loadimg(self, events, *largs):
