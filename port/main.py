@@ -30,10 +30,10 @@ from random import uniform
 from settings_options import settings_json
 from presets import presets
 
-def dump(obj):
-    for attr in dir(obj):
-        print "obj.%s = %s" % (attr, getattr(obj, attr))
-        pass
+# def dump(obj):
+#     for attr in dir(obj):
+#         print "obj.%s = %s" % (attr, getattr(obj, attr))
+#         pass
 cellsize = 10
 v_border = (0,0)
 h_border = (0,0)
@@ -89,6 +89,7 @@ class Cells(Widget):
     accept_touches = False # Avoid sticky cell from intial click/move
     all_activated = NumericProperty(0)
     score = NumericProperty(0)
+    old_mech = NumericProperty(0)
     bonus_multiplier = 1
     spawn_count = NumericProperty(100)
     generations = NumericProperty(500)
@@ -267,9 +268,10 @@ class Cells(Widget):
         self.changes_dict.clear()
         self.all_activated += plus
         self.spawn_adder = self.all_activated / (1000)
-        # self.score += (plus * self.bonus_multiplier)
-        self.score += max(self.active_cell_count - last_active_cell_count,0) * self.bonus_multiplier
-        # print max(self.active_cell_count - last_active_cell_count,0)
+        # self.score += (plus *self.bonus_multiplier)
+        self.score += ((max(self.active_cell_count - last_active_cell_count,0) * 0.7) + (plus * 0.3)) * self.bonus_multiplier * 10
+        # print str(((max(self.active_cell_count - last_active_cell_count,0) * 0.7) + (plus * 0.3)) * self.bonus_multiplier * 10)
+
         self.all_died += minus
         if not self.active_cell_count and self.game_mode:
             if self.spawn_count != 100 and self.generations > 0:
@@ -350,6 +352,7 @@ class Cells(Widget):
         self.active_cell_count = 0
         self.spawn_count = 100
         self.score = 0
+        self.old_mech = 0
         self.bonus_multiplier = 1
         self.game_over_message = "You've done better!"
 
@@ -482,12 +485,12 @@ class Cells(Widget):
         content = BoxLayout(pos_hint={'center':1,'center':1})
         content.add_widget(choose_mode)
         
-        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.2)
-
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
+        dump(next_btn)
         content.add_widget(next_btn)
 
         popup = Popup(title="Main Menu", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.9, .3),title_align='center', auto_dismiss=False, background_color=[0,0,0,.2])
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, background_color=[0,0,0,.2])
         next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(self.tutorial_bottom, popup))
         popup.open()
@@ -511,12 +514,12 @@ class Cells(Widget):
         content = BoxLayout()
         content.add_widget(choose_mode)
         
-        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.1)
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
 
         popup = Popup(title="Bottom Bar", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.7, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
         # next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(popup.dismiss, popup))
         next_btn.bind(on_release=partial(self.tutorial_grid, popup))
@@ -541,12 +544,12 @@ class Cells(Widget):
         content = BoxLayout()
         content.add_widget(choose_mode)
         
-        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.1)
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
 
         popup = Popup(title="Main play area", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.7, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
         # next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(popup.dismiss, popup))
         next_btn.bind(on_release=partial(self.tutorial_top, popup))
@@ -571,12 +574,12 @@ class Cells(Widget):
         content = BoxLayout()
         content.add_widget(choose_mode)
         
-        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.1)
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
 
         popup = Popup(title="Top Bar", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.7, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
         # next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(popup.dismiss, popup))
         next_btn.bind(on_release=partial(self.tutorial_score, popup))
@@ -601,12 +604,12 @@ class Cells(Widget):
         content = BoxLayout()
         content.add_widget(choose_mode)
         
-        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.1)
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
 
         popup = Popup(title="Your Score", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.95, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
         # next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(popup.dismiss, popup))
         next_btn.bind(on_release=partial(self.tutorial_end, popup))
@@ -631,7 +634,7 @@ class Cells(Widget):
         content = BoxLayout()
         content.add_widget(choose_mode)
         
-        next_btn = Button(text='Play', size_hint_x=.2, size_hint_y=.1)
+        next_btn = Button(text='Play', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
 
