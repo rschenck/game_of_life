@@ -116,6 +116,8 @@ class Cells(Widget):
             self.music_control('main', True, True)
             pass
 
+
+
     def place_pattern(self, modal, selection, *largs):
         self.setup_cells()
 
@@ -199,8 +201,6 @@ class Cells(Widget):
         if on_request:
             self.canvas.ask_update()
 
-
-
     # add the starting rectangles to the board
     def starting_cells(self, *largs):
         # self.draw_rectangles()
@@ -211,15 +211,19 @@ class Cells(Widget):
         self.should_draw = True
         self.accept_touches = True # Only first time matters
 
-
-
     # game logic for each iteration
     def get_cell_changes(self, *largs):
         for x in range(0,int(self.dimensions[0]/cellsize)):
             for y in range(0,int(self.dimensions[1]/cellsize)):
-                over_x,over_y = (x + 1) % (self.dimensions[0]/cellsize), (y + 1) % (self.dimensions[1]/cellsize)
-                bel_x, bel_y = (x - 1) % (self.dimensions[0]/cellsize), (y - 1) % (self.dimensions[1]/cellsize)
+                # With wrap-around
+                # over_x,over_y = (x + 1) % (self.dimensions[0]/cellsize), (y + 1) % (self.dimensions[1]/cellsize)
+                # bel_x, bel_y = (x - 1) % (self.dimensions[0]/cellsize), (y - 1) % (self.dimensions[1]/cellsize)
+                # w/o wrap-around
+                over_x,over_y = (x + 1) , (y + 1)
+                bel_x, bel_y = (x - 1) , (y - 1)
+                
                 alive_neighbors = self.on_board[bel_x,bel_y]['alive'] + self.on_board[bel_x,y]['alive'] + self.on_board[bel_x,over_y]['alive'] + self.on_board[x,bel_y]['alive'] + self.on_board[x,over_y]['alive'] + self.on_board[over_x,bel_y]['alive'] + self.on_board[over_x,y]['alive'] + self.on_board[over_x,over_y]['alive']
+
 
                 if self.on_board[x,y]['alive']:
                     if (int(self.lonely) >= alive_neighbors or alive_neighbors >= int(self.crowded)):
@@ -231,6 +235,7 @@ class Cells(Widget):
                         self.changes_dict[x,y] = 1
                     else:
                         pass
+                
 
 
 
@@ -242,7 +247,7 @@ class Cells(Widget):
                     self.game_over_message = "         Out of moves!\n" + "Use your spawns wisely."
                     self.game_over = True
 
-
+        
         plus, minus = 0,0
         for x_y in self.changes_dict:
             if self.changes_dict[x_y]:
