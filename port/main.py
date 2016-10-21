@@ -466,7 +466,9 @@ class Cells(Widget):
         except:
             pass
 
+        
         self.main_menu.open()
+        
 
         playground = '''Playground mode lets you change the game!\n\nCompete in game mode against yourself or others on twitter!\n'''
         choose_mode = Label(text=playground, font_size=mysize)
@@ -635,6 +637,7 @@ class Cells(Widget):
         popup.open()
 
     def loadimg(self, events, *largs):
+        
         content = Image(source='IMO_GOL2.png')
         popup = Popup(title='', content=content,
               auto_dismiss=False, separator_height=0,title_size=0, separator_color=[0.,0.,0.,0.], size=(Window.height,Window.width),
@@ -642,6 +645,7 @@ class Cells(Widget):
               background='black_thing.png',
               background_color=[0,0,0,1])
         content.bind(on_touch_down=popup.dismiss)
+        
         popup.bind(on_dismiss=self.open_main_menu)
         popup.open()
 
@@ -864,6 +868,12 @@ class GameApp(App):
         self.use_kivy_settings = False
         data_dir = getattr(self, 'user_data_dir')
         self.highscorejson = JsonStore(join(data_dir, 'highscore.json'))
+        self.firsttimer = JsonStore(join(data_dir, 'tutorial.json'))
+        if self.firsttimer.exists('tutorial'):
+            runtutorial = bool(self.firsttimer.get('tutorial')['done'])
+        else:
+            self.firsttimer.put('tutorial', done=True)
+            runtutorial = False
         if self.highscorejson.exists('highscore'):
             self.highscore = int(self.highscorejson.get('highscore')['best'])
         # Delete this once finalized
@@ -887,7 +897,7 @@ class GameApp(App):
         cells.create_rectangles()
         # cells.draw_rectangles()
         # cells.add_instruction_groups()
-        Clock.schedule_once(cells.loadimg, 0)
+        Clock.schedule_once(partial(cells.loadimg), 0)
 
         usrgridnum = cells.cellcount / 1000.0
 
@@ -1043,9 +1053,11 @@ class GameApp(App):
         end_layout.add_widget(play_again)
         game_end.add_widget(end_layout)
         # setup main menu buttons
-        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns,grid, cells,placeval,genval,btn_sett))
+        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns, grid, cells,placeval,genval,btn_sett))
+        
 
         game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid, csval, genval, placeval, hsval,btn_sett))
+
         # cells.bind(a_d_ratio=partial(self.update_score, cells, cs,place))
         cells.bind(generations=partial(self.update_game, cells, csval,placeval,genval, game_end))
         cells.bind(spawn_count=partial(self.update_game, cells, csval, placeval, genval, game_end))
