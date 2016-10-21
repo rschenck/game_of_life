@@ -267,8 +267,8 @@ class Cells(Widget):
         self.changes_dict.clear()
         self.all_activated += plus
         self.spawn_adder = self.all_activated / (1000)
-        self.score += (plus * self.bonus_multiplier)
-        # self.score += max(self.active_cell_count - last_active_cell_count,0) * self.bonus_multiplier
+        # self.score += (plus * self.bonus_multiplier)
+        self.score += max(self.active_cell_count - last_active_cell_count,0) * self.bonus_multiplier
         # print max(self.active_cell_count - last_active_cell_count,0)
         self.all_died += minus
         if not self.active_cell_count and self.game_mode:
