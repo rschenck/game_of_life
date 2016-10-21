@@ -486,7 +486,7 @@ class Cells(Widget):
         content.add_widget(choose_mode)
         
         next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
-        dump(next_btn)
+
         content.add_widget(next_btn)
 
         popup = Popup(title="Main Menu", separator_height=0, title_size=titlesize,
