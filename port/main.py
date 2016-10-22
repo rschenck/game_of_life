@@ -71,12 +71,29 @@ class Cells(Widget):
     allcols = {
     'White': (0,0,1),
     'Grey': (0,0,0.25),
-    'Blue': (0.6666,1,1),
+    'Blue': (0.638888,1,1),
     'Green': (0.3333,1,1),
     'Black':(0,0,0),
-    'Red': (1,1,1)
+    'Red': (1,1,1),
+    'Orange': (0.06388,1,1),
+    'Yellow': (.16666,1,1),
+    'Pink': (0.872222,1,1),
+    'Purple': (0.76111,.8,.7),
+    'Cyan': (0.5,1,.9)
     }
 
+    speeds = {
+    "Max Speed": 0.0,
+    "Very Fast": 0.01,
+    "Faster": 0.03,
+    "Fast": 0.05,
+    "Above Average": 0.07,
+    "Average": 0.1,
+    "Slow": 0.15,
+    "Slower": 0.25,
+    "Very Slow": 0.5,
+    "Min Speed": 1.
+    }
     dimensions = None # Use this instead of self.size, which resets each frame
     rectangles_dict = {}
     def default_cells():
@@ -89,7 +106,7 @@ class Cells(Widget):
     accept_touches = False # Avoid sticky cell from intial click/move
     all_activated = NumericProperty(0)
     score = NumericProperty(0)
-    old_mech = NumericProperty(0)
+    # old_mech = NumericProperty(0)
     bonus_multiplier = 1
     spawn_count = NumericProperty(100)
     generations = NumericProperty(500)
@@ -102,7 +119,7 @@ class Cells(Widget):
     main_menu = None
     cellcount = 0
     game_over_message = "You've done better!"
-
+    wrap = 0
     # Starting Patterns
     # Each will:
     # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -171,7 +188,7 @@ class Cells(Widget):
                 color = Color(0,0,0,mode="hsv")
                 self.rectangles_dict[x,y] = {"rect":rect,"color":color}
                 self.cellcount += 1
-
+        print round(self.cellcount / 1000.,2)
     # def add_instruction_groups(self, *largs):
     #     # self.canvas.add(self.alive_color_instruction)
     #     self.canvas.add(self.alive_cell_instructions)
@@ -217,12 +234,14 @@ class Cells(Widget):
         for x in range(0,int(self.dimensions[0]/cellsize)):
             for y in range(0,int(self.dimensions[1]/cellsize)):
                 # With wrap-around
-                # over_x,over_y = (x + 1) % (self.dimensions[0]/cellsize), (y + 1) % (self.dimensions[1]/cellsize)
-                # bel_x, bel_y = (x - 1) % (self.dimensions[0]/cellsize), (y - 1) % (self.dimensions[1]/cellsize)
+                if self.wrap:
+                    over_x,over_y = (x + 1) % (self.dimensions[0]/cellsize), (y + 1) % (self.dimensions[1]/cellsize)
+                    bel_x, bel_y = (x - 1) % (self.dimensions[0]/cellsize), (y - 1) % (self.dimensions[1]/cellsize)
                 # w/o wrap-around
-                over_x,over_y = (x + 1) , (y + 1)
-                bel_x, bel_y = (x - 1) , (y - 1)
-                
+                else:
+                    over_x,over_y = (x + 1) , (y + 1)
+                    bel_x, bel_y = (x - 1) , (y - 1)
+
                 alive_neighbors = self.on_board[bel_x,bel_y]['alive'] + self.on_board[bel_x,y]['alive'] + self.on_board[bel_x,over_y]['alive'] + self.on_board[x,bel_y]['alive'] + self.on_board[x,over_y]['alive'] + self.on_board[over_x,bel_y]['alive'] + self.on_board[over_x,y]['alive'] + self.on_board[over_x,over_y]['alive']
 
 
@@ -236,7 +255,7 @@ class Cells(Widget):
                         self.changes_dict[x,y] = 1
                     else:
                         pass
-                
+
 
 
 
@@ -303,7 +322,7 @@ class Cells(Widget):
         if len(events) > 0:
             events[-1].cancel()
             events.pop()
-        events.append(Clock.schedule_interval(self.update_cells,float(self.speed)))
+        events.append(Clock.schedule_interval(self.update_cells,self.speed))
 
     def stop_interval(self, events, *largs):
         self.should_draw = True
@@ -352,7 +371,7 @@ class Cells(Widget):
         self.active_cell_count = 0
         self.spawn_count = 100
         self.score = 0
-        self.old_mech = 0
+        # self.old_mech = 0
         self.bonus_multiplier = 1
         self.game_over_message = "You've done better!"
 
@@ -450,7 +469,7 @@ class Cells(Widget):
 
         content = BoxLayout()
         content.add_widget(Label(text=''.join([info1,info2,info3]),font_size=mysize))
-        
+
         tutorial_btn = Button(text='Tutorial', size_hint_x=.2, size_hint_y=.1)
         # tutorial_btn.bind(on_press=self.tutorial_main)
         content.add_widget(tutorial_btn)
@@ -475,16 +494,16 @@ class Cells(Widget):
         except:
             pass
 
-        
+
         self.main_menu.open()
-        
+
 
         playground = '''Playground mode lets you change the game!\n\nCompete in game mode against yourself or others on twitter!\n'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout(pos_hint={'center':1,'center':1})
         content.add_widget(choose_mode)
-        
+
         next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
@@ -513,7 +532,7 @@ class Cells(Widget):
 
         content = BoxLayout()
         content.add_widget(choose_mode)
-        
+
         next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
@@ -543,7 +562,7 @@ class Cells(Widget):
 
         content = BoxLayout()
         content.add_widget(choose_mode)
-        
+
         next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
@@ -573,7 +592,7 @@ class Cells(Widget):
 
         content = BoxLayout()
         content.add_widget(choose_mode)
-        
+
         next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
@@ -603,7 +622,7 @@ class Cells(Widget):
 
         content = BoxLayout()
         content.add_widget(choose_mode)
-        
+
         next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
@@ -633,7 +652,7 @@ class Cells(Widget):
 
         content = BoxLayout()
         content.add_widget(choose_mode)
-        
+
         next_btn = Button(text='Play', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
@@ -646,7 +665,7 @@ class Cells(Widget):
         popup.open()
 
     def loadimg(self, events, first_timer, *largs):
-        
+
         content = Image(source='IMO_GOL2.png')
         popup = Popup(title='', content=content,
               auto_dismiss=False, separator_height=0,title_size=0, separator_color=[0.,0.,0.,0.], size=(Window.height,Window.width),
@@ -654,7 +673,7 @@ class Cells(Widget):
               background='black_thing.png',
               background_color=[0,0,0,1])
         content.bind(on_touch_down=popup.dismiss)
-        
+
 
         popup.bind(on_dismiss=partial(self.open_main_menu, first_timer))
         popup.open()
@@ -776,6 +795,7 @@ class GameApp(App):
 
 
         if cells.generations == 0 or cells.game_over:
+            print cells.all_activated, cells.all_died
             cells.stop_interval(self.events)
             cells.music_control('score', True, True)
             game_end.open()
@@ -827,6 +847,7 @@ class GameApp(App):
         self.game_cells.crowded = 4
         self.game_cells.birth = 3
         self.game_cells.speed = 0.05
+        self.game_cells.wrap = 0
         main_menu.dismiss()
         cells.reset_counters()
         cells.game_mode = True
@@ -835,13 +856,15 @@ class GameApp(App):
 
     def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, genval,btn_sett, *largs):
         btn_sett.background_down = 'bttn_dn.png'
-        btn_sett.text = "Options"
+        btn_sett.text = "Settings"
         btn_sett.disabled = False
         cells.reset_counters()
         for item in self.config._sections:
             for x in self.config._sections[item]:
+                if x == 'wrap':
+                    self.game_cells.wrap = int(self.config._sections[item][x])
                 if x == 'speed':
-                    self.game_cells.speed = self.config._sections[item][x]
+                    self.game_cells.speed = self.game_cells.speeds[self.config._sections[item][x]]
                 if x == 'born':
                     self.game_cells.birth = self.config._sections[item][x]
                 if x == 'lonely':
@@ -883,11 +906,6 @@ class GameApp(App):
         data_dir = getattr(self, 'user_data_dir')
         self.highscorejson = JsonStore(join(data_dir, 'highscore.json'))
         self.firsttimer = JsonStore(join(data_dir, 'tutorial.json'))
-        # if self.firsttimer.exists('tutorial'):
-        #     runtutorial = bool(self.firsttimer.get('tutorial')['done'])
-        # else:
-        #     self.firsttimer.put('tutorial', done=True)
-        #     runtutorial = False
         if self.highscorejson.exists('highscore'):
             self.highscore = int(self.highscorejson.get('highscore')['best'])
         # Delete this once finalized
@@ -1008,16 +1026,16 @@ class GameApp(App):
 
 
 # game buttons
-        btn_start = Button(text='START', font_name='joystix' ,on_press=partial(cells.start_interval, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
-        btn_stop = Button(text='Stop', font_name='joystix' ,on_press=partial(cells.stop_interval, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
-        btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_start = Button(text='START', font_name='joystix' ,on_press=partial(cells.start_interval, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_stop = Button(text='Stop', font_name='joystix' ,on_press=partial(cells.stop_interval, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_reset = Button(text='Reset', font_name='joystix' ,
-                           on_press=restart_game.open, background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+                           on_press=restart_game.open,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_reset.bind(on_press=partial(cells.stop_interval, self.events))
-        btn_place = Button(text='Place', font_name='joystix' , on_press=partial(cells.place_option, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='test.png')
+        # btn_place = Button(text='Place', font_name='joystix' , on_press=partial(cells.place_option, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='test.png')
         # dump(btn_place)
-        btn_sett = Button(text='Options', font_name='joystix' ,on_press=partial(self.settings, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
-        btn_info = Button(text='Info', font_name='joystix' ,on_press=partial(cells.info, self.events), background_down='black_thing.png', background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_sett = Button(text='Settings', font_name='joystix' ,on_press=partial(self.settings, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_info = Button(text='Info', font_name='joystix' ,on_press=partial(cells.info, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
@@ -1068,7 +1086,7 @@ class GameApp(App):
         game_end.add_widget(end_layout)
         # setup main menu buttons
         playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns, grid, cells,placeval,genval,btn_sett))
-        
+
 
         game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid, csval, genval, placeval, hsval,btn_sett))
 
@@ -1094,7 +1112,8 @@ class GameApp(App):
 
     def build_config(self, config):
         config.setdefaults('initiate', {
-            'Speed': 0.05,
+            'Wrap': 0,
+            'Speed': 'Fast',
             'Lonely': 1,
             'Crowded': 4,
             'Born': 3,
@@ -1105,8 +1124,10 @@ class GameApp(App):
         config.read(config_file)
         for item in config._sections:
             for x in config._sections[item]:
+                if x == 'wrap':
+                    Cells.wrap = int(config._sections[item][x])
                 if x == 'speed':
-                    Cells.speed = config._sections[item][x]
+                    Cells.speed = Cells.speeds[config._sections[item][x]]
                 if x == 'color':
                     Cells.cellcol = config._sections[item][x]
                 if x == 'born':
@@ -1119,14 +1140,17 @@ class GameApp(App):
                     Cells.music = config._sections[item][x]
 
 
+
     def build_settings(self, settings):
         settings.register_type('scrolloptions', SettingScrollOptions)
         settings.add_json_panel('Game Settings', self.config, data=settings_json)
 
 
     def on_config_change(self, config, section, key, value):
+        if key == 'Wrap':
+            self.game_cells.wrap = int(value)
         if key == 'Speed':
-            self.game_cells.speed = float(value)
+            self.game_cells.speed = self.game_cells.speeds[value]
         if key == 'Color':
             self.game_cells.cellcol = value
             self.game_cells.set_canvas_color()
