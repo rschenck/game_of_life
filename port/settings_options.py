@@ -13,7 +13,7 @@ settings_json = json.dumps([
     {
     'type': 'scrolloptions',
     'title': 'Speed of game',
-    'desc': 'Adjust the speed of the game in seconds. (Default = 0.1)',
+    'desc': 'Adjust the speed of the game in seconds. (Default = Fast)',
     'section': 'initiate',
     'key': 'Speed',
     'options': ['Max Speed',

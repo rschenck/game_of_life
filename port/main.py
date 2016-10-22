@@ -188,7 +188,7 @@ class Cells(Widget):
                 color = Color(0,0,0,mode="hsv")
                 self.rectangles_dict[x,y] = {"rect":rect,"color":color}
                 self.cellcount += 1
-        print round(self.cellcount / 1000.,2)
+        # print round(self.cellcount / 1000.,2)
     # def add_instruction_groups(self, *largs):
     #     # self.canvas.add(self.alive_color_instruction)
     #     self.canvas.add(self.alive_cell_instructions)
@@ -463,7 +463,7 @@ class Cells(Widget):
 
         # info0 = '''Game modes:\n   Select Playground Mode or Game Mode.\n    The playground has unlimited cells!\n    Change the colors!\n    Change the rules!\n'''
         info1 = '''Rules:\n      If a cell has 0-1 neighbors, it dies.\n      If a cell has 4 or more neighbors, it dies.\n      If a cell has 2-3 neighbors, it survives.\n      If a space is surrounded by 3 neighbors, a cell is born.\n\n'''
-        info2 = '''Controls:\n      Click or draw to add cells.\n       Modify the default rules and more in settings.\n'''
+        info2 = '''Controls:\n      Click or draw to add cells.\n      Modify the default rules and more in settings.\n'''
         info3 = '''\nCreated by:\n      Steven Lee-Kramer\n      Ryan O Schenck'''
         text_info = Label(text=''.join([info1,info2,info3]),font_size=mysize)
 
