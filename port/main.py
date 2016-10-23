@@ -325,6 +325,7 @@ class Cells(Widget):
         events.append(Clock.schedule_interval(self.update_cells,self.speed))
 
     def stop_interval(self, events, *largs):
+        # print(events)
         self.should_draw = True
         if len(events) > 0:
             events[-1].cancel()
@@ -480,6 +481,8 @@ class Cells(Widget):
         popup.bind(on_dismiss=partial(self.music_control, 'main', True, True))
         self.music_control('options', True, True)
         popup.open()
+        self.stop_interval(events)
+
 
     def tutorial_main(self, popup, *largs):
         if Window.width < Window.height:
@@ -795,7 +798,7 @@ class GameApp(App):
 
 
         if cells.generations == 0 or cells.game_over:
-            print cells.all_activated, cells.all_died
+            # print cells.all_activated, cells.all_died
             cells.stop_interval(self.events)
             cells.music_control('score', True, True)
             game_end.open()
