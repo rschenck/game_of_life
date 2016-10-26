@@ -123,7 +123,7 @@ class Cells(Widget):
     ever_was_alive = 0
     non_positive_gens = 10
     events = []
-    stop = False
+    stop_iteration = False
     prevent_update = False
     # Starting Patterns
     # Each will:
@@ -358,7 +358,7 @@ class Cells(Widget):
             self.non_positive_gens -= 1
         else:
             self.non_positive_gens = 10
-            if not self.stop:
+            if not self.stop_iteration:
                 self.start_interval()
         if self.game_mode:
             self.check_game_over()
@@ -389,7 +389,7 @@ class Cells(Widget):
             self.get_cell_changes()
             if self.game_mode == 2:
                 self.update_canvas_survival()
-                if self.non_positive_gens < 5 and not self.stop:
+                if self.non_positive_gens < 5 and not self.stop_iteration:
                     self.step(1.)
             else:
                 self.update_canvas_objects()
@@ -419,7 +419,7 @@ class Cells(Widget):
 
 
     def start_interval(self, *largs):
-        self.stop = False
+        self.stop_iteration = False
         self.should_draw = False
         if len(self.events) > 0:
             self.events[-1].cancel()
@@ -427,7 +427,7 @@ class Cells(Widget):
         self.events.append(Clock.schedule_interval(self.update_cells,self.speed))
 
     def stop_interval(self, *largs):
-        self.stop = True
+        self.stop_iteration = True
         self.prevent_update = True
         self.should_draw = True
         if len(self.events) > 0:
@@ -436,7 +436,7 @@ class Cells(Widget):
 
     def step(self, interval, from_button=False,*largs):
         if from_button:
-            self.stop = True
+            self.stop_iteration = True
             self.prevent_update = False
         self.should_draw = True
         if len(self.events) > 0:
@@ -458,7 +458,7 @@ class Cells(Widget):
         self.canvas.clear()
         self.setup_cells()
         self.game_over = False
-        self.stop = False
+        self.stop_iteration = False
         self.prevent_update = False
         if modal:
             modal.open()
@@ -815,7 +815,7 @@ class Cells(Widget):
             first_timer.put('tutorial', done=True)
             Clock.schedule_once(self.tutorial_main,0)
 
-    def stop(self, *largs):
+    def stop_music(self, *largs):
         try:
             sound.stop()
         except:
@@ -1309,7 +1309,7 @@ class GameApp(App):
                 if x == 'crowded':
                     Cells.crowded = config._sections[item][x]
                 if x == 'music':
-                    Cells.music = config._sections[item][x]
+                    Cells.music = int(config._sections[item][x])
 
 
 
@@ -1337,7 +1337,7 @@ class GameApp(App):
             if self.game_cells.music == 1:
                 self.game_cells.music_control('main', True, True)
             else:
-                self.game_cells.stop()
+                self.game_cells.stop_music()
         else:
             pass
         # print config, section, key, value
