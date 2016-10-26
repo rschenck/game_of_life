@@ -79,7 +79,8 @@ class Cells(Widget):
     'Yellow': (.16666,1,1),
     'Pink': (0.872222,1,1),
     'Purple': (0.76111,.8,.7),
-    'Cyan': (0.5,1,.9)
+    'Cyan': (0.5,1,.9),
+    'Stem': (0.80555,0.4,1)
     }
 
     speeds = {
@@ -110,16 +111,20 @@ class Cells(Widget):
     bonus_multiplier = 1
     spawn_count = NumericProperty(100)
     generations = NumericProperty(500)
-    all_died = NumericProperty(0)
     game_over = False
     active_cell_count = NumericProperty(0)
-    game_mode = False
+    game_mode = 0
     spawn_adder = NumericProperty(0)
     cell_color = (0,0,0)
     main_menu = None
     cellcount = 0
     game_over_message = "You've done better!"
     wrap = 0
+    ever_was_alive = 0
+    non_positive_gens = 10
+    events = []
+    stop = False
+    prevent_update = False
     # Starting Patterns
     # Each will:
     # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -158,6 +163,13 @@ class Cells(Widget):
         self.music_control('main', True, True)
         modal.dismiss()
 
+    def place_viral_cells(self, *largs):
+        for x_y in [(self.mid_x+15,self.mid_y+10),(self.mid_x+15,self.mid_y-10),(self.mid_x-15,self.mid_y+10),(self.mid_x-15,self.mid_y-10),(3,3),(3,self.dimensions[1]/cellsize -4),(self.dimensions[0]/cellsize-4,3),(self.dimensions[0]/cellsize-4,self.dimensions[1]/cellsize-4),(self.mid_x,self.mid_y)]:
+            self.rectangles_dict[x_y]['color'].hsv = self.allcols["Red"]
+            self.canvas.add(self.rectangles_dict[x_y]['color'])
+            self.canvas.add(self.rectangles_dict[x_y]['rect'])
+            self.on_board[x_y] = {'alive':-5}
+            self.ever_was_alive += 1
 
     # Setup functions
     def determine_borders(self,*largs):
@@ -188,27 +200,12 @@ class Cells(Widget):
                 color = Color(0,0,0,mode="hsv")
                 self.rectangles_dict[x,y] = {"rect":rect,"color":color}
                 self.cellcount += 1
-        # print round(self.cellcount / 1000.,2)
-    # def add_instruction_groups(self, *largs):
-    #     # self.canvas.add(self.alive_color_instruction)
-    #     self.canvas.add(self.alive_cell_instructions)
-    #     self.canvas.add(self.was_cell_instructions)
-    def draw_rectangles(self, *largs):
-        for x_y in self.rectangles_dict:
-            self.rectangles_dict[x_y]["color"].hsv = (0,0,0)
-            self.canvas.add(self.rectangles_dict[x_y]["color"])
-            self.canvas.add(self.rectangles_dict[x_y]["rect"])
-
-
 
     # set canvas_color, self.pos and cells midpoint
     def setup_cells(self, *largs):
         self.set_canvas_color()
         self.pos = (v_border[0] +1,h_border[0] +51)
         self.mid_x,self.mid_y = self.dimensions[0]/(2 * cellsize), self.dimensions[1]/(2 * cellsize)
-
-
-
 
     # assigns color instruction to canvas.before
     def set_canvas_color(self, on_request=False, *largs):
@@ -221,11 +218,12 @@ class Cells(Widget):
 
     # add the starting rectangles to the board
     def starting_cells(self, *largs):
-        # self.draw_rectangles()
         for x_y in self.on_board:
             self.rectangles_dict[x_y]["color"].hsv = self.cell_color
             self.canvas.add(self.rectangles_dict[x_y]["color"])
             self.canvas.add(self.rectangles_dict[x_y]["rect"])
+        if self.game_mode == 2:
+            self.place_viral_cells()
         self.should_draw = True
         self.accept_touches = True # Only first time matters
 
@@ -244,32 +242,50 @@ class Cells(Widget):
 
                 alive_neighbors = self.on_board[bel_x,bel_y]['alive'] + self.on_board[bel_x,y]['alive'] + self.on_board[bel_x,over_y]['alive'] + self.on_board[x,bel_y]['alive'] + self.on_board[x,over_y]['alive'] + self.on_board[over_x,bel_y]['alive'] + self.on_board[over_x,y]['alive'] + self.on_board[over_x,over_y]['alive']
 
-
-                if self.on_board[x,y]['alive']:
-                    if (int(self.lonely) >= alive_neighbors or alive_neighbors >= int(self.crowded)):
-                        self.changes_dict[x,y] = 0
-                    else:
-                        pass
+                if self.game_mode == 2:
+                    self.mark_changes_survival(x,y,alive_neighbors)
                 else:
-                    if alive_neighbors == int(self.birth):
-                        self.changes_dict[x,y] = 1
-                    else:
-                        pass
+                    self.mark_changes(x,y,alive_neighbors)
 
+    def mark_changes(self,x,y,alive_neighbors,*largs):
+        if self.on_board[x,y]['alive']:
+            if (int(self.lonely) >= alive_neighbors or alive_neighbors >= int(self.crowded)):
+                self.changes_dict[x,y] = 0
+            else:
+                pass
+        else:
+            if alive_neighbors == int(self.birth):
+                self.changes_dict[x,y] = 1
+            else:
+                pass
 
+    def mark_changes_survival(self,x,y,alive_neighbors,*largs):
+        if self.on_board[x,y]['alive'] == 9:
+            self.on_board[x,y]['survival'] -= 1
+            if self.on_board[x,y]['survival'] == 0:
+                self.changes_dict[x,y] = 0
+        elif self.on_board[x,y]['alive'] == -5:
+            if alive_neighbors >= 5:
+                self.changes_dict[x,y] = 0
+        elif self.on_board[x,y]['alive'] == 1:
+            if alive_neighbors < 0:
+                self.changes_dict[x,y] = -1
+            elif alive_neighbors in [2,3] or alive_neighbors > 8:
+                pass
+            else:
+                self.changes_dict[x,y] = 0
+        else:
+            if alive_neighbors == int(self.birth) or alive_neighbors > 8:
+                self.changes_dict[x,y] = 1
+            else:
+                pass
 
 
     # loops through changes from ^^ and adds the rectangles
     def update_canvas_objects(self,*largs):
-        if self.game_mode:
-            if not bool(self.changes_dict) and not self.spawn_count:
-                if self.generations > 0:
-                    self.game_over_message = "         Out of moves!\n" + "Use your spawns wisely."
-                    self.game_over = True
-
         last_active_cell_count = self.active_cell_count
-
         plus, minus = 0,0
+
         for x_y in self.changes_dict:
             if self.changes_dict[x_y]:
                 self.rectangles_dict[x_y]["color"].hsv = self.cell_color
@@ -284,97 +300,191 @@ class Cells(Widget):
                 self.on_board[x_y] = {'alive':0,'was':1}
                 minus += 1
                 self.active_cell_count -= 1
-        self.changes_dict.clear()
         self.all_activated += plus
         self.spawn_adder = self.all_activated / (1000)
-        # self.score += (plus *self.bonus_multiplier)
         self.score += ((max(self.active_cell_count - last_active_cell_count,0) * 0.7) + (plus * 0.3)) * self.bonus_multiplier * 10
-        # print str(((max(self.active_cell_count - last_active_cell_count,0) * 0.7) + (plus * 0.3)) * self.bonus_multiplier * 10)
 
-        self.all_died += minus
-        if not self.active_cell_count and self.game_mode:
+        if self.game_mode:
+            self.check_game_over()
+        self.changes_dict.clear()
+
+    def update_canvas_survival(self,*largs):
+        last_active_cell_count = self.active_cell_count
+        plus = 0
+        for x_y in self.changes_dict:
+            if self.changes_dict[x_y] == 2:
+                self.rectangles_dict[x_y]["color"].hsv = self.allcols["Stem"]
+                self.on_board[x_y]['alive'] = 9
+                self.on_board[x_y]['survival'] = 15
+                plus += 1
+                self.active_cell_count += 1
+            elif self.changes_dict[x_y] == 1:
+                self.rectangles_dict[x_y]["color"].hsv = self.cell_color
+                self.on_board[x_y]['alive'] = 1
+                plus += 1
+                self.active_cell_count += 1
+            elif self.changes_dict[x_y] == -1:
+                self.rectangles_dict[x_y]["color"].hsv = self.allcols["Red"]
+                self.on_board[x_y]['alive'] = -5
+                self.on_board[x_y]['was'] = 1
+                self.active_cell_count -= 1
+            else:
+                self.rectangles_dict[x_y]["color"].hsv = self.allcols["Grey"]
+                self.on_board[x_y] = {'alive':0,'was':1}
+                self.active_cell_count -= 1
+            if not self.on_board[x_y]['was']:
+                self.canvas.add(self.rectangles_dict[x_y]["color"])
+                self.canvas.add(self.rectangles_dict[x_y]["rect"])
+                self.spawn_count += 1
+                self.ever_was_alive += 1
+        if not (self.generations % 5):
+            x_y = (randint(0,self.dimensions[0]/cellsize-1), randint(0,self.dimensions[1]/cellsize-1))
+            while self.on_board[x_y]['alive'] == -5:
+                x_y = (randint(0,self.dimensions[0]/cellsize-1), randint(0,self.dimensions[1]/cellsize-1))
+            self.rectangles_dict[x_y]["color"].hsv = self.allcols["Red"]
+            if self.on_board[x_y]['alive'] == 1:
+                self.on_board[x_y]['was'] = 1
+                self.active_cell_count -= 1
+            self.on_board[x_y]['alive'] = -5
+            if not self.on_board[x_y]['was']:
+                self.canvas.add(self.rectangles_dict[x_y]["color"])
+                self.canvas.add(self.rectangles_dict[x_y]["rect"])
+                self.ever_was_alive += 1
+        self.all_activated += plus
+        self.spawn_adder = self.all_activated / (1000)
+        bonus = self.bonus_multiplier * (int(self.active_cell_count > last_active_cell_count))
+        self.score += 1 + bonus
+        if self.active_cell_count <= last_active_cell_count:
+            self.non_positive_gens -= 1
+        else:
+            self.non_positive_gens = 10
+            if not self.stop:
+                self.start_interval()
+        if self.game_mode:
+            self.check_game_over()
+        self.changes_dict.clear()
+
+
+    def check_game_over(self,*largs):
+        if not bool(self.changes_dict) and not self.spawn_count:
+            if self.generations > 0:
+                self.game_over_message = "Out of moves!\nUse your spawns wisely."
+                self.game_over = True
+        if not self.active_cell_count:
             if self.spawn_count != 100 and self.generations > 0:
                 self.game_over = True
-                self.game_over_message = "                  Everything is dead!\n" + "Try placing cells in groups of 3 or more."
+                self.game_over_message = "All your cells are dead!\nTry placing cells in groups of 3 or more."
+        if self.game_mode == 2:
+            if self.non_positive_gens == 0:
+                self.game_over = True
+                self.game_over_message = "10 generations without population growth.\nYou must promote life!"
 
     # Our start/step scheduled function
     def update_cells(self,*largs):
-        if self.cellcol == 'Random':
-            self.set_canvas_color(on_request=True)
-        self.get_cell_changes()
-        self.update_canvas_objects()
-        self.update_counters()
+        if self.prevent_update:
+            self.prevent_update = False
+        else:
+            if self.cellcol == 'Random':
+                self.set_canvas_color(on_request=True)
+            self.get_cell_changes()
+            if self.game_mode == 2:
+                self.update_canvas_survival()
+                if self.non_positive_gens < 5 and not self.stop:
+                    self.step(1.)
+            else:
+                self.update_canvas_objects()
+            self.update_counters()
 
 
     def add_spawns(self, *largs):
-        self.spawn_count += 5
+        if self.game_mode == 2:
+            if self.ever_was_alive >= self.cellcount:
+                self.spawn_count += 10
+        else:
+            self.spawn_count += 5
 
     def update_counters(self,*largs):
-        if self.game_mode:
-            self.generations -= 1
+        if self.game_mode == 2:
+            self.generations += 1
+            if self.ever_was_alive >= self.cellcount:
+                self.bonus_multiplier = self.generations / 500
+            else:
+                self.bonus_multiplier = 0
+        else:
+            if self.game_mode == 1:
+                self.generations -= 1
+            self.bonus_multiplier = 1 + (self.active_cell_count * 30000 / pow(self.cellcount,2))
 
-        self.bonus_multiplier = 1 + (self.active_cell_count * 30000 / pow(self.cellcount,2))
 
 
 
-    def start_interval(self, events, *largs):
+    def start_interval(self, *largs):
+        self.stop = False
         self.should_draw = False
-        if len(events) > 0:
-            events[-1].cancel()
-            events.pop()
-        events.append(Clock.schedule_interval(self.update_cells,self.speed))
+        if len(self.events) > 0:
+            self.events[-1].cancel()
+            self.events.pop()
+        self.events.append(Clock.schedule_interval(self.update_cells,self.speed))
 
-    def stop_interval(self, events, *largs):
-        # print(events)
+    def stop_interval(self, *largs):
+        self.stop = True
+        self.prevent_update = True
         self.should_draw = True
-        if len(events) > 0:
-            events[-1].cancel()
-            events.pop()
+        if len(self.events) > 0:
+            self.events[-1].cancel()
+            self.events.pop()
 
-    def step(self, events, *largs):
+    def step(self, interval, from_button=False,*largs):
+        if from_button:
+            self.stop = True
+            self.prevent_update = False
         self.should_draw = True
-        if len(events) > 0:
-            events[-1].cancel()
-            events.pop()
-        Clock.schedule_once(self.update_cells, 1.0/60.0)
+        if len(self.events) > 0:
+            self.events[-1].cancel()
+            self.events.pop()
+        Clock.schedule_once(self.update_cells, interval)
 
-    def reset_interval(self, events, grid, modal,*largs):
+    def reset_interval(self, grid, modal,*largs):
         for x in largs:
             if type(x) == Popup:
                 x.dismiss()
         self.should_draw = False
-        if len(events) > 0:
-            events[-1].cancel()
-            events.pop()
+        if len(self.events) > 0:
+            self.events[-1].cancel()
+            self.events.pop()
         self.on_board.clear()
         self.changes_dict.clear()
         grid.canvas.clear()
-        # self.alive_cell_instructions.clear()
-        # self.was_cell_instructions.clear()
-        # self.was_cell_instructions.add(Color(0.25,0.25,0.25,mode='rgb'))
         self.canvas.clear()
         self.setup_cells()
         self.game_over = False
-        # self.reset_counters()
+        self.stop = False
+        self.prevent_update = False
         if modal:
             modal.open()
-            self.game_mode = False
+            self.game_mode = 0
         else:
             self.assign_blank(None)
             grid.draw_grid()
             self.starting_cells()
-            self.game_mode = True
+
 
     def reset_counters(self):
         self.all_activated = 0
-        self.all_died = 0
-        self.generations = 500
         self.active_cell_count = 0
         self.spawn_count = 100
         self.score = 0
-        # self.old_mech = 0
-        self.bonus_multiplier = 1
         self.game_over_message = "You've done better!"
+        self.spawn_adder = 0
+        if self.game_mode == 2:
+            self.generations = 1
+            self.ever_was_alive = 0
+            self.non_positive_gens = 10
+        else:
+            self.generations = 500
+            self.bonus_multiplier = 1
+
+
 
 
     # Touch Handlers
@@ -386,28 +496,14 @@ class Cells(Widget):
         pos_x = int(pos_x / cellsize)
         pos_y = int(pos_y / cellsize)
         in_bounds = (0 <= pos_x < (self.dimensions[0] / cellsize)) and (0 <= pos_y < (self.dimensions[1] / cellsize))
-        # sign_x = "+" if pos_x - self.mid_x >= 0 else ""
-        # sign_y = "+" if pos_y - self.mid_y >= 0 else ""
+
         # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")] = {'alive':1, 'was':0}"
         if self.accept_touches and in_bounds and self.spawn_count > 0:
-        # if self.accept_touches and in_bounds:
-            try:
-                if not self.on_board[pos_x,pos_y]['alive']:
-                    if self.should_draw:
-                        self.on_board[pos_x,pos_y]['alive'] = 1
-                        self.rectangles_dict[pos_x,pos_y]["color"].hsv = self.cell_color
-                        self.active_cell_count += 1
-                        if not self.on_board[pos_x,pos_y]['was']:
-                            self.canvas.add(self.rectangles_dict[pos_x,pos_y]["color"])
-                            self.canvas.add(self.rectangles_dict[pos_x,pos_y]["rect"])
-                    else:
-                        self.changes_dict[(pos_x,pos_y)] = 1
-                    if self.game_mode:
-                        self.spawn_count -= 1
-            except KeyError:
-                pass
-        else:
-            pass
+            if self.game_mode == 2:
+                self.handle_touch_survival(pos_x,pos_y)
+            else:
+                self.handle_touch(pos_x,pos_y)
+
 
     def on_touch_move(self, touch):
         self.mouse_positions.append(touch.pos)
@@ -419,28 +515,63 @@ class Cells(Widget):
 
             in_bounds = (0 <= pos_x < (self.dimensions[0] / cellsize)) and (0 <= pos_y < (self.dimensions[1] / cellsize))
 
-            # print "touch_move in bounds?", in_bounds
-            # print "pos_x, pos_y", pos_x ,",",pos_y
-            # print "canvas width and height", self.width, self.height
             # print "self.on_board[(", pos_x, ",",pos_y,")] = {'alive':1, 'was':0}"
             if self.accept_touches and in_bounds and self.spawn_count > 0:
-            # if self.accept_touches and in_bounds:
-                try:
-                    if not self.on_board[pos_x,pos_y]['alive']:
-                        if self.should_draw:
-                            self.on_board[pos_x,pos_y]['alive'] = 1
-                            self.rectangles_dict[pos_x,pos_y]["color"].hsv = self.cell_color
-                            self.active_cell_count += 1
-                            if not self.on_board[pos_x,pos_y]['was']:
-                                self.canvas.add(self.rectangles_dict[pos_x,pos_y]["color"])
-                                self.canvas.add(self.rectangles_dict[pos_x,pos_y]["rect"])
-                        else:
-                            self.changes_dict[(pos_x,pos_y)] = 1
-                        if self.game_mode:
-                            self.spawn_count -= 1
-                except KeyError:
-                    pass
+                if self.game_mode == 2:
+                    self.handle_touch_survival(pos_x,pos_y)
+                else:
+                    self.handle_touch(pos_x,pos_y)
         self.mouse_positions = []
+
+    def handle_touch(self, pos_x,pos_y,*largs):
+        try:
+            if not self.on_board[pos_x,pos_y]['alive']:
+                if self.should_draw:
+                    self.on_board[pos_x,pos_y]['alive'] = 1
+                    self.rectangles_dict[pos_x,pos_y]["color"].hsv = self.cell_color
+                    self.active_cell_count += 1
+                    if not self.on_board[pos_x,pos_y]['was']:
+                        self.canvas.add(self.rectangles_dict[pos_x,pos_y]["color"])
+                        self.canvas.add(self.rectangles_dict[pos_x,pos_y]["rect"])
+                else:
+                    self.changes_dict[(pos_x,pos_y)] = 1
+                if self.game_mode:
+                    self.spawn_count -= 1
+        except KeyError:
+            pass
+
+    def handle_touch_survival(self,pos_x,pos_y,*largs):
+        try:
+            if self.on_board[pos_x,pos_y]['alive'] == -5 and self.spawn_count >= 5:
+                if self.should_draw:
+                    self.rectangles_dict[pos_x,pos_y]['color'].hsv = self.allcols["Grey"]
+                    self.on_board[pos_x,pos_y] = {'alive':0,'was':1}
+                else:
+                    self.changes_dict[pos_x,pos_y] = 0
+                self.spawn_count -= 5
+            elif not self.on_board[pos_x,pos_y]['alive']:
+                if self.should_draw:
+                    if randint(0,30) == 30:
+                        self.on_board[pos_x,pos_y]['alive'] = 9
+                        self.on_board[pos_x,pos_y]['survival'] = 15
+                        self.rectangles_dict[pos_x,pos_y]['color'].hsv = self.allcols['Stem']
+                    else:
+                        self.on_board[pos_x,pos_y]['alive'] = 1
+                        self.rectangles_dict[pos_x,pos_y]["color"].hsv = self.cell_color
+                    self.active_cell_count += 1
+                    if 'was' not in self.on_board[pos_x,pos_y] or not self.on_board[pos_x,pos_y]['was']:
+                        self.canvas.add(self.rectangles_dict[pos_x,pos_y]["color"])
+                        self.canvas.add(self.rectangles_dict[pos_x,pos_y]["rect"])
+                        self.ever_was_alive += 1
+                else:
+                    if randint(0,30) == 30:
+                        self.changes_dict[(pos_x,pos_y)] = 2
+                    else:
+                        self.changes_dict[(pos_x,pos_y)] = 1
+
+                self.spawn_count -= 1
+        except KeyError:
+            pass
 
     def on_rotate(self):
         self.loadimg
@@ -450,11 +581,7 @@ class Cells(Widget):
         self.loadimg
         self.reset_interval
 
-    # Need to add some placement options...
-    def place_option(self, events, *largs):
-        pass
-
-    def info(self, events, *largs):
+    def info(self, *largs):
         if Window.width < Window.height:
             titlesize = 18
             mysize = 18
@@ -481,7 +608,7 @@ class Cells(Widget):
         popup.bind(on_dismiss=partial(self.music_control, 'main', True, True))
         self.music_control('options', True, True)
         popup.open()
-        self.stop_interval(events)
+        self.stop_interval()
 
 
     def tutorial_main(self, popup, *largs):
@@ -501,7 +628,7 @@ class Cells(Widget):
         self.main_menu.open()
 
 
-        playground = '''Playground mode lets you change the game!\n\nCompete in game mode against yourself or others on twitter!\n'''
+        playground = '''Playground mode allows for infinite play, and rule customization!\n\nCompete in game mode against yourself or others on twitter!\n'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout(pos_hint={'center':1,'center':1})
@@ -530,7 +657,7 @@ class Cells(Widget):
         except:
             pass
 
-        playground = '''Here you have the main controls\n\nStop, Start, Step, Reset\n\nYou can only change the rules in playground mode!\n'''
+        playground = '''Here you have the main controls\n\nStart, Stop, Step: Progress one generation, and Reset\n\nSettings will allow you to change the rules, but only in Playground Mode.\n'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout()
@@ -540,7 +667,7 @@ class Cells(Widget):
 
         content.add_widget(next_btn)
 
-        popup = Popup(title="Bottom Bar", separator_height=0, title_size=titlesize,
+        popup = Popup(title="Bottom Controls Bar", separator_height=0, title_size=titlesize,
             content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
         # next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(popup.dismiss, popup))
@@ -560,7 +687,7 @@ class Cells(Widget):
         except:
             pass
 
-        playground = '''Click to add a single spawn.\n\nDrag your finger to add multiple spawns.\n\nYou can do this before or during play.\n\nBe aware that a cell by itself will die!\n'''
+        playground = '''Click to add a single spawn.\n\nDrag your finger to add multiple spawns.\n\nYou can do this before or during play.\n\nBe aware , cells in clusters of fewer than 3 will die!\n'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout()
@@ -590,7 +717,7 @@ class Cells(Widget):
         except:
             pass
 
-        playground = '''This area is important in game mode.\n\nStart off with 100 spawns.\n\nGain more spawns by scoring!\n\nYou have 500 generations to score\n'''
+        playground = '''Use this area to track your stats in Game Mode.\n\nStart with 100 spawns.\n\nGain more spawns by activating cells!\n\nYour current Score, High Score, and game status will be displayed.\n'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout()
@@ -600,7 +727,7 @@ class Cells(Widget):
 
         content.add_widget(next_btn)
 
-        popup = Popup(title="Top Bar", separator_height=0, title_size=titlesize,
+        popup = Popup(title="Top Score Bar", separator_height=0, title_size=titlesize,
             content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
         # next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(popup.dismiss, popup))
@@ -620,18 +747,18 @@ class Cells(Widget):
         except:
             pass
 
-        playground = '''Earn points with the more cells you have!\n\nFind the best patterns to get the highest score.\n\nTake a screenshot when you're done and upload to twitter using #GOLapp\n'''
+        playground = '''There are two game play modes, Creation and Survival.\n\nCreation: find the best patterns to create life and gain points.\n\nBonus points awarded for having more alive cells.\n\nSurvival: Stay alive amidst a viral outbreak.\n\nBonus point awarded once all black spaces are gone.\n\nTake a screenshot when you're done and upload to twitter using #GOLapp\n'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout()
         content.add_widget(choose_mode)
 
-        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.14993, font_size=mysize)
 
         content.add_widget(next_btn)
 
-        popup = Popup(title="Your Score", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+        popup = Popup(title="Game Mode", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.95, .75),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
         # next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(popup.dismiss, popup))
         next_btn.bind(on_release=partial(self.tutorial_end, popup))
@@ -667,7 +794,7 @@ class Cells(Widget):
         next_btn.bind(on_press=partial(self.main_menu.open, popup))
         popup.open()
 
-    def loadimg(self, events, first_timer, *largs):
+    def loadimg(self, first_timer, *largs):
 
         content = Image(source='IMO_GOL2.png')
         popup = Popup(title='', content=content,
@@ -761,9 +888,7 @@ class SettingScrollOptions(SettingOptions):
         content.add_widget(btn)
 
 class GameApp(App):
-    events = []
     game_cells = None
-    # restart_menu = None
     highscore = 0
     blinky = None
 
@@ -789,7 +914,10 @@ class GameApp(App):
     # def update_score(self,cells, cs, place, *largs):
     def update_game(self, cells, cs, place, gen, game_end, *largs):
         if cells.game_mode:
-            gen.text = str(cells.generations)
+            if cells.game_mode == 1:
+                gen.text = str(cells.generations)
+            elif cells.game_mode == 2:
+                gen.text = str(cells.non_positive_gens)
             place.text = str(cells.spawn_count)
         else:
             gen.text = '∞'
@@ -798,21 +926,31 @@ class GameApp(App):
 
 
         if cells.generations == 0 or cells.game_over:
-            # print cells.all_activated, cells.all_died
-            cells.stop_interval(self.events)
+            cells.stop_interval()
             cells.music_control('score', True, True)
             game_end.open()
 
-    def reset_labels(self, csval, genval, placeval, hsval, cells,*largs):
+    def reset_labels(self, csval, gen, genval, placeval, hsval, cells,*largs):
         csval.text = "--"
-        hsval.text = str(self.intWithCommas(self.highscore))
+        self.highscore = 0
         if cells.game_mode:
-            genval.text = "500"
+            if cells.game_mode == 1:
+                gen.text = "Gens:"
+                genval.text = "500"
+                if self.highscorejson.exists('creation'):
+                    self.highscore = self.highscorejson.get('creation')['best']
+            elif cells.game_mode == 2:
+                gen.text = "- "+ u'\u2206'+"Population:"
+                genval.text = "10"
+                if self.highscorejson.exists('survival'):
+                    self.highscore = self.highscorejson.get('survival')['best']
             placeval.text = "100"
         else:
+            if self.highscorejson.exists('creation'):
+                self.highscore = self.highscorejson.get('creation')['best']
             genval.text = '∞'
             placeval.text = '∞'
-
+        hsval.text = str(self.intWithCommas(self.highscore))
 
     def update_score_labels(self, myobject, final_score_label, high_score_label,cells, *largs):
         self.blinky = Clock.schedule_interval(lambda a:self.colorit(myobject),0.3)
@@ -820,7 +958,10 @@ class GameApp(App):
         # global blinky
         if self.game_cells.score > self.highscore:
             self.highscore = cells.score
-            self.highscorejson.put('highscore', best=self.game_cells.score)
+            if self.game_cells.game_mode == 1:
+                self.highscorejson.put('creation', best=self.game_cells.score)
+            elif self.game_cells.game_mode == 2:
+                self.highscorejson.put('survival', best=self.game_cells.score)
             high_score_display = str(self.intWithCommas(self.highscore)) + " New Record!!"
         else:
             high_score_display = cells.game_over_message
@@ -842,22 +983,29 @@ class GameApp(App):
         except:
             pass
 
-    def trigger_game_mode(self, main_menu, cells, grid, csval, genval, placeval, hsval,btn_sett,*largs):
+    def trigger_game_mode(self, main_menu, cells, grid, csval, gen, genval, placeval, hsval,btn_sett,mode,*largs):
         btn_sett.background_down = 'btn_solid.png'
         btn_sett.text = "---"
         btn_sett.disabled = True
         self.game_cells.lonely = 1
         self.game_cells.crowded = 4
         self.game_cells.birth = 3
-        self.game_cells.speed = 0.05
         self.game_cells.wrap = 0
+        if mode == 1:
+            self.game_cells.speed = 0.05
+            self.game_cells.cellcol = self.config._sections['initiate']['color']
+        elif mode == 2:
+            self.game_cells.speed = 0.1
+            self.game_cells.cellcol = 'Green'
         main_menu.dismiss()
+        cells.game_over = False
+        cells.game_mode = mode
         cells.reset_counters()
-        cells.game_mode = True
-        self.reset_labels(csval, genval, placeval, hsval, cells)
-        cells.reset_interval(self.events, grid, None)
 
-    def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, genval,btn_sett, *largs):
+        self.reset_labels(csval, gen, genval, placeval, hsval, cells)
+        cells.reset_interval(grid, None)
+
+    def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, gen, genval,btn_sett, *largs):
         btn_sett.background_down = 'bttn_dn.png'
         btn_sett.text = "Settings"
         btn_sett.disabled = False
@@ -875,17 +1023,19 @@ class GameApp(App):
                 if x == 'crowded':
                     self.game_cells.crowded = self.config._sections[item][x]
         popup.dismiss()
+        gen.text = 'Gens:'
         placeval.text = '∞'
         genval.text = '∞'
-        cells.reset_interval(self.events,grid, start_patterns)
-    def restart_btn_action(self, grid, start_patterns, cells, restart_game, csval, genval, placeval,hsval,*largs):
+        cells.reset_interval(grid, start_patterns)
+    def restart_btn_action(self, grid, start_patterns, cells, restart_game, csval, gen,genval, placeval,hsval,*largs):
         restart_game.dismiss()
         cells.reset_counters()
-        self.reset_labels(csval, genval, placeval, hsval, cells)
+        self.reset_labels(csval, gen,genval, placeval, hsval, cells)
         if cells.game_mode:
-            cells.reset_interval(self.events,grid,None)
+            cells.game_over = False
+            cells.reset_interval(grid,None)
         else:
-            cells.reset_interval(self.events, grid, start_patterns)
+            cells.reset_interval(grid, start_patterns)
 
     def colorit(self, myobject, *largs):
         myobject.color = [randint(0,1),randint(0,1),randint(0,1),1]
@@ -894,7 +1044,11 @@ class GameApp(App):
     def unscheduleit(self, myobject, *largs):
         Clock.unschedule(self.blinky)
 
-    def settings(self, events, *largs):
+    def open_popup(self, to_open, to_close,*largs):
+        to_close.dismiss()
+        to_open.open()
+
+    def settings(self, *largs):
         if self.game_cells.game_mode:
             pass
         else:
@@ -908,9 +1062,14 @@ class GameApp(App):
         self.use_kivy_settings = False
         data_dir = getattr(self, 'user_data_dir')
         self.highscorejson = JsonStore(join(data_dir, 'highscore.json'))
+
         self.firsttimer = JsonStore(join(data_dir, 'tutorial.json'))
-        if self.highscorejson.exists('highscore'):
-            self.highscore = int(self.highscorejson.get('highscore')['best'])
+        if self.highscorejson.exists('creation'):
+            if 'creation' in self.highscorejson.get('creation'):
+                self.highscore = self.highscorejson.get('creation')['best']
+            else:
+                self.highscore = 0
+
         # Delete this once finalized
         # if Window.width < 1334 and Window.height < 750:
         #     Window.size = (1334,750)
@@ -932,7 +1091,7 @@ class GameApp(App):
         cells.create_rectangles()
         # cells.draw_rectangles()
         # cells.add_instruction_groups()
-        Clock.schedule_once(partial(cells.loadimg, self.events, self.firsttimer), 0)
+        Clock.schedule_once(partial(cells.loadimg,self.firsttimer), 0)
 
         usrgridnum = cells.cellcount / 1000.0
 
@@ -1029,22 +1188,21 @@ class GameApp(App):
 
 
 # game buttons
-        btn_start = Button(text='START', font_name='joystix' ,on_press=partial(cells.start_interval, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
-        btn_stop = Button(text='Stop', font_name='joystix' ,on_press=partial(cells.stop_interval, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
-        btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_start = Button(text='START', font_name='joystix' ,on_press=cells.start_interval,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_stop = Button(text='Stop', font_name='joystix' ,on_press=cells.stop_interval,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step,0.01),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_reset = Button(text='Reset', font_name='joystix' ,
                            on_press=restart_game.open,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
-        btn_reset.bind(on_press=partial(cells.stop_interval, self.events))
-        # btn_place = Button(text='Place', font_name='joystix' , on_press=partial(cells.place_option, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='test.png')
-        # dump(btn_place)
-        btn_sett = Button(text='Settings', font_name='joystix' ,on_press=partial(self.settings, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
-        btn_info = Button(text='Info', font_name='joystix' ,on_press=partial(cells.info, self.events),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
-        btn_sett.bind(on_press=partial(cells.stop_interval, self.events))
+        btn_reset.bind(on_press=cells.stop_interval)
+
+        btn_sett = Button(text='Settings', font_name='joystix' ,on_press=self.settings,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_info = Button(text='Info', font_name='joystix' ,on_press=cells.info,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_sett.bind(on_press=cells.stop_interval)
 
         buttons = BoxLayout(size_hint=(1, None), height=50, pos_hint={'x':0, 'y':0})
 
         board.bind(size=cells.create_rectangles)
-        board.bind(size=partial(cells.reset_interval,self.events,grid,main_menu))
+        board.bind(size=partial(cells.reset_interval,grid,main_menu))
 
         controls =[btn_start,btn_stop,btn_step,btn_reset,btn_sett,btn_info]
         for btn in controls:
@@ -1080,26 +1238,37 @@ class GameApp(App):
 
         game_end = Popup(title="Game Over", title_size = 42, title_color=[0,0,0], title_font='joystix', background='black_thing.png', separator_height=0, size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0.5},auto_dismiss=False)
         end_layout = GridLayout(cols=1, spacing=10, size_hint=(1,1))
-        high_score_label = Label(text="", font_name='Roboto', bold=True, font_size=36, color=[1,.25,0,1])
-        final_score_label = Label(text=(""), font_name='Roboto', bold=True, font_size=36)
-        play_again = Button(text="Play Again", font_size=42,font_name='joystix', size_hint_y=.5, on_press=partial(self.trigger_game_mode, game_end,cells, grid, csval, genval, placeval, hsval, btn_sett))
+        high_score_label = Label(text="", font_name='Roboto', bold=True, font_size=36, color=[1,.25,0,1],halign="center")
+        final_score_label = Label(text=(""), font_name='Roboto', bold=True, font_size=36,halign="center")
+        play_again = Button(text="Play Again", font_size=42,font_name='joystix', size_hint_y=.5, on_press=partial(self.restart_btn_action, grid,start_patterns, cells,game_end, csval, gen,genval, placeval,hsval))
         end_layout.add_widget(high_score_label)
         end_layout.add_widget(final_score_label)
         end_layout.add_widget(play_again)
         game_end.add_widget(end_layout)
         # setup main menu buttons
-        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns, grid, cells,placeval,genval,btn_sett))
+        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns, grid, cells,placeval,gen,genval,btn_sett))
 
-
-        game_btn.bind(on_press=partial(self.trigger_game_mode, main_menu, cells, grid, csval, genval, placeval, hsval,btn_sett))
-
+        choose_game = Popup(title="Select Game Version", background='black_thing.png', title_font='joystix', title_size=50, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center",auto_dismiss=False)
+        choose_game_layout = GridLayout(rows=3, spacing=[20,5], size_hint_y=.9, size_hint_x=.7)
+        creation_mode_btn = Button(text="Creation",font_size=mysize, font_name='joystix',size_hint_x=.3)
+        survival_mode_btn = Button(text="Survival",font_size=mysize, font_name='joystix',size_hint_x=.3)
+        for two_times in range(2):
+            choose_game_layout.add_widget(Button(text='', background_normal='black_thing.png', background_down='black_thing.png',height=dp(5)))
+        choose_game_layout.add_widget(creation_mode_btn)
+        choose_game_layout.add_widget(survival_mode_btn)
+        for two_more_times in range(2):
+            choose_game_layout.add_widget(Button(text='', background_normal='black_thing.png', background_down='black_thing.png',height=dp(5)))
+        choose_game.add_widget(choose_game_layout)
+        creation_mode_btn.bind(on_press=partial(self.trigger_game_mode, choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,1))
+        survival_mode_btn.bind(on_press=partial(self.trigger_game_mode,choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,2))
+        game_btn.bind(on_press=partial(self.open_popup,choose_game,main_menu))
         # cells.bind(a_d_ratio=partial(self.update_score, cells, cs,place))
         cells.bind(generations=partial(self.update_game, cells, csval,placeval,genval, game_end))
         cells.bind(spawn_count=partial(self.update_game, cells, csval, placeval, genval, game_end))
         cells.bind(all_activated=partial(self.update_game, cells, csval, placeval, genval, game_end))
         cells.bind(spawn_adder=cells.add_spawns)
-        start_patterns.bind(on_open=partial(self.reset_labels, csval, genval, placeval, hsval,cells))
-        restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game, csval, genval, placeval,hsval))
+        start_patterns.bind(on_open=partial(self.reset_labels, csval, gen, genval, placeval, hsval,cells))
+        restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game, csval, gen,genval, placeval,hsval))
 
         game_end.bind(on_open=partial(self.update_score_labels, play_again, final_score_label,high_score_label, cells))
         game_end.bind(on_dismiss=partial(self.unscheduleit, play_again))
