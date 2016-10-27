@@ -940,7 +940,7 @@ class GameApp(App):
                 if self.highscorejson.exists('creation'):
                     self.highscore = self.highscorejson.get('creation')['best']
             elif cells.game_mode == 2:
-                gen.text = "- "+ u'\u2206'+"Population:"
+                gen.text = "-"+ u'\u2206'+" Pop:"
                 genval.text = "10"
                 if self.highscorejson.exists('survival'):
                     self.highscore = self.highscorejson.get('survival')['best']
@@ -1028,11 +1028,11 @@ class GameApp(App):
         genval.text = '∞'
         cells.reset_interval(grid, start_patterns)
     def restart_btn_action(self, grid, start_patterns, cells, restart_game, csval, gen,genval, placeval,hsval,*largs):
+        cells.game_over = False
         restart_game.dismiss()
         cells.reset_counters()
         self.reset_labels(csval, gen,genval, placeval, hsval, cells)
         if cells.game_mode:
-            cells.game_over = False
             cells.reset_interval(grid,None)
         else:
             cells.reset_interval(grid, start_patterns)
@@ -1204,7 +1204,7 @@ class GameApp(App):
         board.bind(size=cells.create_rectangles)
         board.bind(size=partial(cells.reset_interval,grid,main_menu))
 
-        controls =[btn_start,btn_stop,btn_step,btn_reset,btn_sett,btn_info]
+        controls =[btn_info,btn_reset,btn_start,btn_stop,btn_step,btn_sett]
         for btn in controls:
             buttons.add_widget(btn)
 
