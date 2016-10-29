@@ -147,7 +147,6 @@ class Cells(Widget):
     events = []
     stop_iteration = False
     prevent_update = False
-    redraw = False
     # Starting Patterns
     # Each will:
     # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -413,38 +412,12 @@ class Cells(Widget):
             if self.game_mode == 2:
                 self.update_canvas_survival()
                 if self.non_positive_gens < 5 and not self.stop_iteration:
-                    
-                    with self.canvas:
-                        self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
-                        test = Grid()
-                        test.determine_grid(self.width,self.height)
-                        self.pos = (0,50)
-                        with self.canvas:
-                            Color(0.2,0,0, mode='rgb')
-                            for x in range(v_border[0],self.width,cellsize):
-                                Rectangle(pos=(x,self.y),size=(1,self.height))
-                            for y in range(self.y+h_border[0],self.height+self.y,cellsize):
-                                Rectangle(pos=(self.x,y),size=(self.width,1))
-                            Rectangle(pos=(self.x,self.y),size=(v_border[0],self.height))
-                            Rectangle(pos=(self.x,self.y),size=(self.width,h_border[0]))
-                            Rectangle(pos=(self.width-v_border[1],self.y),size=(v_border[1],self.height))
-                            Rectangle(pos=(self.x,self.y+self.height-h_border[1]),size=(self.width,h_border[1]))
-
                     self.step(1.)
-
-
-                    # Clock.schedule_once(self.flash, 1)
             else:
                 self.update_canvas_objects()
             self.update_counters()
 
-    # def flash(self,*largs):
-    #     popup5 = Popup(title='', content='',
-    #           auto_dismiss=True, separator_height=0,title_size=0, separator_color=[0.,0.,0.,0.], size=(Window.height,Window.width),
-    #           # border=[20,20,20,20],
-    #           background_color=[1,0,0,1])
-    #     popup5.open()
-    #     popup5.dismiss()
+
 
 
 
@@ -1540,7 +1513,7 @@ class GameApp(App):
         choose_game_layout = GridLayout(rows=3, spacing=[20,5], size_hint_y=.9, size_hint_x=.7)
         creation_mode_btn = Button(text="Creation",font_size=mysize, font_name='joystix',size_hint_x=.3)
         survival_mode_btn = Button(text="Survival",font_size=mysize, font_name='joystix',size_hint_x=.3)
-        
+
         for two_times in range(2):
             choose_game_layout.add_widget(Button(text='', background_normal='black_thing.png', background_down='black_thing.png',height=dp(5)))
         choose_game_layout.add_widget(creation_mode_btn)
