@@ -38,12 +38,15 @@ cellsize = 10
 v_border = (0,0)
 h_border = (0,0)
 class Grid(Widget):
+    flash_event = None
+    grid_color = None
+    flash_color = True
     def draw_grid(self, *largs):
         self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
         self.determine_grid(self.width,self.height)
         self.pos = (0,50)
         with self.canvas:
-            Color(0.5,0.5,0.5, mode='rgb')
+            self.grid_color = Color(0.5,0.5,0.5, mode='rgb')
             for x in range(v_border[0],self.width,cellsize):
                 Rectangle(pos=(x,self.y),size=(1,self.height))
             for y in range(self.y+h_border[0],self.height+self.y,cellsize):
@@ -66,6 +69,25 @@ class Grid(Widget):
         v_border = (int(v_w / 2.),int((v_w + 1 ) / 2.))
         h_border = (int(h_w / 2.), int((h_w + 1) / 2.))
 
+    def flash(self,*largs):
+        if self.flash_color:
+            self.grid_color.rgb = (1,0,0)
+            self.flash_color = False
+        else:
+            self.grid_color.rgb = (0.5,0.5,0.5)
+            self.flash_color = True
+
+    def stop_flash(self,*largs):
+        if self.flash_event:
+            self.flash_event.cancel()
+            self.grid_color.rgb = (0.5,0.5,0.5)
+            self.flash_color = True
+            self.flash_event = None
+
+    def start_flash(self,*largs):
+        if self.flash_event:
+            self.flash_event.cancel()
+        self.flash_event = Clock.schedule_interval(self.flash,0.25)
 
 class Cells(Widget):
     allcols = {
@@ -121,7 +143,7 @@ class Cells(Widget):
     game_over_message = "You've done better!"
     wrap = 0
     ever_was_alive = 0
-    non_positive_gens = 10
+    non_positive_gens = NumericProperty(10)
     events = []
     stop_iteration = False
     prevent_update = False
@@ -1295,6 +1317,12 @@ class GameApp(App):
         else:
             cells.reset_interval(grid, start_patterns)
 
+    def check_close_to_end(self, grid, *largs):
+        if self.game_cells.non_positive_gens == 4:
+            grid.start_flash()
+        elif self.game_cells.non_positive_gens == 10:
+            grid.stop_flash()
+
     def colorit(self, myobject, *largs):
         myobject.color = [randint(0,1),randint(0,1),randint(0,1),1]
         # print myobject.color
@@ -1530,6 +1558,7 @@ class GameApp(App):
         cells.bind(spawn_count=partial(self.update_game, cells, csval, placeval, genval, game_end))
         cells.bind(all_activated=partial(self.update_game, cells, csval, placeval, genval, game_end))
         cells.bind(spawn_adder=cells.add_spawns)
+        cells.bind(non_positive_gens=partial(self.check_close_to_end, grid))
         start_patterns.bind(on_open=partial(self.reset_labels, csval, gen, genval, placeval, hsval,cells))
         restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game, csval, gen,genval, placeval,hsval))
 
