@@ -147,6 +147,7 @@ class Cells(Widget):
     events = []
     stop_iteration = False
     prevent_update = False
+    redraw = False
     # Starting Patterns
     # Each will:
     # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -412,10 +413,39 @@ class Cells(Widget):
             if self.game_mode == 2:
                 self.update_canvas_survival()
                 if self.non_positive_gens < 5 and not self.stop_iteration:
+                    
+                    with self.canvas:
+                        self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
+                        test = Grid()
+                        test.determine_grid(self.width,self.height)
+                        self.pos = (0,50)
+                        with self.canvas:
+                            Color(0.2,0,0, mode='rgb')
+                            for x in range(v_border[0],self.width,cellsize):
+                                Rectangle(pos=(x,self.y),size=(1,self.height))
+                            for y in range(self.y+h_border[0],self.height+self.y,cellsize):
+                                Rectangle(pos=(self.x,y),size=(self.width,1))
+                            Rectangle(pos=(self.x,self.y),size=(v_border[0],self.height))
+                            Rectangle(pos=(self.x,self.y),size=(self.width,h_border[0]))
+                            Rectangle(pos=(self.width-v_border[1],self.y),size=(v_border[1],self.height))
+                            Rectangle(pos=(self.x,self.y+self.height-h_border[1]),size=(self.width,h_border[1]))
+
                     self.step(1.)
+
+
+                    # Clock.schedule_once(self.flash, 1)
             else:
                 self.update_canvas_objects()
             self.update_counters()
+
+    # def flash(self,*largs):
+    #     popup5 = Popup(title='', content='',
+    #           auto_dismiss=True, separator_height=0,title_size=0, separator_color=[0.,0.,0.,0.], size=(Window.height,Window.width),
+    #           # border=[20,20,20,20],
+    #           background_color=[1,0,0,1])
+    #     popup5.open()
+    #     popup5.dismiss()
+
 
 
     def add_spawns(self, *largs):
@@ -617,16 +647,23 @@ class Cells(Widget):
         info3 = '''\nCreated by:\n      Steven Lee-Kramer\n      Ryan O Schenck'''
         text_info = Label(text=''.join([info1,info2,info3]),font_size=mysize)
 
+
         content = BoxLayout()
         content.add_widget(Label(text=''.join([info1,info2,info3]),font_size=mysize))
 
         tutorial_btn = Button(text='Tutorial', size_hint_x=.2, size_hint_y=.1)
+        creation_btn = Button(text='Creation', size_hint_x=.2, size_hint_y=.1)
+        survival_btn = Button(text='Survival', size_hint_x=.2, size_hint_y=.1)
         # tutorial_btn.bind(on_press=self.tutorial_main)
         content.add_widget(tutorial_btn)
+        content.add_widget(creation_btn)
+        content.add_widget(survival_btn)
 
-        popup = Popup(title="John Conway's Game of Life", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.8, .8),title_align='center',)
+        popup = Popup(title="GoL: Game of Life", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.98, .98),title_align='center',)
         tutorial_btn.bind(on_press=partial(self.tutorial_main, popup))
+        creation_btn.bind(on_press=partial(self.tutorial_creation, popup))
+        survival_btn.bind(on_press=partial(self.tutorial_survival, popup))
         popup.bind(on_dismiss=partial(self.music_control, 'main', True, True))
         self.music_control('options', True, True)
         popup.open()
@@ -650,7 +687,7 @@ class Cells(Widget):
         self.main_menu.open()
 
 
-        playground = '''Playground mode allows for infinite play, and rule customization!\n\nCompete in game mode against yourself or others on twitter!\n'''
+        playground = '''Playground mode allows for infinite play, and rule customization!\n\nCompete in game mode against yourself or others via twitter!\n'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout(pos_hint={'center':1,'center':1})
@@ -679,7 +716,7 @@ class Cells(Widget):
         except:
             pass
 
-        playground = '''Here you have the main controls\n\nStart, Stop, Step: Progress one generation, and Reset\n\nSettings will allow you to change the rules, but only in Playground Mode.\n'''
+        playground = '''Here you have the main controls\n\nStart, Stop, Step: progress one generation, and Reset\n\nSettings will allow you to change the rules, but ONLY in Playground Mode.\n'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout()
@@ -739,7 +776,7 @@ class Cells(Widget):
         except:
             pass
 
-        playground = '''Use this area to track your stats in Game Mode.\n\nStart with 100 spawns.\n\nGain more spawns by activating cells!\n\nYour current Score, High Score, and game status will be displayed.\n'''
+        playground = '''Use this area to track your stats in Game Mode.\n\nYour current Score, High Score, and game status will be displayed.\n'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout()
@@ -769,7 +806,8 @@ class Cells(Widget):
         except:
             pass
 
-        playground = '''There are two game play modes, Creation and Survival.\n\nCreation: find the best patterns to create life and gain points.\n\nBonus points awarded for having more alive cells.\n\nSurvival: Stay alive amidst a viral outbreak.\n\nBonus point awarded once all black spaces are gone.\n\nTake a screenshot when you're done and upload to twitter using #GOLapp\n'''
+        playground = '''There are two game play modes, Creation and Survival.\n\nTake a screenshot when you're done and upload to twitter using #GOLapp\n'''
+        # Creation: find the best patterns to create life and gain points.\n\nBonus points awarded for having more alive cells.\n\nSurvival: Stay alive amidst a viral outbreak.\n\nBonus point awarded once all black spaces are gone.\n\n
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout()
@@ -780,7 +818,7 @@ class Cells(Widget):
         content.add_widget(next_btn)
 
         popup = Popup(title="Game Mode", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.95, .75),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
         # next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(popup.dismiss, popup))
         next_btn.bind(on_release=partial(self.tutorial_end, popup))
@@ -816,6 +854,212 @@ class Cells(Widget):
         next_btn.bind(on_press=partial(self.main_menu.open, popup))
         popup.open()
 
+    def tutorial_creation(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+        playground = '''Welcome to creation mode!\n\nIn this game mode you play with class Game of Life rules with a score!\n\nFind the best patterns to create life and gain points.\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout(pos_hint={'center':1,'center':1})
+        content.add_widget(choose_mode)
+
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Creation Mode", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, background_color=[0,0,0,.2])
+
+        next_btn.bind(on_release=partial(self.tutorial_creation1, popup))
+        popup.open()
+
+    def tutorial_creation1(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+        playground = '''You have 500 generations to score!\n\nYou start with 100 spawns and earn more spawns through playing.\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout(pos_hint={'center':1,'center':1})
+        content.add_widget(choose_mode)
+
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Playing", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, background_color=[0,0,0,.2])
+
+        next_btn.bind(on_release=partial(self.tutorial_creation2, popup))
+        popup.open()
+
+    def tutorial_creation2(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+        playground = '''Your score is calculated by:\n\nThe change in population size and number of new cells.\n\nBonus points are awarded for having more alive cells.\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout(pos_hint={'center':1,'center':1})
+        content.add_widget(choose_mode)
+
+        next_btn = Button(text='Play', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Scoring", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, background_color=[0,0,0,.2])
+
+        next_btn.bind(on_release=partial(popup.dismiss, popup))
+        popup.open()
+
+    def tutorial_survival(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+        playground = '''Welcome to survival mode!\n\nIn this mode there are some unique cells!\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout(pos_hint={'center':1,'center':1})
+        content.add_widget(choose_mode)
+
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Survival Mode", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, background_color=[0,0,0,.2])
+
+        next_btn.bind(on_press=self.main_menu.dismiss)
+        next_btn.bind(on_release=partial(self.tutorial_survival1, popup))
+        popup.open()
+
+    def tutorial_survival1(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+
+        playground = '''Red cells are viral cells.\n\nThese pop up randomly as you play the game.\n\nThey will "infect" your cells.\n\nYou can remove them by tapping or drawing over them.\n\nThis will cost you precious spawns!\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout(pos_hint={'center':1,'center':1})
+        content.add_widget(choose_mode)
+
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Red Cell Types", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, background_color=[0,0,0,.2])
+        next_btn.bind(on_release=partial(self.tutorial_survival2, popup))
+        popup.open()
+
+    def tutorial_survival2(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+
+        playground = '''Pink cells are stem cells.\n\nDiscover these cells as you play.\n\nThey will provide protection to your cells.\n\nThey stay alive for 15 generations.\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout(pos_hint={'center':1,'center':1})
+        content.add_widget(choose_mode)
+
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Pink Cell Types", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, background_color=[0,0,0,.2])
+        next_btn.bind(on_press=self.main_menu.dismiss)
+        next_btn.bind(on_release=partial(self.tutorial_survival3, popup))
+        popup.open()
+
+    def tutorial_survival3(self, popup, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        try:
+            popup.dismiss()
+        except:
+            pass
+
+
+        playground = '''Bonus points are awarded once all black spaces are gone.\n\nYour score is the generation count.\n\n-''' + u"\u2206Pop" + ''' is the generations allowed without popuplation growth.\n\nThe game ends if it hits 0.\n'''
+        choose_mode = Label(text=playground, font_size=mysize)
+
+        content = BoxLayout(pos_hint={'center':1,'center':1})
+        content.add_widget(choose_mode)
+
+        next_btn = Button(text='Play', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
+
+        content.add_widget(next_btn)
+
+        popup = Popup(title="Scoring", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, background_color=[0,0,0,.2])
+        next_btn.bind(on_press=self.main_menu.dismiss)
+        next_btn.bind(on_release=partial(popup.dismiss, popup))
+        popup.open()
+
     def loadimg(self, first_timer, *largs):
 
         content = Image(source='IMO_GOL2.png')
@@ -836,6 +1080,20 @@ class Cells(Widget):
         else:
             first_timer.put('tutorial', done=True)
             Clock.schedule_once(self.tutorial_main,0)
+
+    def survival_mode_check(self, survival_first ,*largs):
+        if survival_first.exists('survival_tutorial'):
+            pass
+        else:
+            survival_first.put('survival_tutorial', done=True)
+            Clock.schedule_once(self.tutorial_survival,0)
+
+    def creation_mode_check(self, creation_first ,*largs):
+        if creation_first.exists('creation_tutorial'):
+            pass
+        else:
+            creation_first.put('creation_tutorial', done=True)
+            Clock.schedule_once(self.tutorial_creation,0)
 
     def stop_music(self, *largs):
         try:
@@ -1092,6 +1350,8 @@ class GameApp(App):
         self.highscorejson = JsonStore(join(data_dir, 'highscore.json'))
 
         self.firsttimer = JsonStore(join(data_dir, 'tutorial.json'))
+        self.survival_first = JsonStore(join(data_dir, 'survival.json'))
+        self.creation_first = JsonStore(join(data_dir, 'creation.json'))
         if self.highscorejson.exists('creation'):
             if 'creation' in self.highscorejson.get('creation'):
                 self.highscore = self.highscorejson.get('creation')['best']
@@ -1280,6 +1540,7 @@ class GameApp(App):
         choose_game_layout = GridLayout(rows=3, spacing=[20,5], size_hint_y=.9, size_hint_x=.7)
         creation_mode_btn = Button(text="Creation",font_size=mysize, font_name='joystix',size_hint_x=.3)
         survival_mode_btn = Button(text="Survival",font_size=mysize, font_name='joystix',size_hint_x=.3)
+        
         for two_times in range(2):
             choose_game_layout.add_widget(Button(text='', background_normal='black_thing.png', background_down='black_thing.png',height=dp(5)))
         choose_game_layout.add_widget(creation_mode_btn)
@@ -1289,6 +1550,8 @@ class GameApp(App):
         choose_game.add_widget(choose_game_layout)
         creation_mode_btn.bind(on_press=partial(self.trigger_game_mode, choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,1))
         survival_mode_btn.bind(on_press=partial(self.trigger_game_mode,choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,2))
+        survival_mode_btn.bind(on_release=partial(self.game_cells.survival_mode_check, self.survival_first))
+        creation_mode_btn.bind(on_release=partial(self.game_cells.creation_mode_check, self.creation_first))
         game_btn.bind(on_press=partial(self.open_popup,choose_game,main_menu))
         # cells.bind(a_d_ratio=partial(self.update_score, cells, cs,place))
         cells.bind(generations=partial(self.update_game, cells, csval,placeval,genval, game_end))
