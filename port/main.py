@@ -625,16 +625,23 @@ class Cells(Widget):
         info3 = '''\nCreated by:\n      Steven Lee-Kramer\n      Ryan O Schenck'''
         text_info = Label(text=''.join([info1,info2,info3]),font_size=mysize)
 
+
         content = BoxLayout()
         content.add_widget(Label(text=''.join([info1,info2,info3]),font_size=mysize))
 
         tutorial_btn = Button(text='Tutorial', size_hint_x=.2, size_hint_y=.1)
+        creation_btn = Button(text='Creation', size_hint_x=.2, size_hint_y=.1)
+        survival_btn = Button(text='Survival', size_hint_x=.2, size_hint_y=.1)
         # tutorial_btn.bind(on_press=self.tutorial_main)
         content.add_widget(tutorial_btn)
+        content.add_widget(creation_btn)
+        content.add_widget(survival_btn)
 
-        popup = Popup(title="John Conway's Game of Life", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.8, .8),title_align='center',)
+        popup = Popup(title="GoL: Game of Life", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.98, .98),title_align='center',)
         tutorial_btn.bind(on_press=partial(self.tutorial_main, popup))
+        creation_btn.bind(on_press=partial(self.tutorial_creation, popup))
+        survival_btn.bind(on_press=partial(self.tutorial_survival, popup))
         popup.bind(on_dismiss=partial(self.music_control, 'main', True, True))
         self.music_control('options', True, True)
         popup.open()
