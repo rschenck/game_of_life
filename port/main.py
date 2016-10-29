@@ -1183,36 +1183,40 @@ class GameApp(App):
 # setup restart game mode popup
 
         restart_game = Popup(title="Reset", title_font='joystix', title_size=56, background='black_thing.png', separator_height=0 ,size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0})
-        restart_game_layout = BoxLayout(orientation='vertical')
+        restart_game_layout = BoxLayout(orientation='vertical',spacing=dp(5),pos_hint={'center_x':.5, 'center_y':.5},size_hint=(0.8,1),width=Window.width*0.8)
 
         button_container = GridLayout(cols=3, spacing='5dp', size=(50,50))
-        restart_btn = Button(text="Restart", font_size=mysize, font_name='joystix', size_hint=(1,None),height=dp(100))
-        cancel_main_box = BoxLayout(size_hint=(0.5,0.1), height=dp(55), pos_hint={'center':.5, 'center':.1}, orientation='horizontal')
-        cancel_restart_button = Button(text="Cancel", font_size=mysize, font_name='joystix',on_press=restart_game.dismiss,size_hint=(1,None), height=dp(100))
-        r_main_menu_button = Button(text="Main Menu", font_size=mysize, font_name='joystix',on_press=main_menu.open,size_hint=(1,None), height=dp(45))
+        restart_btn = Button(text="Restart", font_size=mysize, font_name='joystix', size_hint=(0.48,None),height=dp(50))
+        cancel_main_box = BoxLayout(size_hint=(1,None), height=dp(75), pos_hint={'center_x':.5}, orientation='horizontal')
+        version_main_box = BoxLayout(size_hint=(0.8,None), height=dp(100), pos_hint={'center_x':.5}, orientation='vertical',spacing=dp(5))
+        cancel_restart_button = Button(text="Cancel", font_size=mysize, font_name='joystix',on_press=restart_game.dismiss,size_hint=(0.48,None),height=dp(50))
+        r_version_button=Button(text="Select Version", font_size=mysize,font_name='joystix',height=dp(45))
+        r_main_menu_button = Button(text="Main Menu", font_size=mysize, font_name='joystix',on_press=main_menu.open,size_hint=(1,1),height=dp(45))
         r_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
 
-        # restart_game_layout.add_widget(restart_game_label)
-        cmb = [restart_btn, cancel_restart_button]
-        for btn in cmb:
-            cancel_main_box.add_widget(btn)
-
-        r1 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        r2 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        r3 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        r4 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        ra = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        rb = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        rc = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        rd = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        re = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        rf = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        bc = [ra, rb, rc, rd, re, rf, r1, cancel_main_box, r2, r3, r_main_menu_button, r4]
-        for btn in bc:
-            button_container.add_widget(btn)
-
-        restart_game_layout.add_widget(button_container)
-        restart_game.add_widget(restart_game_layout)
+        cancel_main_box.add_widget(restart_btn)
+        cancel_main_box.add_widget(cancel_restart_button)
+        version_main_box.add_widget(r_version_button)
+        version_main_box.add_widget(r_main_menu_button)
+        restart_game_layout.add_widget(cancel_main_box)
+        restart_game_layout.add_widget(version_main_box)
+        restart_game.content = restart_game_layout
+        # r1 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        # r2 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        # r3 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        # r4 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        # ra = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        # rb = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        # rc = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        # rd = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        # re = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        # rf = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
+        # bc = [ra, rb, rc, rd, re, rf, r1, cancel_main_box, r2, r3, r_main_menu_button, r4]
+        # for btn in bc:
+        #     button_container.add_widget(btn)
+        #
+        # restart_game_layout.add_widget(button_container)
+        # restart_game.add_widget(restart_game_layout)
 
 
 # game buttons
@@ -1299,6 +1303,7 @@ class GameApp(App):
         start_patterns.bind(on_open=partial(self.reset_labels, csval, gen, genval, placeval, hsval,cells))
         restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game, csval, gen,genval, placeval,hsval))
 
+        r_version_button.bind(on_press=choose_game.open)
         game_end.bind(on_open=partial(self.update_score_labels, play_again, final_score_label,high_score_label, cells))
         game_end.bind(on_dismiss=partial(self.unscheduleit, play_again))
         game_end.bind(on_dismiss=partial(self.clear_text, high_score_label))
