@@ -1348,12 +1348,12 @@ class GameApp(App):
 
 # Main Menu Components
         main_menu = cells.main_menu = Popup(title="Main Menu", background='black_thing.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center",auto_dismiss=False)
-        main_menu_layout = BoxLayout(orientation='vertical', spacing=dp(100), pos_hint={'center_x':.5,'center_y':.7},size_hint=(0.8,1))
-        main_menu_buttons_box = BoxLayout(size_hint=(0.6,None), height=dp(280), pos_hint={'center_x':.5},orientation='vertical',spacing=dp(30))
+        main_menu_layout = BoxLayout(orientation='vertical', spacing=dp(100), pos_hint={'center_x':.5,'center_y':.5},size_hint=(0.8,0.7))
+        main_menu_buttons_box = BoxLayout(size_hint=(0.6,1), pos_hint={'center_x':.5},orientation='vertical',spacing=dp(30))
 
-        playground_btn = Button(text="Playground Mode",font_size=mysize, font_name='joystix', height=dp(120))
+        playground_btn = Button(text="Playground Mode", font_name='joystix',size_hint=(1,0.45),font_size='20sp')
 
-        game_btn = Button(text="Game Mode", font_name='joystix', font_size=mysize, height=dp(120))
+        game_btn = Button(text="Game Mode", font_name='joystix', size_hint=(1,0.45),font_size='20sp')
 
         main_menu_buttons_box.add_widget(playground_btn)
         main_menu_buttons_box.add_widget(game_btn)
@@ -1396,14 +1396,14 @@ class GameApp(App):
 
 # setup restart game mode popup
         restart_game = Popup(title="Reset",title_font='joystix',title_size=56,background='black_thing.png',separator_height=0 ,size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0})
-        restart_game_layout = BoxLayout(orientation='vertical', spacing=dp(100), pos_hint={'center_x':.5,'center_y':.6},size_hint=(0.8,1))
+        restart_game_layout = BoxLayout(orientation='vertical', spacing=dp(30), pos_hint={'center_x':.5,'center_y':.375},size_hint=(1,0.75))
 
-        restart_cancel_box = BoxLayout(size_hint=(0.8,None), height=dp(100), pos_hint={'center_x':.5}, orientation='horizontal',spacing=dp(5))
-        restart_btn = Button(text="Restart", font_size=mysize, font_name='joystix', size_hint=(0.47,None), height=dp(95))
-        cancel_restart_button = Button(text="Cancel", font_size=mysize, font_name='joystix', on_press=restart_game.dismiss, size_hint=(0.47,None), height=dp(95))
-        version_main_box = BoxLayout(size_hint=(0.6,None), height=dp(100), pos_hint={'center_x':.5},orientation='vertical',spacing=dp(5))
-        r_version_button = Button(text="", font_size=mysize, font_name='joystix', height=dp(45))
-        r_main_menu_button = Button(text="Main Menu", font_size=mysize, font_name='joystix', on_press=partial(self.open_popup, main_menu, restart_game), size_hint=(1,1), height=dp(45))
+        restart_cancel_box = BoxLayout(size_hint=(0.9,0.4), pos_hint={'center_x':.5}, orientation='horizontal',spacing=dp(10))
+        restart_btn = Button(text="Restart",  font_name='joystix', font_size='20sp',size_hint=(0.47,1))
+        cancel_restart_button = Button(text="Cancel",  font_name='joystix', on_press=restart_game.dismiss, font_size='20sp',size_hint=(0.47,1))
+        version_main_box = BoxLayout(size_hint=(0.6,0.35), pos_hint={'center_x':.5},orientation='vertical',spacing=dp(5))
+        r_version_button = Button(text="",  font_name='joystix', size_hint=(1,0.5), font_size='15sp')
+        r_main_menu_button = Button(text="Main Menu",  font_name='joystix', on_press=partial(self.open_popup, main_menu, restart_game), size_hint=(1,0.5), font_size='15sp')
         r_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
 
         restart_cancel_box.add_widget(restart_btn)
@@ -1471,17 +1471,17 @@ class GameApp(App):
 
         playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns, grid, cells,placeval,gen,genval,btn_sett,r_version_button))
 
-        choose_game = Popup(title="Select Game Version", background='black_thing.png', title_font='joystix', title_size=50, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center", auto_dismiss=False)
-        choose_game_layout = BoxLayout(orientation='vertical', spacing=dp(100), pos_hint={'center_x':.5,'center_y':.6}, size_hint=(0.8,1))
-        survival_creation_box = BoxLayout(size_hint=(0.95,None), height=dp(100), pos_hint={'center_x':.5}, orientation='horizontal',spacing=dp(5))
-        choose_game_main_box = BoxLayout(size_hint=(0.6,None), height=dp(100), pos_hint={'center_x':.5},orientation='vertical',spacing=dp(5))
-        creation_mode_btn = Button(text="Creation", font_size=mysize, font_name='joystix', size_hint=(0.48,None))
-        survival_mode_btn = Button(text="Survival", font_size=mysize, font_name='joystix', size_hint=(0.48,None))
+        choose_game = Popup(title="Select Version", background='black_thing.png', title_font='joystix', title_size=50, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center", auto_dismiss=False)
+        choose_game_layout = BoxLayout(orientation='vertical', spacing=dp(30), pos_hint={'center_x':.5,'center_y':.4}, size_hint=(1,0.8))
+        survival_creation_box = BoxLayout(size_hint=(0.9,0.4), pos_hint={'center_x':.5}, orientation='horizontal',spacing=dp(10))
+        choose_game_main_box = BoxLayout(size_hint=(0.6,0.35), pos_hint={'center_x':.5},orientation='vertical',spacing=dp(5))
+        creation_mode_btn = Button(text="Creation", font_size='20sp', font_name='joystix', size_hint=(0.45,0.9))
+        survival_mode_btn = Button(text="Survival", font_size='20sp', font_name='joystix', size_hint=(0.45,0.9))
 
         survival_creation_box.add_widget(creation_mode_btn)
         survival_creation_box.add_widget(survival_mode_btn)
-        choose_game_main_box.add_widget(Button(text='', background_normal='black_thing.png', background_down='black_thing.png', height=dp(45)))
-        choose_game_main_box.add_widget(Button(text="Main Menu", font_size=mysize, font_name='joystix', on_press=partial(self.open_popup,main_menu,choose_game), size_hint=(1,1), height=dp(45)))
+        choose_game_main_box.add_widget(Button(text='', background_normal='black_thing.png', background_down='black_thing.png',size_hint=(1,0.5)))
+        choose_game_main_box.add_widget(Button(text="Main Menu", font_name='joystix', on_press=partial(self.open_popup,main_menu,choose_game), size_hint=(1,0.5), font_size='15sp'))
 
         choose_game_layout.add_widget(survival_creation_box)
         choose_game_layout.add_widget(choose_game_main_box)
