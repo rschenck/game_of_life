@@ -437,7 +437,10 @@ class Cells(Widget):
                 self.bonus_multiplier = 0
         else:
             if self.game_mode == 1:
+                if self.generations == 1:
+                    self.game_over = True
                 self.generations -= 1
+
             self.bonus_multiplier = 1 + (self.active_cell_count * 30000 / pow(self.cellcount,2))
 
 
@@ -1100,19 +1103,6 @@ class Cells(Widget):
                 sound.volume = 0.5
                 sound.play()
 
-
-
-class score_frame(Widget):
-    def draw_scorepad(self, *largs):
-        # self.size = (Window.width/2., 50)
-        # self.pos = (Window.width,Window.height-50)
-
-        with self.canvas:
-            border = Color(0.5,0.5,0.5, mode='rgb')
-            Rect = Rectangle(size=((Window.width),50), pos=(0,Window.height-50))
-            inner = Color(0,0,0,mode='rgb')
-            Inner_rect = Rectangle(size=(Window.width/3.*2+50-10,50-5), pos=(Window.width/3.-50+5,Window.height-50))
-
 class SettingScrollOptions(SettingOptions):
 
     def _create_popup(self, instance):
@@ -1154,8 +1144,6 @@ class GameApp(App):
 
     # seconds = 0
     def intWithCommas(self, x, *largs):
-        # if type(x) not in [type(0), type(0L)]:
-        #     raise TypeError("Parameter must be an integer.")
         if x < 0:
             return '-' + intWithCommas(-x)
         result = ''
@@ -1177,8 +1165,7 @@ class GameApp(App):
             place.text = '∞'
         cs.text = self.intWithCommas(self.game_cells.score)
 
-
-        if cells.generations == 0 or cells.game_over:
+        if cells.game_over:
             cells.stop_interval()
             cells.music_control('score', True, True)
             game_end.open()
@@ -1220,23 +1207,16 @@ class GameApp(App):
             high_score_display = cells.game_over_message
         high_score_label.text = high_score_display
         final_score_label.text = "Final Score: " + str(self.intWithCommas(self.game_cells.score))
-# REMOVE THIS LINE TO GET RID OF HIGH SCORE = 0
-        # self.highscorejson.put('highscore', best=0)
-        # self.highscore = 0
+
     def clear_text(self, high_score_label, *largs):
         high_score_label.text = ""
 
-    def close_modals(self, start_patterns, restart_game, *largs):
-        try:
-            start_patterns.dismiss()
-        except:
-            pass
-        try:
-            restart_game.dismiss()
-        except:
-            pass
 
-    def trigger_game_mode(self, main_menu, cells, grid, csval, gen, genval, placeval, hsval,btn_sett,mode,*largs):
+    def trigger_game_mode(self, main_menu, cells, grid, csval, gen, genval, placeval, hsval,btn_sett,mode,r_version_button,*largs):
+        r_version_button.text = "Select Version"
+        r_version_button.background_down = 'atlas://data/images/defaulttheme/button_pressed'
+        r_version_button.background_normal = 'atlas://data/images/defaulttheme/button'
+        r_version_button.disabled = False
         btn_sett.background_down = 'btn_solid.png'
         btn_sett.text = "---"
         btn_sett.disabled = True
@@ -1258,7 +1238,11 @@ class GameApp(App):
         self.reset_labels(csval, gen, genval, placeval, hsval, cells)
         cells.reset_interval(grid, None)
 
-    def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, gen, genval,btn_sett, *largs):
+    def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, gen, genval,btn_sett, r_version_button,*largs):
+        r_version_button.text = ''
+        r_version_button.background_down = 'black_thing.png'
+        r_version_button.background_normal = 'black_thing.png'
+        r_version_button.disabled = True
         btn_sett.background_down = 'bttn_dn.png'
         btn_sett.text = "Settings"
         btn_sett.disabled = False
@@ -1364,20 +1348,16 @@ class GameApp(App):
 
 # Main Menu Components
         main_menu = cells.main_menu = Popup(title="Main Menu", background='black_thing.png', title_font='joystix', title_size=60, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center",auto_dismiss=False)
-        main_menu_layout = GridLayout(cols=3, spacing=20, size_hint_y=.9, size_hint_x=.1)
-        holda = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        holdb = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        holdc = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        hold1 = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        playground_btn = Button(text="Playground Mode",font_size=mysize, font_name='joystix')
-        hold2 = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        hold3 = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
-        game_btn = Button(text="Game Mode", font_name='joystix', font_size=mysize, size_hint_x=.5)
-        hold4 = Button(text='', background_normal='black_thing.png', background_down='black_thing.png')
+        main_menu_layout = BoxLayout(orientation='vertical', spacing=dp(100), pos_hint={'center_x':.5,'center_y':.7},size_hint=(0.8,1))
+        main_menu_buttons_box = BoxLayout(size_hint=(0.6,None), height=dp(280), pos_hint={'center_x':.5},orientation='vertical',spacing=dp(30))
 
-        main_men_btns = [holda,holdb,holdc,hold1,playground_btn,hold2,hold3,game_btn,hold4]
-        for btn in main_men_btns:
-            main_menu_layout.add_widget(btn)
+        playground_btn = Button(text="Playground Mode",font_size=mysize, font_name='joystix', height=dp(120))
+
+        game_btn = Button(text="Game Mode", font_name='joystix', font_size=mysize, height=dp(120))
+
+        main_menu_buttons_box.add_widget(playground_btn)
+        main_menu_buttons_box.add_widget(game_btn)
+        main_menu_layout.add_widget(main_menu_buttons_box)
         main_menu.add_widget(main_menu_layout)
 
 # Set start patterns and internal scrolling layout
@@ -1409,51 +1389,37 @@ class GameApp(App):
         start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
         start_layout.add_widget(pattern_scroll)
         start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
-        sp_main_menu_button = Button(text="Main Menu", font_name='joystix', on_press=main_menu.open, size_hint=(1,None), height=dp(45))
+        sp_main_menu_button = Button(text="Main Menu", font_name='joystix', on_press=partial(self.open_popup, main_menu, start_patterns), size_hint=(1,None), height=dp(45))
         sp_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
         start_layout.add_widget(sp_main_menu_button)
         start_patterns.add_widget(start_layout)
+
 # setup restart game mode popup
+        restart_game = Popup(title="Reset",title_font='joystix',title_size=56,background='black_thing.png',separator_height=0 ,size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0})
+        restart_game_layout = BoxLayout(orientation='vertical', spacing=dp(100), pos_hint={'center_x':.5,'center_y':.6},size_hint=(0.8,1))
 
-        restart_game = Popup(title="Reset", title_font='joystix', title_size=56, background='black_thing.png', separator_height=0 ,size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0})
-        restart_game_layout = BoxLayout(orientation='vertical')
-
-        button_container = GridLayout(cols=3, spacing='5dp', size=(50,50))
-        restart_btn = Button(text="Restart", font_size=mysize, font_name='joystix', size_hint=(1,None),height=dp(100))
-        cancel_main_box = BoxLayout(size_hint=(0.5,0.1), height=dp(55), pos_hint={'center':.5, 'center':.1}, orientation='horizontal')
-        cancel_restart_button = Button(text="Cancel", font_size=mysize, font_name='joystix',on_press=restart_game.dismiss,size_hint=(1,None), height=dp(100))
-        r_main_menu_button = Button(text="Main Menu", font_size=mysize, font_name='joystix',on_press=main_menu.open,size_hint=(1,None), height=dp(45))
+        restart_cancel_box = BoxLayout(size_hint=(0.8,None), height=dp(100), pos_hint={'center_x':.5}, orientation='horizontal',spacing=dp(5))
+        restart_btn = Button(text="Restart", font_size=mysize, font_name='joystix', size_hint=(0.47,None), height=dp(95))
+        cancel_restart_button = Button(text="Cancel", font_size=mysize, font_name='joystix', on_press=restart_game.dismiss, size_hint=(0.47,None), height=dp(95))
+        version_main_box = BoxLayout(size_hint=(0.6,None), height=dp(100), pos_hint={'center_x':.5},orientation='vertical',spacing=dp(5))
+        r_version_button = Button(text="", font_size=mysize, font_name='joystix', height=dp(45))
+        r_main_menu_button = Button(text="Main Menu", font_size=mysize, font_name='joystix', on_press=partial(self.open_popup, main_menu, restart_game), size_hint=(1,1), height=dp(45))
         r_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
 
-        # restart_game_layout.add_widget(restart_game_label)
-        cmb = [restart_btn, cancel_restart_button]
-        for btn in cmb:
-            cancel_main_box.add_widget(btn)
-
-        r1 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        r2 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        r3 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        r4 = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        ra = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        rb = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        rc = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        rd = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        re = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        rf = Button(text='',background_down='black_thing.png', background_normal='black_thing.png')
-        bc = [ra, rb, rc, rd, re, rf, r1, cancel_main_box, r2, r3, r_main_menu_button, r4]
-        for btn in bc:
-            button_container.add_widget(btn)
-
-        restart_game_layout.add_widget(button_container)
-        restart_game.add_widget(restart_game_layout)
+        restart_cancel_box.add_widget(restart_btn)
+        restart_cancel_box.add_widget(cancel_restart_button)
+        version_main_box.add_widget(r_version_button)
+        version_main_box.add_widget(r_main_menu_button)
+        restart_game_layout.add_widget(restart_cancel_box)
+        restart_game_layout.add_widget(version_main_box)
+        restart_game.content = restart_game_layout
 
 
 # game buttons
         btn_start = Button(text='START', font_name='joystix' ,on_press=cells.start_interval,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_stop = Button(text='Stop', font_name='joystix' ,on_press=cells.stop_interval,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step,0.01),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
-        btn_reset = Button(text='Reset', font_name='joystix' ,
-                           on_press=restart_game.open,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_reset = Button(text='Reset', font_name='joystix' , on_press=restart_game.open,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_reset.bind(on_press=cells.stop_interval)
 
         btn_sett = Button(text='Settings', font_name='joystix' ,on_press=self.settings,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
@@ -1469,11 +1435,6 @@ class GameApp(App):
         for btn in controls:
             buttons.add_widget(btn)
 
-        # Clock.schedule_once(main_menu.open,0.5)
-        # event = Clock.schedule_once(main_menu.open)
-
-        main_menu.bind(on_open=partial(self.close_modals, start_patterns, restart_game))
-        start_patterns.bind(on_open=partial(self.close_modals, None, restart_game))
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
 
@@ -1507,24 +1468,28 @@ class GameApp(App):
         end_layout.add_widget(play_again)
         game_end.add_widget(end_layout)
         # setup main menu buttons
-        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns, grid, cells,placeval,gen,genval,btn_sett))
 
-        choose_game = Popup(title="Select Game Version", background='black_thing.png', title_font='joystix', title_size=50, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center",auto_dismiss=False)
-        choose_game_layout = GridLayout(rows=3, spacing=[20,5], size_hint_y=.9, size_hint_x=.7)
-        creation_mode_btn = Button(text="Creation",font_size=mysize, font_name='joystix',size_hint_x=.3)
-        survival_mode_btn = Button(text="Survival",font_size=mysize, font_name='joystix',size_hint_x=.3)
+        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns, grid, cells,placeval,gen,genval,btn_sett,r_version_button))
 
-        for two_times in range(2):
-            choose_game_layout.add_widget(Button(text='', background_normal='black_thing.png', background_down='black_thing.png',height=dp(5)))
-        choose_game_layout.add_widget(creation_mode_btn)
-        choose_game_layout.add_widget(survival_mode_btn)
-        for two_more_times in range(2):
-            choose_game_layout.add_widget(Button(text='', background_normal='black_thing.png', background_down='black_thing.png',height=dp(5)))
+        choose_game = Popup(title="Select Game Version", background='black_thing.png', title_font='joystix', title_size=50, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center", auto_dismiss=False)
+        choose_game_layout = BoxLayout(orientation='vertical', spacing=dp(100), pos_hint={'center_x':.5,'center_y':.6}, size_hint=(0.8,1))
+        survival_creation_box = BoxLayout(size_hint=(0.95,None), height=dp(100), pos_hint={'center_x':.5}, orientation='horizontal',spacing=dp(5))
+        choose_game_main_box = BoxLayout(size_hint=(0.6,None), height=dp(100), pos_hint={'center_x':.5},orientation='vertical',spacing=dp(5))
+        creation_mode_btn = Button(text="Creation", font_size=mysize, font_name='joystix', size_hint=(0.48,None))
+        survival_mode_btn = Button(text="Survival", font_size=mysize, font_name='joystix', size_hint=(0.48,None))
+
+        survival_creation_box.add_widget(creation_mode_btn)
+        survival_creation_box.add_widget(survival_mode_btn)
+        choose_game_main_box.add_widget(Button(text='', background_normal='black_thing.png', background_down='black_thing.png', height=dp(45)))
+        choose_game_main_box.add_widget(Button(text="Main Menu", font_size=mysize, font_name='joystix', on_press=partial(self.open_popup,main_menu,choose_game), size_hint=(1,1), height=dp(45)))
+
+        choose_game_layout.add_widget(survival_creation_box)
+        choose_game_layout.add_widget(choose_game_main_box)
         choose_game.add_widget(choose_game_layout)
-        creation_mode_btn.bind(on_press=partial(self.trigger_game_mode, choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,1))
-        survival_mode_btn.bind(on_press=partial(self.trigger_game_mode,choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,2))
-        survival_mode_btn.bind(on_release=partial(self.game_cells.survival_mode_check, self.survival_first))
-        creation_mode_btn.bind(on_release=partial(self.game_cells.creation_mode_check, self.creation_first))
+        creation_mode_btn.bind(on_press=partial(self.trigger_game_mode, choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,1,r_version_button))
+
+        survival_mode_btn.bind(on_press=partial(self.trigger_game_mode,choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,2,r_version_button))
+
         game_btn.bind(on_press=partial(self.open_popup,choose_game,main_menu))
         # cells.bind(a_d_ratio=partial(self.update_score, cells, cs,place))
         cells.bind(generations=partial(self.update_game, cells, csval,placeval,genval, game_end))
@@ -1535,6 +1500,7 @@ class GameApp(App):
         start_patterns.bind(on_open=partial(self.reset_labels, csval, gen, genval, placeval, hsval,cells))
         restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game, csval, gen,genval, placeval,hsval))
 
+        r_version_button.bind(on_press=partial(self.open_popup, choose_game, restart_game))
         game_end.bind(on_open=partial(self.update_score_labels, play_again, final_score_label,high_score_label, cells))
         game_end.bind(on_dismiss=partial(self.unscheduleit, play_again))
         game_end.bind(on_dismiss=partial(self.clear_text, high_score_label))
@@ -1543,9 +1509,6 @@ class GameApp(App):
         board.add_widget(top_buttons)
         board.add_widget(buttons)
         return board
-
-    def update(self,event):
-        self.hs.text = randint(0,100)
 
     def build_config(self, config):
         config.setdefaults('initiate', {
