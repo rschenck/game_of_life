@@ -1526,6 +1526,9 @@ class GameApp(App):
 
         survival_mode_btn.bind(on_press=partial(self.trigger_game_mode,choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,2,r_version_button))
 
+        survival_mode_btn.bind(on_release=partial(self.game_cells.survival_mode_check, self.survival_first))
+        creation_mode_btn.bind(on_release=partial(self.game_cells.creation_mode_check, self.creation_first))
+
         game_btn.bind(on_press=partial(self.open_popup,choose_game,main_menu))
         # cells.bind(a_d_ratio=partial(self.update_score, cells, cs,place))
         cells.bind(generations=partial(self.update_game, cells, csval,placeval,genval, game_end, grid, controls))
