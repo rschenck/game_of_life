@@ -45,6 +45,8 @@ class Grid(Widget):
         self.size = (Window.width, Window.height - 100) # Should be fine to draw off window size
         self.determine_grid(self.width,self.height)
         self.pos = (0,50)
+        if self.flash_event:
+            self.stop_flash(True)
         with self.canvas:
             self.grid_color = Color(0.5,0.5,0.5, mode='rgb')
             for x in range(v_border[0],self.width,cellsize):
@@ -55,6 +57,7 @@ class Grid(Widget):
             Rectangle(pos=(self.x,self.y),size=(self.width,h_border[0]))
             Rectangle(pos=(self.width-v_border[1],self.y),size=(v_border[1],self.height))
             Rectangle(pos=(self.x,self.y+self.height-h_border[1]),size=(self.width,h_border[1]))
+
 
     def determine_grid(self,width,height,*largs):
         global v_border, h_border, cellsize
@@ -77,10 +80,13 @@ class Grid(Widget):
             self.grid_color.rgb = (0.5,0.5,0.5)
             self.flash_color = True
 
-    def stop_flash(self,*largs):
+    def stop_flash(self,grey,*largs):
         if self.flash_event:
             self.flash_event.cancel()
-            self.grid_color.rgb = (0.5,0.5,0.5)
+            if grey:
+                self.grid_color.rgb = (0.5,0.5,0.5)
+            else:
+                self.grid_color.rgb = (1,0,0)
             self.flash_color = True
             self.flash_event = None
 
@@ -415,6 +421,9 @@ class Cells(Widget):
                     self.step(1.)
             else:
                 self.update_canvas_objects()
+                if self.generations <= 25 and self.game_mode == 1:
+                    if not self.stop_iteration:
+                        self.step(0.3)
             self.update_counters()
 
 
@@ -1153,10 +1162,12 @@ class GameApp(App):
         return "%d%s" % (x, result)
 
     # def update_score(self,cells, cs, place, *largs):
-    def update_game(self, cells, cs, place, gen, game_end, *largs):
+    def update_game(self, cells, cs, place, gen, game_end,grid, buttons,*largs):
         if cells.game_mode:
             if cells.game_mode == 1:
                 gen.text = str(cells.generations)
+                if cells.generations == 25:
+                    grid.start_flash()
             elif cells.game_mode == 2:
                 gen.text = str(cells.non_positive_gens)
             place.text = str(cells.spawn_count)
@@ -1166,9 +1177,15 @@ class GameApp(App):
         cs.text = self.intWithCommas(self.game_cells.score)
 
         if cells.game_over:
+            for button in buttons:
+                button.disabled = True
+            if grid.flash_event:
+                grid.stop_flash(False)
+            else:
+                grid.grid_color.rgb = (1,0,0)
             cells.stop_interval()
             cells.music_control('score', True, True)
-            game_end.open()
+            Clock.schedule_once(game_end.open,1.5)
 
     def reset_labels(self, csval, gen, genval, placeval, hsval, cells,*largs):
         csval.text = "--"
@@ -1192,7 +1209,9 @@ class GameApp(App):
             placeval.text = '∞'
         hsval.text = str(self.intWithCommas(self.highscore))
 
-    def update_score_labels(self, myobject, final_score_label, high_score_label,cells, *largs):
+    def update_score_labels(self, myobject, final_score_label, high_score_label,cells, buttons,*largs):
+        for button in buttons:
+            button.disabled = False
         self.blinky = Clock.schedule_interval(lambda a:self.colorit(myobject),0.3)
 
         # global blinky
@@ -1265,6 +1284,10 @@ class GameApp(App):
         genval.text = '∞'
         cells.reset_interval(grid, start_patterns)
     def restart_btn_action(self, grid, start_patterns, cells, restart_game, csval, gen,genval, placeval,hsval,*largs):
+        # if grid.flash_event:
+        #     grid.stop_flash(True)
+        # else:
+        #     grid.grid_color.rgb = (0.5,0.5,0.5)
         cells.game_over = False
         restart_game.dismiss()
         cells.reset_counters()
@@ -1278,7 +1301,7 @@ class GameApp(App):
         if self.game_cells.non_positive_gens == 4:
             grid.start_flash()
         elif self.game_cells.non_positive_gens == 10:
-            grid.stop_flash()
+            grid.stop_flash(True)
 
     def colorit(self, myobject, *largs):
         myobject.color = [randint(0,1),randint(0,1),randint(0,1),1]
@@ -1418,7 +1441,7 @@ class GameApp(App):
 # game buttons
         btn_start = Button(text='START', font_name='joystix' ,on_press=cells.start_interval,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_stop = Button(text='Stop', font_name='joystix' ,on_press=cells.stop_interval,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
-        btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step,0.01),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        btn_step = Button(text='Step', font_name='joystix' ,on_press=partial(cells.step,0.01,True),  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_reset = Button(text='Reset', font_name='joystix' , on_press=restart_game.open,  background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
         btn_reset.bind(on_press=cells.stop_interval)
 
@@ -1434,7 +1457,7 @@ class GameApp(App):
         controls =[btn_info,btn_reset,btn_start,btn_stop,btn_step,btn_sett]
         for btn in controls:
             buttons.add_widget(btn)
-
+        controls.pop()
         start_patterns.bind(on_dismiss=grid.draw_grid)
         start_patterns.bind(on_dismiss=cells.starting_cells)
 
@@ -1492,16 +1515,16 @@ class GameApp(App):
 
         game_btn.bind(on_press=partial(self.open_popup,choose_game,main_menu))
         # cells.bind(a_d_ratio=partial(self.update_score, cells, cs,place))
-        cells.bind(generations=partial(self.update_game, cells, csval,placeval,genval, game_end))
-        cells.bind(spawn_count=partial(self.update_game, cells, csval, placeval, genval, game_end))
-        cells.bind(all_activated=partial(self.update_game, cells, csval, placeval, genval, game_end))
+        cells.bind(generations=partial(self.update_game, cells, csval,placeval,genval, game_end, grid, controls))
+        cells.bind(spawn_count=partial(self.update_game, cells, csval, placeval, genval, game_end, grid, controls))
+        cells.bind(all_activated=partial(self.update_game, cells, csval, placeval, genval, game_end, grid, controls))
         cells.bind(spawn_adder=cells.add_spawns)
         cells.bind(non_positive_gens=partial(self.check_close_to_end, grid))
         start_patterns.bind(on_open=partial(self.reset_labels, csval, gen, genval, placeval, hsval,cells))
         restart_btn.bind(on_press=partial(self.restart_btn_action, grid,start_patterns, cells,restart_game, csval, gen,genval, placeval,hsval))
 
         r_version_button.bind(on_press=partial(self.open_popup, choose_game, restart_game))
-        game_end.bind(on_open=partial(self.update_score_labels, play_again, final_score_label,high_score_label, cells))
+        game_end.bind(on_open=partial(self.update_score_labels, play_again, final_score_label,high_score_label, cells, controls))
         game_end.bind(on_dismiss=partial(self.unscheduleit, play_again))
         game_end.bind(on_dismiss=partial(self.clear_text, high_score_label))
 
