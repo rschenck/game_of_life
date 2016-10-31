@@ -650,7 +650,7 @@ class Cells(Widget):
         popup = Popup(title="GoL: Game of Life", separator_height=0, title_size=titlesize,
             content=content, size_hint=(.8, .8),title_align='center')
         self.first_time = False
-        tutorial_btn.bind(on_press=partial(self.tutorial_main, popup))
+        tutorial_btn.bind(on_press=partial(self.welcome_img, popup))
         creation_btn.bind(on_press=partial(self.tutorial_creation, popup))
         survival_btn.bind(on_press=partial(self.tutorial_survival, popup))
         popup.bind(on_dismiss=partial(self.music_control, 'main', True, True))
@@ -1056,9 +1056,22 @@ class Cells(Widget):
         next_btn.bind(on_release=partial(popup.dismiss, popup))
         popup.open()
 
+    def welcome_img(self, first_timer, *largs):
+
+        content = Image(source='GOL_Welcome.png')
+        popup = Popup(title='', content=content,
+              auto_dismiss=False, separator_height=0,title_size=0, separator_color=[0.,0.,0.,0.], size=(Window.height,Window.width),
+              # border=[20,20,20,20],
+              background='black_thing.png',
+              background_color=[0,0,0,1])
+        content.bind(on_touch_down=popup.dismiss)
+
+        popup.bind(on_dismiss=partial(self.tutorial_main, first_timer))
+        popup.open()
+
     def loadimg(self, first_timer, *largs):
 
-        content = Image(source='IMO_GOL2.png')
+        content = Image(source='IMO_GoL_noText.png')
         popup = Popup(title='', content=content,
               auto_dismiss=False, separator_height=0,title_size=0, separator_color=[0.,0.,0.,0.], size=(Window.height,Window.width),
               # border=[20,20,20,20],
@@ -1077,7 +1090,7 @@ class Cells(Widget):
         else:
             first_timer.put('tutorial', done=True)
             self.first_time = True
-            Clock.schedule_once(self.tutorial_main,0)
+            Clock.schedule_once(self.welcome_img,0)
 
     def survival_mode_check(self, survival_first ,*largs):
         if survival_first.exists('survival_tutorial'):
