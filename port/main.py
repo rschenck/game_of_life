@@ -147,6 +147,7 @@ class Cells(Widget):
     events = []
     stop_iteration = False
     prevent_update = False
+    first_time = True
     # Starting Patterns
     # Each will:
     # 1) call self.setup_cells() to make sure color, and midpoint are set
@@ -618,22 +619,23 @@ class Cells(Widget):
         info1 = '''Rules:\n      If a cell has 0-1 neighbors, it dies.\n      If a cell has 4 or more neighbors, it dies.\n      If a cell has 2-3 neighbors, it survives.\n      If a space is surrounded by 3 neighbors, a cell is born.\n\n'''
         info2 = '''Controls:\n      Click or draw to add cells.\n      Modify the default rules and more in settings.\n'''
         info3 = '''\nCreated by:\n      Steven Lee-Kramer\n      Ryan O Schenck'''
-        text_info = Label(text=''.join([info1,info2,info3]),font_size=mysize)
+        text_info = Label(text=''.join([info1,info2,info3]),font_size=mysize, size_hint=(1,0.8))
 
 
-        content = BoxLayout()
-        content.add_widget(Label(text=''.join([info1,info2,info3]),font_size=mysize))
-
-        tutorial_btn = Button(text='Tutorial', size_hint_x=.2, size_hint_y=.1)
-        creation_btn = Button(text='Creation', size_hint_x=.2, size_hint_y=.1)
-        survival_btn = Button(text='Survival', size_hint_x=.2, size_hint_y=.1)
+        content = BoxLayout(orientation='vertical',spacing='5sp')
+        content.add_widget(text_info)
+        buttons = BoxLayout(orientation='horizontal', spacing='10sp',size_hint=(1,0.2))
+        tutorial_btn = Button(text='Tutorial', size_hint=(.2,.7))
+        creation_btn = Button(text='Creation', size_hint=(.2,.7))
+        survival_btn = Button(text='Survival', size_hint=(.2,.7))
         # tutorial_btn.bind(on_press=self.tutorial_main)
-        content.add_widget(tutorial_btn)
-        content.add_widget(creation_btn)
-        content.add_widget(survival_btn)
-
+        buttons.add_widget(tutorial_btn)
+        buttons.add_widget(creation_btn)
+        buttons.add_widget(survival_btn)
+        content.add_widget(buttons)
         popup = Popup(title="GoL: Game of Life", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.98, .98),title_align='center',)
+            content=content, size_hint=(.8, .8),title_align='center')
+        self.first_time = False
         tutorial_btn.bind(on_press=partial(self.tutorial_main, popup))
         creation_btn.bind(on_press=partial(self.tutorial_creation, popup))
         survival_btn.bind(on_press=partial(self.tutorial_survival, popup))
@@ -719,23 +721,29 @@ class Cells(Widget):
         except:
             pass
 
-        playground = '''Click to add a single spawn.\n\nDrag your finger to add multiple spawns.\n\nYou can do this before or during play.\n\nBe aware , cells in clusters of fewer than 3 will die!\n'''
+        playground = '''Each cell has 8 neighbors that effect its state for the next generation.\n\nIf 0-1 neighbors are alive, that cell dies.\n\nIf 4 or more neighbors are alive, that cell dies.\n\nIf a cell has 2 or 3 live neighbors, it survives.\n\nA dead cell will animate, if it has exactly 3 live neighbors.'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout()
         content.add_widget(choose_mode)
+        next_btn_1 = Button(text='Next', size_hint_x=.2, size_hint_y=.17307692, font_size=mysize)
+        next_btn_2 = Button(text='Next', size_hint_x=.2, size_hint_y=.17307692, font_size=mysize)
 
-        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
+        content.add_widget(next_btn_1)
 
-        content.add_widget(next_btn)
-
-        popup = Popup(title="Main play area", separator_height=0, title_size=titlesize,
-            content=content, size_hint=(.95, .45),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
-        # next_btn.bind(on_press=self.main_menu.dismiss)
-        next_btn.bind(on_release=partial(popup.dismiss, popup))
-        next_btn.bind(on_release=partial(self.tutorial_top, popup))
+        popup = Popup(title="Rules of Life", separator_height=0, title_size=titlesize,
+            content=content, size_hint=(.95, .65),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
+        # next_btn_2.bind(on_press=self.main_menu.dismiss)
+        next_btn_1.bind(on_release=partial(self.swap_tutorial_grid, next_btn_1,next_btn_2,choose_mode,popup))
+        next_btn_2.bind(on_release=partial(popup.dismiss, popup))
+        next_btn_2.bind(on_release=partial(self.tutorial_top, popup))
         popup.open()
-
+    def swap_tutorial_grid(self, btn1, btn2, label, popup, *largs):
+        popup.content.remove_widget(btn1)
+        popup.content.add_widget(btn2)
+        popup.title="Game Play"
+        new_text = '''You may add live cells to the board by using Spawns.\n\nTap or drag your finger to add cells.\n\nAdd cells before or during animation or while paused.\n\nControl the animation with Start, Stop, and Step buttons.\n\nBe aware, groups of less than 3 cells will die.'''
+        label.text = new_text
     def tutorial_top(self, popup, *largs):
         if Window.width < Window.height:
             titlesize = 18
@@ -786,7 +794,7 @@ class Cells(Widget):
         content = BoxLayout()
         content.add_widget(choose_mode)
 
-        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.14993, font_size=mysize)
+        next_btn = Button(text='Next', size_hint_x=.2, size_hint_y=.25, font_size=mysize)
 
         content.add_widget(next_btn)
 
@@ -824,7 +832,8 @@ class Cells(Widget):
             content=content, size_hint=(.7, .4),title_align='center', auto_dismiss=False, opacity=1, background_color=[0,0,0,.2])
         # next_btn.bind(on_press=self.main_menu.dismiss)
         next_btn.bind(on_release=partial(popup.dismiss, popup))
-        next_btn.bind(on_press=partial(self.main_menu.open, popup))
+        if self.first_time:
+            next_btn.bind(on_press=partial(self.main_menu.open, popup))
         popup.open()
 
     def tutorial_creation(self, popup, *largs):
@@ -840,7 +849,7 @@ class Cells(Widget):
         except:
             pass
 
-        playground = '''Welcome to creation mode!\n\nIn this game mode you play with class Game of Life rules with a score!\n\nFind the best patterns to create life and gain points.\n'''
+        playground = '''Welcome to creation mode!\n\nIn this game mode you play with classic Game of Life rules with a score!\n\nFind the best patterns to create life and gain points.\n'''
         choose_mode = Label(text=playground, font_size=mysize)
 
         content = BoxLayout(pos_hint={'center':1,'center':1})
@@ -1049,9 +1058,11 @@ class Cells(Widget):
 
     def open_main_menu(self, first_timer ,*largs):
         if first_timer.exists('tutorial'):
+            self.first_time = False
             Clock.schedule_once(self.main_menu.open,0)
         else:
             first_timer.put('tutorial', done=True)
+            self.first_time = True
             Clock.schedule_once(self.tutorial_main,0)
 
     def survival_mode_check(self, survival_first ,*largs):
@@ -1332,8 +1343,8 @@ class GameApp(App):
                 self.highscore = 0
 
         # Delete this once finalized
-        # if Window.width < 1334 and Window.height < 750:
-        #     Window.size = (1334,750)
+        # if Window.width < 667 or Window.height < 375:
+        # Window.size = (1366,1024)
 
         if Window.width < Window.height:
             titlesize = 18
