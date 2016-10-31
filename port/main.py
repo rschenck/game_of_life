@@ -536,10 +536,11 @@ class Cells(Widget):
 
         # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")] = {'alive':1, 'was':0}"
         if self.accept_touches and in_bounds and self.spawn_count > 0:
-            if self.game_mode == 2:
-                self.handle_touch_survival(pos_x,pos_y)
-            else:
-                self.handle_touch(pos_x,pos_y)
+            if not self.game_over:
+                if self.game_mode == 2:
+                    self.handle_touch_survival(pos_x,pos_y)
+                else:
+                    self.handle_touch(pos_x,pos_y)
 
 
     def on_touch_move(self, touch):
@@ -554,10 +555,11 @@ class Cells(Widget):
 
             # print "self.on_board[(", pos_x, ",",pos_y,")] = {'alive':1, 'was':0}"
             if self.accept_touches and in_bounds and self.spawn_count > 0:
-                if self.game_mode == 2:
-                    self.handle_touch_survival(pos_x,pos_y)
-                else:
-                    self.handle_touch(pos_x,pos_y)
+                if not self.game_over:
+                    if self.game_mode == 2:
+                        self.handle_touch_survival(pos_x,pos_y)
+                    else:
+                        self.handle_touch(pos_x,pos_y)
         self.mouse_positions = []
 
     def handle_touch(self, pos_x,pos_y,*largs):
