@@ -650,7 +650,7 @@ class Cells(Widget):
         popup = Popup(title="GoL: Game of Life", separator_height=0, title_size=titlesize,
             content=content, size_hint=(.8, .8),title_align='center')
         self.first_time = False
-        tutorial_btn.bind(on_press=partial(self.welcome_img, popup))
+        tutorial_btn.bind(on_press=partial(self.tutorial_main, popup))
         creation_btn.bind(on_press=partial(self.tutorial_creation, popup))
         survival_btn.bind(on_press=partial(self.tutorial_survival, popup))
         popup.bind(on_dismiss=partial(self.music_control, 'main', True, True))
