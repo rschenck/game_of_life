@@ -23,6 +23,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.settings import SettingsWithSpinner, SettingOptions
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.widget import Widget
+from kivy.uix.textinput import TextInput
 import math
 from os.path import join
 from random import randint
@@ -30,10 +31,10 @@ from random import uniform
 from settings_options import settings_json
 from presets import presets
 
-# def dump(obj):
-#     for attr in dir(obj):
-#         print "obj.%s = %s" % (attr, getattr(obj, attr))
-#         pass
+def dump(obj):
+    for attr in dir(obj):
+        print "obj.%s = %s" % (attr, getattr(obj, attr))
+        pass
 cellsize = 10
 v_border = (0,0)
 h_border = (0,0)
@@ -168,6 +169,8 @@ class Cells(Widget):
             self.music_control('main', True, True)
             pass
 
+    def load_patterns(self, modal, *largs):
+        pass
 
 
     def place_pattern(self, modal, selection, *largs):
@@ -1083,6 +1086,54 @@ class Cells(Widget):
         popup.bind(on_dismiss=partial(self.open_main_menu, first_timer))
         popup.open()
 
+    def check_text(self, popup, usrtext, usrpatterns, *largs):
+        if len(str(usrtext.text)) == 0 or len(str(usrtext.text)) > 8:
+            self.get_patt_name()
+        else:
+            usrpattern = []
+            for (pos_x,pos_y) in self.on_board:
+                if self.on_board[(pos_x,pos_y)]['alive'] == 1:
+                    usrpattern.append((pos_x,pos_y))
+            usrpatterns.put(str(usrtext.text), pattern=str(usrpattern))
+
+    def get_patt_name(self, usrpatterns, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        # Have usr input a Name
+        info1 = '''Enter a name for your pattern (< 8 characters)'''
+
+        text_info = TextInput(text='', multiline=False, size_hint_x=None, width=100)
+        enterlabel = Label(text=info1,font_size=mysize, size_hint=(1,0.8))
+        layout = GridLayout(cols=1, row_force_default=True, row_default_height=70, spacing='5sp')
+
+        buttons = BoxLayout(orientation='horizontal', spacing='10sp')
+        save_btn = Button(text='Save', font_size=mysize, font_name='joystix')
+        cancel_btn = Button(text='Cancel', font_size=mysize, font_name='joystix')
+        buttons.add_widget(save_btn)
+        buttons.add_widget(cancel_btn)
+        layout.add_widget(enterlabel)
+        layout.add_widget(text_info)
+        layout.add_widget(buttons)
+        
+        popup = Popup(title="Save your Pattern", separator_height=0, title_size=titlesize,
+            content=layout, size_hint=(.6, .4), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center':0.5,'center':0.50})
+        
+        
+        cancel_btn.bind(on_press=popup.dismiss)
+        save_btn.bind(on_press=partial(self.check_text, popup, text_info, usrpatterns))
+        save_btn.bind(on_release=popup.dismiss)
+
+        popup.open()
+
+    def save_pattern(self, usrpatterns, *largs):
+        self.stop_interval()
+        self.get_patt_name(usrpatterns)
+
     def open_main_menu(self, first_timer ,*largs):
         if first_timer.exists('tutorial'):
             self.first_time = False
@@ -1354,7 +1405,7 @@ class GameApp(App):
         self.use_kivy_settings = False
         data_dir = getattr(self, 'user_data_dir')
         self.highscorejson = JsonStore(join(data_dir, 'highscore.json'))
-
+        self.usrpatterns = JsonStore(join(data_dir, 'usr_patterns.json'))
         self.firsttimer = JsonStore(join(data_dir, 'tutorial.json'))
         self.survival_first = JsonStore(join(data_dir, 'survival.json'))
         self.creation_first = JsonStore(join(data_dir, 'creation.json'))
@@ -1428,9 +1479,11 @@ class GameApp(App):
         patt_imo_6 = Button(text='IMO 6', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.place_pattern, start_patterns, 'imo_6'))
         patt_omega = Button(text='RESISTANCE', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.place_pattern,start_patterns, 'omega'))
         patt_maze = Button(text='MAZE', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.place_pattern,start_patterns, 'maze'))
+        usr_made = Button(text='CUSTOM', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.load_patterns,start_patterns))
+
 
 # attach buttons to scrolling layout
-        patterns = [patt_blank, patt_imo_6, patt_omega, patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders,patt_face,patt_binary, patt_maze]
+        patterns = [patt_blank, patt_imo_6, patt_omega, patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders,patt_face,patt_binary, patt_maze, usr_made]
         for pattern in patterns:
             scroll_layout.add_widget(pattern)
         pattern_scroll = ScrollView(size_hint=(1, 1))
@@ -1500,8 +1553,8 @@ class GameApp(App):
         placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-        usrgrid = Button(text='Grid: '+ str(round(usrgridnum,1)), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-
+        # usrgrid = Button(text='Grid: '+ str(round(usrgridnum,1)), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        usrgrid = Button(text='Save', font_name='joystix', on_press=partial(cells.save_pattern, self.usrpatterns), background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
 
         btns_top = [place, placeval, gen, genval, usrgrid, cs, csval, hs, hsval]
         for btn in btns_top:
