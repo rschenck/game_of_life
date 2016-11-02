@@ -30,6 +30,7 @@ from random import randint
 from random import uniform
 from settings_options import settings_json
 from presets import presets
+import ast
 
 def dump(obj):
     for attr in dir(obj):
@@ -169,9 +170,50 @@ class Cells(Widget):
             self.music_control('main', True, True)
             pass
 
-    def load_patterns(self, modal, *largs):
-        pass
+    def load_patterns(self, modal, usrpttrns, *largs):
+        modal.dismiss()
 
+        # Set start patterns and internal scrolling layout
+        start_patterns = Popup(title="Custom Patterns", title_size=32, background='black_thing.png', title_font='joystix', separator_height=0 ,size_hint=(0.5,0.8),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
+        start_layout = GridLayout(cols=1, spacing='5dp')
+        scroll_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
+
+# Set up buttons to go inside the scrolling portion
+        
+        patterns = []
+        for pattern in usrpttrns.keys():
+            bttn = Button(text=pattern, font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.place_custom_pattern, start_patterns, usrpttrns, pattern))
+            patterns.append(bttn)        
+
+# attach buttons to scrolling layout
+        for pattern in patterns:
+            scroll_layout.add_widget(pattern)
+        pattern_scroll = ScrollView(size_hint=(1, 1))
+        pattern_scroll.add_widget(scroll_layout)
+        start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
+        start_layout.add_widget(pattern_scroll)
+        start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
+        sp_main_menu_button = Button(text="Main Menu", font_name='joystix', on_press=partial(self.main_menu.open), size_hint=(1,None), height=dp(45))
+        sp_main_menu_button.bind(on_release=partial(self.dual_purpose, start_patterns))
+        start_layout.add_widget(sp_main_menu_button)
+        start_patterns.add_widget(start_layout)
+
+        start_patterns.open()
+
+    def dual_purpose(self, start_patterns, *largs):
+        self.music_control('options', True, True)
+        start_patterns.dismiss()
+
+    def place_custom_pattern(self, modal, usrpttrns, selection, *largs):
+        self.setup_cells()
+        usrcoors = ast.literal_eval(usrpttrns.get(selection)['pattern'])
+        # usrcoors = [n.strip() for n in usrcoors]
+        for posx, posy in usrcoors:
+            self.on_board[( int(posx), int(posy) )] = {'alive':1, 'was':0}
+            self.active_cell_count += 1
+
+        modal.dismiss()
 
     def place_pattern(self, modal, selection, *largs):
         self.setup_cells()
@@ -1479,7 +1521,7 @@ class GameApp(App):
         patt_imo_6 = Button(text='IMO 6', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.place_pattern, start_patterns, 'imo_6'))
         patt_omega = Button(text='RESISTANCE', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.place_pattern,start_patterns, 'omega'))
         patt_maze = Button(text='MAZE', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.place_pattern,start_patterns, 'maze'))
-        usr_made = Button(text='CUSTOM', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.load_patterns,start_patterns))
+        usr_made = Button(text='CUSTOM', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.load_patterns,start_patterns, self.usrpatterns))
 
 
 # attach buttons to scrolling layout
