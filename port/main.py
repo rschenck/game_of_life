@@ -180,11 +180,11 @@ class Cells(Widget):
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
 
 # Set up buttons to go inside the scrolling portion
-        
+
         patterns = []
         for pattern in usrpttrns.keys():
             bttn = Button(text=pattern, font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.place_custom_pattern, start_patterns, usrpttrns, pattern))
-            patterns.append(bttn)        
+            patterns.append(bttn)
 
 # attach buttons to scrolling layout
         for pattern in patterns:
@@ -212,7 +212,7 @@ class Cells(Widget):
         for posx, posy in usrcoors:
             self.on_board[( int(posx), int(posy) )] = {'alive':1, 'was':0}
             self.active_cell_count += 1
-
+        self.starting_cells()
         modal.dismiss()
 
     def place_pattern(self, modal, selection, *largs):
@@ -1130,7 +1130,7 @@ class Cells(Widget):
 
     def check_text(self, popup, usrtext, usrpatterns, *largs):
         if len(str(usrtext.text)) == 0 or len(str(usrtext.text)) > 8:
-            self.get_patt_name()
+            self.get_patt_name(usrpatterns)
         else:
             usrpattern = []
             for (pos_x,pos_y) in self.on_board:
@@ -1149,29 +1149,37 @@ class Cells(Widget):
         # Have usr input a Name
         info1 = '''Enter a name for your pattern (< 8 characters)'''
 
-        text_info = TextInput(text='', multiline=False, size_hint_x=None, width=100)
-        enterlabel = Label(text=info1,font_size=mysize, size_hint=(1,0.8))
-        layout = GridLayout(cols=1, row_force_default=True, row_default_height=70, spacing='5sp')
+        layout = BoxLayout(size_hint=(1,1),pos_hint={'center_x':0.5,'center_y':0.5}, spacing='5sp',orientation='vertical')
 
-        buttons = BoxLayout(orientation='horizontal', spacing='10sp')
-        save_btn = Button(text='Save', font_size=mysize, font_name='joystix')
-        cancel_btn = Button(text='Cancel', font_size=mysize, font_name='joystix')
+        text_info = TextInput(text='', multiline=False,font_size=titlesize,font_name="joystix", size_hint=(1,0.3333))
+        enterlabel = Label(text=info1,font_size=mysize, size_hint=(1,0.3333))
+        text_info.bind(text=partial(self.update_padding,text_info))
+        buttons = BoxLayout(orientation='horizontal', spacing='10sp',size_hint=(1,0.3333))
+        save_btn = Button(text='Save', font_size=mysize, font_name='joystix',size_hint=(0.5,1))
+        cancel_btn = Button(text='Cancel', font_size=mysize, font_name='joystix',size_hint=(0.5,1))
         buttons.add_widget(save_btn)
         buttons.add_widget(cancel_btn)
         layout.add_widget(enterlabel)
         layout.add_widget(text_info)
         layout.add_widget(buttons)
-        
+
         popup = Popup(title="Save your Pattern", separator_height=0, title_size=titlesize,
-            content=layout, size_hint=(.6, .4), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center':0.5,'center':0.50})
-        
-        
+            content=layout, size_hint=(.7, .5), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center':0.5,'center':0.50})
+
+
         cancel_btn.bind(on_press=popup.dismiss)
         save_btn.bind(on_press=partial(self.check_text, popup, text_info, usrpatterns))
         save_btn.bind(on_release=popup.dismiss)
 
         popup.open()
-
+    def update_padding(self,text_info, *largs):
+        text_width = text_info._get_text_width(
+            text_info.text,
+            text_info.tab_width,
+            text_info._label_cached
+        )
+        text_info.padding_x = (text_info.width - text_width)/2
+        text_info.padding_y = (text_info.height - text_info.font_size) / 2
     def save_pattern(self, usrpatterns, *largs):
         self.stop_interval()
         self.get_patt_name(usrpatterns)
