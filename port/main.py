@@ -186,6 +186,8 @@ class Cells(Widget):
             bttn = Button(text=pattern, font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.place_custom_pattern, start_patterns, usrpttrns, pattern))
             patterns.append(bttn)
 
+        patterns.append(Button(text='Delete All', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.delete_check, usrpttrns, start_patterns)))
+
 # attach buttons to scrolling layout
         for pattern in patterns:
             scroll_layout.add_widget(pattern)
@@ -200,6 +202,41 @@ class Cells(Widget):
         start_patterns.add_widget(start_layout)
 
         start_patterns.open()
+
+    def delete_check(self, usrpttrns, mymodal, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        mymodal.dismiss()
+
+        layout = BoxLayout(size_hint=(1,.5),pos_hint={'center_x':0.5,'center_y':0.5}, spacing='5sp',orientation='vertical')
+
+        buttons = BoxLayout(orientation='horizontal', spacing='10sp',size_hint=(1,0.3333))
+        delete = Button(text='Delete', font_size=mysize, font_name='joystix',size_hint=(0.5,1))
+        cancel_btn = Button(text='Cancel', font_size=mysize, font_name='joystix',size_hint=(0.5,1))
+        buttons.add_widget(delete)
+        buttons.add_widget(cancel_btn)
+
+        layout.add_widget(buttons)
+
+        popup = Popup(title="Are you sure?", separator_height=0, title_size=titlesize,
+            content=layout, size_hint=(.7, .5), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center':0.5,'center':0.50})
+
+        cancel_btn.bind(on_press=popup.dismiss)
+        cancel_btn.bind(on_release=partial(self.place_pattern, popup, 'blank'))
+        delete.bind(on_press=partial(self.clear_json, usrpttrns, popup))
+        
+        popup.open()
+
+    def clear_json(self, usrpttrns, mymodal, *largs):
+        for pattern in usrpttrns.keys():
+            usrpttrns.delete(pattern)
+        
+        self.place_pattern(mymodal, 'blank')
 
     def dual_purpose(self, start_patterns, *largs):
         self.music_control('options', True, True)
