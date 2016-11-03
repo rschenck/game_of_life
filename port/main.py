@@ -138,7 +138,7 @@ class Cells(Widget):
     # old_mech = NumericProperty(0)
     bonus_multiplier = 1
     spawn_count = NumericProperty(100)
-    generations = NumericProperty(50)
+    generations = NumericProperty(500)
     game_over = 0
     active_cell_count = NumericProperty(0)
     game_mode = 0
@@ -519,7 +519,7 @@ class Cells(Widget):
             self.ever_was_alive = 0
             self.non_positive_gens = 10
         else:
-            self.generations = 50
+            self.generations = 500
             self.bonus_multiplier = 1
 
 
