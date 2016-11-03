@@ -138,7 +138,7 @@ class Cells(Widget):
     # old_mech = NumericProperty(0)
     bonus_multiplier = 1
     spawn_count = NumericProperty(100)
-    generations = NumericProperty(500)
+    generations = NumericProperty(50)
     game_over = 0
     active_cell_count = NumericProperty(0)
     game_mode = 0
@@ -519,7 +519,7 @@ class Cells(Widget):
             self.ever_was_alive = 0
             self.non_positive_gens = 10
         else:
-            self.generations = 500
+            self.generations = 50
             self.bonus_multiplier = 1
 
 
@@ -1250,14 +1250,14 @@ class GameApp(App):
             high_score_display = str(self.intWithCommas(self.highscore)) + " New Record!!"
         else:
             if cells.game_over == 1:
-                high_score_display = cells.game_over_message + self.add_advice()
+                high_score_display = self.add_advice()
             else:
                 high_score_display = cells.game_over_message
         high_score_label.text = high_score_display
         final_score_label.text = "Final Score: " + str(self.intWithCommas(self.game_cells.score))
 
     def add_advice(self, *largs):
-        advices = ["\nBeware, the borders are dead zones.", "\nCheckout cool patterns in Playground Mode.", "\nCells only score points if they generate life.","\nDon't wait too long to use your spawns.","\nEach color represents a generation.","\nFill more of the screen for a bigger bonus."]
+        advices = ["Beware, the borders will stop your cells\nin their tracks.", "Find the best patterns by experimenting\nin Playground Mode.", "Cells only score points if they generate life.\nGet rid of stagnant groups.","Don't wait too long to use your spawns.","With Color set to Random,\neach color represents a generation.","Fill more of the screen for a bigger bonus.","You've done better!","Try pausing the animation before\nusing your spawns."]
 
         return advices[randint(0,len(advices) - 1)]
 
