@@ -170,40 +170,59 @@ class Cells(Widget):
             self.music_control('main', True, True)
             pass
 
-    def load_patterns(self, modal, usrpttrns, *largs):
+    def load_patterns(self, modal, user_patterns, *largs):
         modal.dismiss()
 
         # Set start patterns and internal scrolling layout
-        start_patterns = Popup(title="Custom Patterns", title_size=32, background='black_thing.png', title_font='joystix', separator_height=0 ,size_hint=(0.5,0.8),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
+        custom_patterns = Popup(title="Custom Patterns", title_size=32, background='black_thing.png', title_font='joystix', separator_height=0 ,size_hint=(0.5,0.8),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
         start_layout = GridLayout(cols=1, spacing='5dp')
         scroll_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
 
 # Set up buttons to go inside the scrolling portion
-
         patterns = []
-        for pattern in usrpttrns.keys():
-            bttn = Button(text=pattern, font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.place_custom_pattern, start_patterns, usrpttrns, pattern))
-            patterns.append(bttn)
+        for pattern in user_patterns.keys():
+            bttn = Button(text=pattern, font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.place_custom_pattern, custom_patterns, user_patterns, pattern))
+            # attach buttons to scrolling layout
+            scroll_layout.add_widget(bttn)
 
-        patterns.append(Button(text='Delete All', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.delete_check, usrpttrns, start_patterns)))
-
-# attach buttons to scrolling layout
-        for pattern in patterns:
-            scroll_layout.add_widget(pattern)
         pattern_scroll = ScrollView(size_hint=(1, 1))
         pattern_scroll.add_widget(scroll_layout)
         start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
         start_layout.add_widget(pattern_scroll)
         start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
-        sp_main_menu_button = Button(text="Main Menu", font_name='joystix', on_press=partial(self.main_menu.open), size_hint=(1,None), height=dp(45))
-        sp_main_menu_button.bind(on_release=partial(self.dual_purpose, start_patterns))
-        start_layout.add_widget(sp_main_menu_button)
-        start_patterns.add_widget(start_layout)
 
-        start_patterns.open()
+        buttons = BoxLayout(orientation='horizontal', spacing='5sp',size_hint=(1,None),height=dp(50))
+        back_btn = Button(text="Back", font_name='joystix', on_press=custom_patterns.dismiss, size_hint=(0.5,1))
+        back_btn.bind(on_release=modal.open)
+        edit_btn = Button(text='Edit', font_name='joystix' ,size_hint=(0.5,1),on_press=partial(self.edit_custom_patterns, user_patterns, custom_patterns,start_layout))
+        buttons.add_widget(back_btn)
+        buttons.add_widget(edit_btn)
+        start_layout.add_widget(buttons)
+        custom_patterns.add_widget(start_layout)
 
-    def delete_check(self, usrpttrns, mymodal, *largs):
+        custom_patterns.open()
+
+
+    def edit_custom_patterns(self, user_patterns, custom_patterns, original_layout, *largs):
+        layout = GridLayout(cols=1, spacing='5dp')
+        scroll_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
+# Set up buttons to go inside the scrolling portion
+        for pattern in user_patterns.keys():
+            bttn = Button(text=pattern, font_name='joystix' ,size_hint_y=None, height=50)
+            bttn.bind(on_press=partial(self.edit_pattern, user_patterns, pattern,scroll_layout, bttn))
+            scroll_layout.add_widget(bttn)
+        pattern_scroll = ScrollView(size_hint=(1, 1))
+        pattern_scroll.add_widget(scroll_layout)
+        layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
+        layout.add_widget(pattern_scroll)
+        layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
+        layout.add_widget(Button(text='Save Changes', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.load_patterns, custom_patterns,user_patterns)))
+        custom_patterns.title = "Edit Patterns"
+        custom_patterns.content = layout
+
+    def edit_pattern(self, user_patterns, pattern,scroll_layout,bttn, *largs):
         if Window.width < Window.height:
             titlesize = 18
             mysize = 18
@@ -211,9 +230,46 @@ class Cells(Widget):
             titlesize = Window.size[1]/100.*3.4
             mysize = Window.size[1]/100.*3
 
-        mymodal.dismiss()
+        layout = BoxLayout(size_hint=(1,.75), pos_hint={'center_x':0.5, 'center_y':0.375},  spacing='15sp', orientation='vertical')
 
-        layout = BoxLayout(size_hint=(1,.5),pos_hint={'center_x':0.5,'center_y':0.5}, spacing='5sp',orientation='vertical')
+        buttons = BoxLayout(orientation='horizontal', spacing='10sp',size_hint=(1,0.3333))
+        delete_btn = Button(text='Delete', font_size=mysize, font_name='joystix',size_hint=(0.5,1))
+        rename_btn = Button(text='Rename', font_size=mysize, font_name='joystix',size_hint=(0.5,1))
+        cancel_btn = Button(text='Cancel', font_size=mysize, font_name='joystix',size_hint=(0.5,0.3333),pos_hint={'center_x':0.5})
+
+
+        buttons.add_widget(delete_btn)
+        buttons.add_widget(rename_btn)
+
+        layout.add_widget(buttons)
+        layout.add_widget(cancel_btn)
+        popup = Popup(title="Edit " + pattern, separator_height=0, title_size='15sp',
+            content=layout, size_hint=(.7, .6), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center':0.5,'center':0.50})
+
+        cancel_btn.bind(on_press=popup.dismiss)
+        delete_btn.bind(on_press=partial(self.delete_check, user_patterns, pattern, scroll_layout, bttn))
+        rename_btn.bind(on_press=partial(self.get_patt_name,user_patterns, pattern, scroll_layout, bttn))
+
+        rename_btn.bind(on_release=popup.dismiss)
+        delete_btn.bind(on_release=popup.dismiss)
+        popup.open()
+
+
+    def swap_to_patterns(self, user_patterns, scroll_layout, custom_patterns,*largs):
+        scroll_layout.clear_widgets()
+        for pattern in user_patterns.keys():
+            bttn = Button(text=pattern, font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.place_custom_pattern, custom_patterns, user_patterns, pattern))
+            patterns.append(bttn)
+
+    def delete_check(self, user_patterns, pattern,scroll_layout=None, bttn=None, *largs):
+        if Window.width < Window.height:
+            titlesize = 18
+            mysize = 18
+        else:
+            titlesize = Window.size[1]/100.*3.4
+            mysize = Window.size[1]/100.*3
+
+        layout = BoxLayout(size_hint=(1,.75),pos_hint={'center_x':0.5,'center_y':0.375}, spacing='5sp',orientation='vertical')
 
         buttons = BoxLayout(orientation='horizontal', spacing='10sp',size_hint=(1,0.3333))
         delete = Button(text='Delete', font_size=mysize, font_name='joystix',size_hint=(0.5,1))
@@ -222,29 +278,32 @@ class Cells(Widget):
         buttons.add_widget(cancel_btn)
 
         layout.add_widget(buttons)
-
+        layout.add_widget(Widget(size_hint=(1,0.3333)))
         popup = Popup(title="Are you sure?", separator_height=0, title_size=titlesize,
-            content=layout, size_hint=(.7, .5), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center':0.5,'center':0.50})
+            content=layout, size_hint=(.7, .6), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center':0.5,'center':0.50})
 
         cancel_btn.bind(on_press=popup.dismiss)
-        cancel_btn.bind(on_release=partial(self.place_pattern, popup, 'blank'))
-        delete.bind(on_press=partial(self.clear_json, usrpttrns, popup))
-        
+        delete.bind(on_press=partial(self.del_pattern, user_patterns, pattern,scroll_layout, bttn))
+        delete.bind(on_release=popup.dismiss)
         popup.open()
 
-    def clear_json(self, usrpttrns, mymodal, *largs):
-        for pattern in usrpttrns.keys():
-            usrpttrns.delete(pattern)
-        
+    def del_pattern(self, user_patterns, pattern, scroll_layout,bttn, *largs):
+        user_patterns.delete(pattern)
+        scroll_layout.remove_widget(bttn)
+
+    def clear_json(self, user_patterns, mymodal, *largs):
+        for pattern in user_patterns.keys():
+            user_patterns.delete(pattern)
+
         self.place_pattern(mymodal, 'blank')
 
     def dual_purpose(self, start_patterns, *largs):
         self.music_control('options', True, True)
         start_patterns.dismiss()
 
-    def place_custom_pattern(self, modal, usrpttrns, selection, *largs):
+    def place_custom_pattern(self, modal, user_patterns, selection, *largs):
         self.setup_cells()
-        usrcoors = ast.literal_eval(usrpttrns.get(selection)['pattern'])
+        usrcoors = ast.literal_eval(user_patterns.get(selection)['pattern'])
         # usrcoors = [n.strip() for n in usrcoors]
         for posx, posy in usrcoors:
             self.on_board[( int(posx), int(posy) )] = {'alive':1, 'was':0}
@@ -1165,17 +1224,17 @@ class Cells(Widget):
         popup.bind(on_dismiss=partial(self.open_main_menu, first_timer))
         popup.open()
 
-    def check_text(self, popup, usrtext, usrpatterns, *largs):
+    def check_text(self, popup, usrtext, user_patterns, *largs):
         if len(str(usrtext.text)) == 0 or len(str(usrtext.text)) > 8:
-            self.get_patt_name(usrpatterns)
+            self.get_patt_name(user_patterns)
         else:
             usrpattern = []
             for (pos_x,pos_y) in self.on_board:
                 if self.on_board[(pos_x,pos_y)]['alive'] == 1:
                     usrpattern.append((pos_x,pos_y))
-            usrpatterns.put(str(usrtext.text), pattern=str(usrpattern))
+            user_patterns.put(str(usrtext.text), pattern=str(usrpattern))
 
-    def get_patt_name(self, usrpatterns, *largs):
+    def get_patt_name(self, user_patterns, name='',scroll_layout=None, btn=None,*largs):
         if Window.width < Window.height:
             titlesize = 18
             mysize = 18
@@ -1188,8 +1247,8 @@ class Cells(Widget):
 
         layout = BoxLayout(size_hint=(1,1),pos_hint={'center_x':0.5,'center_y':0.5}, spacing='5sp',orientation='vertical')
 
-        text_info = TextInput(text='', multiline=False,font_size=titlesize,font_name="joystix", size_hint=(1,0.3333))
-        enterlabel = Label(text=info1,font_size=mysize, size_hint=(1,0.3333))
+        text_info = TextInput(text=name, multiline=False,font_size=titlesize,font_name="joystix", size_hint=(1,0.3333))
+        enterlabel = Label(text=info1,font_size='15sp', size_hint=(1,0.3333))
         text_info.bind(text=partial(self.update_padding,text_info))
         buttons = BoxLayout(orientation='horizontal', spacing='10sp',size_hint=(1,0.3333))
         save_btn = Button(text='Save', font_size=mysize, font_name='joystix',size_hint=(0.5,1))
@@ -1200,15 +1259,34 @@ class Cells(Widget):
         layout.add_widget(text_info)
         layout.add_widget(buttons)
 
-        popup = Popup(title="Save your Pattern", separator_height=0, title_size=titlesize,
-            content=layout, size_hint=(.7, .5), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center':0.5,'center':0.50})
+        popup = Popup(title="", separator_height=0, title_size='15sp',
+            content=layout, size_hint=(.7, .7), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center':0.5,'center':0.50})
+
 
 
         cancel_btn.bind(on_press=popup.dismiss)
-        save_btn.bind(on_press=partial(self.check_text, popup, text_info, usrpatterns))
+        if scroll_layout and btn:
+            popup.title = "Rename Pattern: " + name
+            save_btn.bind(on_press=partial(self.rename_pattern, text_info, user_patterns, name, scroll_layout, btn))
+        else:
+            popup.title = "Save Your Pattern"
+            save_btn.bind(on_press=partial(self.check_text, popup, text_info, user_patterns))
         save_btn.bind(on_release=popup.dismiss)
 
         popup.open()
+
+    def rename_pattern(self, text_input, user_patterns,name, scroll_layout,btn,*largs):
+        if len(str(text_input.text)) == 0 or len(str(text_input.text)) > 8:
+            self.get_patt_name(user_patterns,name, scroll_layout, btn)
+        else:
+            usrcoors = user_patterns.get(name)['pattern']
+            user_patterns.delete(name)
+            scroll_layout.remove_widget(btn)
+            bttn = Button(text=str(text_input.text), font_name='joystix' ,size_hint_y=None, height=50)
+            bttn.bind(on_press=partial(self.edit_pattern, user_patterns, str(text_input.text),scroll_layout, bttn))
+            scroll_layout.add_widget(bttn)
+            user_patterns.put(str(text_input.text), pattern=usrcoors)
+
     def update_padding(self,text_info, *largs):
         text_width = text_info._get_text_width(
             text_info.text,
@@ -1217,9 +1295,9 @@ class Cells(Widget):
         )
         text_info.padding_x = (text_info.width - text_width)/2
         text_info.padding_y = (text_info.height - text_info.font_size) / 2
-    def save_pattern(self, usrpatterns, *largs):
+    def save_pattern(self, user_patterns, *largs):
         self.stop_interval()
-        self.get_patt_name(usrpatterns)
+        self.get_patt_name(user_patterns)
 
     def open_main_menu(self, first_timer ,*largs):
         if first_timer.exists('tutorial'):
@@ -1492,7 +1570,7 @@ class GameApp(App):
         self.use_kivy_settings = False
         data_dir = getattr(self, 'user_data_dir')
         self.highscorejson = JsonStore(join(data_dir, 'highscore.json'))
-        self.usrpatterns = JsonStore(join(data_dir, 'usr_patterns.json'))
+        self.user_patterns = JsonStore(join(data_dir, 'usr_patterns.json'))
         self.firsttimer = JsonStore(join(data_dir, 'tutorial.json'))
         self.survival_first = JsonStore(join(data_dir, 'survival.json'))
         self.creation_first = JsonStore(join(data_dir, 'creation.json'))
@@ -1504,7 +1582,7 @@ class GameApp(App):
 
         # Delete this once finalized
         # if Window.width < 667 or Window.height < 375:
-        # Window.size = (1366,1024)
+        # Window.size = (667,375)
 
         if Window.width < Window.height:
             titlesize = 18
@@ -1566,11 +1644,10 @@ class GameApp(App):
         patt_imo_6 = Button(text='IMO 6', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.place_pattern, start_patterns, 'imo_6'))
         patt_omega = Button(text='RESISTANCE', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.place_pattern,start_patterns, 'omega'))
         patt_maze = Button(text='MAZE', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.place_pattern,start_patterns, 'maze'))
-        usr_made = Button(text='CUSTOM', font_name='joystix' , size_hint_y=None, height=50,on_press=partial(cells.load_patterns,start_patterns, self.usrpatterns))
 
 
 # attach buttons to scrolling layout
-        patterns = [patt_blank, patt_imo_6, patt_omega, patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders,patt_face,patt_binary, patt_maze, usr_made]
+        patterns = [patt_blank, patt_imo_6, patt_omega, patt_gol,patt_random,patt_gun,patt_ten,patt_pulsar,patt_gliders,patt_face,patt_binary, patt_maze]
         for pattern in patterns:
             scroll_layout.add_widget(pattern)
         pattern_scroll = ScrollView(size_hint=(1, 1))
@@ -1578,9 +1655,13 @@ class GameApp(App):
         start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
         start_layout.add_widget(pattern_scroll)
         start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
-        sp_main_menu_button = Button(text="Main Menu", font_name='joystix', on_press=partial(self.open_popup, main_menu, start_patterns), size_hint=(1,None), height=dp(45))
+        main_custom_box = BoxLayout(size_hint=(1,None), height=dp(50), orientation='horizontal',spacing='5sp')
+        usr_made = Button(text='CUSTOM', font_name='joystix' ,size_hint=(0.5,1),on_press=partial(cells.load_patterns,start_patterns, self.user_patterns))
+        sp_main_menu_button = Button(text="Main Menu", font_name='joystix', on_press=partial(self.open_popup, main_menu, start_patterns), size_hint=(0.5,1))
         sp_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
-        start_layout.add_widget(sp_main_menu_button)
+        main_custom_box.add_widget(sp_main_menu_button)
+        main_custom_box.add_widget(usr_made)
+        start_layout.add_widget(main_custom_box)
         start_patterns.add_widget(start_layout)
 
 # setup restart game mode popup
@@ -1641,7 +1722,7 @@ class GameApp(App):
         gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         # usrgrid = Button(text='Grid: '+ str(round(usrgridnum,1)), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-        usrgrid = Button(text='Save', font_name='joystix', on_press=partial(cells.save_pattern, self.usrpatterns), background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        usrgrid = Button(text='Save', font_name='joystix', on_press=partial(cells.save_pattern, self.user_patterns), background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
 
         btns_top = [place, placeval, gen, genval, usrgrid, cs, csval, hs, hsval]
         for btn in btns_top:
