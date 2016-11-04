@@ -216,7 +216,7 @@ class Cells(Widget):
         layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
         layout.add_widget(pattern_scroll)
         layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
-        save_changes_btn = Button(text='Save Changes', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.load_patterns, start_patterns,user_patterns))
+        save_changes_btn = Button(text='Save Changes', font_name='joystix' ,size_hint_y=None, height=dp(50),on_press=partial(self.load_patterns, start_patterns,user_patterns))
         layout.add_widget(save_changes_btn)
         save_changes_btn.bind(on_release=custom_patterns.dismiss)
 
@@ -1266,7 +1266,7 @@ class Cells(Widget):
         layout.add_widget(buttons)
 
         popup = Popup(title="", separator_height=0, title_size='15sp',
-            content=layout, size_hint=(.7, .7), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center':0.5,'center':0.50})
+            content=layout, size_hint=(.7, .7), title_align='center', auto_dismiss=False, background='black_thing.png', title_font='joystix', pos_hint={'center_x':0.5,'center_y':0.65})
 
 
 
