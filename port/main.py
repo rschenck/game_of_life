@@ -139,7 +139,7 @@ class Cells(Widget):
     bonus_multiplier = 1
     spawn_count = NumericProperty(100)
     generations = NumericProperty(500)
-    game_over = False
+    game_over = 0
     active_cell_count = NumericProperty(0)
     game_mode = 0
     spawn_adder = NumericProperty(0)
@@ -398,14 +398,14 @@ class Cells(Widget):
         if not bool(self.changes_dict) and not self.spawn_count:
             if self.generations > 0:
                 self.game_over_message = "Out of moves!\nUse your spawns wisely."
-                self.game_over = True
+                self.game_over = 3
         if not self.active_cell_count:
             if self.spawn_count != 100 and self.generations > 0:
-                self.game_over = True
+                self.game_over = 4
                 self.game_over_message = "All your cells are dead!\nTry placing cells in groups of 3 or more."
         if self.game_mode == 2:
             if self.non_positive_gens == 0:
-                self.game_over = True
+                self.game_over = 2
                 self.game_over_message = "10 generations without population growth.\nYou must promote life!"
 
     # Our start/step scheduled function
@@ -448,7 +448,7 @@ class Cells(Widget):
         else:
             if self.game_mode == 1:
                 if self.generations == 1:
-                    self.game_over = True
+                    self.game_over = 1
                 self.generations -= 1
 
             self.bonus_multiplier = 1 + (self.active_cell_count * 30000 / pow(self.cellcount,2))
@@ -495,7 +495,7 @@ class Cells(Widget):
         grid.canvas.clear()
         self.canvas.clear()
         self.setup_cells()
-        self.game_over = False
+        self.game_over = 0
         self.stop_iteration = False
         self.prevent_update = False
         if modal:
@@ -1249,9 +1249,17 @@ class GameApp(App):
                 self.highscorejson.put('survival', best=self.game_cells.score)
             high_score_display = str(self.intWithCommas(self.highscore)) + " New Record!!"
         else:
-            high_score_display = cells.game_over_message
+            if cells.game_over == 1:
+                high_score_display = self.add_advice()
+            else:
+                high_score_display = cells.game_over_message
         high_score_label.text = high_score_display
         final_score_label.text = "Final Score: " + str(self.intWithCommas(self.game_cells.score))
+
+    def add_advice(self, *largs):
+        advices = ["Beware, the borders will stop your cells\nin their tracks.", "Find the best patterns by experimenting\nin Playground Mode.", "Cells only score points if they generate life.\nGet rid of stagnant groups.","Don't wait too long to use your spawns.","With Color set to Random,\neach color represents a generation.","Fill more of the screen for a bigger bonus.","You've done better!","Try pausing the animation before\nusing your spawns."]
+
+        return advices[randint(0,len(advices) - 1)]
 
     def clear_text(self, high_score_label, *largs):
         high_score_label.text = ""
@@ -1276,7 +1284,7 @@ class GameApp(App):
             self.game_cells.speed = 0.1
             self.game_cells.cellcol = 'Green'
         main_menu.dismiss()
-        cells.game_over = False
+        cells.game_over = 0
         cells.game_mode = mode
         cells.reset_counters()
 
@@ -1314,7 +1322,7 @@ class GameApp(App):
         #     grid.stop_flash(True)
         # else:
         #     grid.grid_color.rgb = (0.5,0.5,0.5)
-        cells.game_over = False
+        cells.game_over = 0
         restart_game.dismiss()
         cells.reset_counters()
         self.reset_labels(csval, gen,genval, placeval, hsval, cells)
