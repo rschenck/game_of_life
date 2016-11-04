@@ -171,8 +171,6 @@ class Cells(Widget):
             pass
 
     def load_patterns(self, modal, user_patterns, *largs):
-        modal.dismiss()
-
         # Set start patterns and internal scrolling layout
         custom_patterns = Popup(title="Custom Patterns", title_size=32, background='black_thing.png', title_font='joystix', separator_height=0 ,size_hint=(0.5,0.8),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
         start_layout = GridLayout(cols=1, spacing='5dp')
@@ -195,7 +193,7 @@ class Cells(Widget):
         buttons = BoxLayout(orientation='horizontal', spacing='5sp',size_hint=(1,None),height=dp(50))
         back_btn = Button(text="Back", font_name='joystix', on_press=custom_patterns.dismiss, size_hint=(0.5,1))
         back_btn.bind(on_release=modal.open)
-        edit_btn = Button(text='Edit', font_name='joystix' ,size_hint=(0.5,1),on_press=partial(self.edit_custom_patterns, user_patterns, custom_patterns,start_layout))
+        edit_btn = Button(text='Edit', font_name='joystix' ,size_hint=(0.5,1),on_press=partial(self.edit_custom_patterns, user_patterns, custom_patterns,start_layout,modal))
         buttons.add_widget(back_btn)
         buttons.add_widget(edit_btn)
         start_layout.add_widget(buttons)
@@ -204,7 +202,7 @@ class Cells(Widget):
         custom_patterns.open()
 
 
-    def edit_custom_patterns(self, user_patterns, custom_patterns, original_layout, *largs):
+    def edit_custom_patterns(self, user_patterns, custom_patterns, original_layout, modal,*largs):
         layout = GridLayout(cols=1, spacing='5dp')
         scroll_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
@@ -218,7 +216,10 @@ class Cells(Widget):
         layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
         layout.add_widget(pattern_scroll)
         layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
-        layout.add_widget(Button(text='Save Changes', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.load_patterns, custom_patterns,user_patterns)))
+        save_changes_btn = Button(text='Save Changes', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.load_patterns, modal,user_patterns))
+        layout.add_widget(save_changes_btn)
+        save_changes_btn.bind(on_release=custom_patterns.dismiss)
+
         custom_patterns.title = "Edit Patterns"
         custom_patterns.content = layout
 
@@ -1676,6 +1677,7 @@ class GameApp(App):
         start_layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
         main_custom_box = BoxLayout(size_hint=(1,None), height=dp(50), orientation='horizontal',spacing='5sp')
         usr_made = Button(text='CUSTOM', font_name='joystix' ,size_hint=(0.5,1),on_press=partial(cells.load_patterns,start_patterns, self.user_patterns))
+        usr_made.bind(on_release=start_patterns.dismiss)
         sp_main_menu_button = Button(text="Main Menu", font_name='joystix', on_press=partial(self.open_popup, main_menu, start_patterns), size_hint=(0.5,1))
         sp_main_menu_button.bind(on_release=partial(cells.music_control, 'options', True, True))
         main_custom_box.add_widget(sp_main_menu_button)
