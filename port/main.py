@@ -535,13 +535,19 @@ class Cells(Widget):
         pos_y = int(pos_y / cellsize)
         in_bounds = (0 <= pos_x < (self.dimensions[0] / cellsize)) and (0 <= pos_y < (self.dimensions[1] / cellsize))
 
-        # print "self.on_board[(self.mid_x" + sign_x, pos_x - self.mid_x,",self.mid_y"+sign_y,pos_y-self.mid_y,")] = {'alive':1, 'was':0}"
         if self.accept_touches and in_bounds and self.spawn_count > 0:
             if not self.game_over:
                 if self.game_mode == 2:
                     self.handle_touch_survival(pos_x,pos_y)
                 else:
-                    self.handle_touch(pos_x,pos_y)
+                    if self.on_board[pos_x,pos_y]['alive'] == 1 and not self.game_mode:
+                        if self.should_draw:
+                            self.rectangles_dict[pos_x,pos_y]['color'].hsv = self.allcols["Grey"]
+                            self.on_board[pos_x,pos_y] = {'alive':0,'was':1}
+                        else:
+                            self.changes_dict[pos_x,pos_y] = 0
+                    else:
+                        self.handle_touch(pos_x,pos_y)
 
 
     def on_touch_move(self, touch):
@@ -554,7 +560,6 @@ class Cells(Widget):
 
             in_bounds = (0 <= pos_x < (self.dimensions[0] / cellsize)) and (0 <= pos_y < (self.dimensions[1] / cellsize))
 
-            # print "self.on_board[(", pos_x, ",",pos_y,")] = {'alive':1, 'was':0}"
             if self.accept_touches and in_bounds and self.spawn_count > 0:
                 if not self.game_over:
                     if self.game_mode == 2:
