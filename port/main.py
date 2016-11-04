@@ -170,7 +170,7 @@ class Cells(Widget):
             self.music_control('main', True, True)
             pass
 
-    def load_patterns(self, modal, user_patterns, *largs):
+    def load_patterns(self, start_patterns, user_patterns, *largs):
         # Set start patterns and internal scrolling layout
         custom_patterns = Popup(title="Custom Patterns", title_size=32, background='black_thing.png', title_font='joystix', separator_height=0 ,size_hint=(0.5,0.8),title_align='center' ,pos_hint={'center':0.5,'center':0.50})
         start_layout = GridLayout(cols=1, spacing='5dp')
@@ -192,8 +192,8 @@ class Cells(Widget):
 
         buttons = BoxLayout(orientation='horizontal', spacing='5sp',size_hint=(1,None),height=dp(50))
         back_btn = Button(text="Back", font_name='joystix', on_press=custom_patterns.dismiss, size_hint=(0.5,1))
-        back_btn.bind(on_release=modal.open)
-        edit_btn = Button(text='Edit', font_name='joystix' ,size_hint=(0.5,1),on_press=partial(self.edit_custom_patterns, user_patterns, custom_patterns,start_layout,modal))
+        back_btn.bind(on_release=start_patterns.open)
+        edit_btn = Button(text='Edit', font_name='joystix' ,size_hint=(0.5,1),on_press=partial(self.edit_custom_patterns, user_patterns, custom_patterns,start_layout,start_patterns))
         buttons.add_widget(back_btn)
         buttons.add_widget(edit_btn)
         start_layout.add_widget(buttons)
@@ -202,7 +202,7 @@ class Cells(Widget):
         custom_patterns.open()
 
 
-    def edit_custom_patterns(self, user_patterns, custom_patterns, original_layout, modal,*largs):
+    def edit_custom_patterns(self, user_patterns, custom_patterns, original_layout, start_patterns,*largs):
         layout = GridLayout(cols=1, spacing='5dp')
         scroll_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         scroll_layout.bind(minimum_height=scroll_layout.setter('height'))
@@ -216,7 +216,7 @@ class Cells(Widget):
         layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
         layout.add_widget(pattern_scroll)
         layout.add_widget(Widget(size_hint_y=None, height=dp(2)))
-        save_changes_btn = Button(text='Save Changes', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.load_patterns, modal,user_patterns))
+        save_changes_btn = Button(text='Save Changes', font_name='joystix' ,size_hint_y=None, height=50,on_press=partial(self.load_patterns, start_patterns,user_patterns))
         layout.add_widget(save_changes_btn)
         save_changes_btn.bind(on_release=custom_patterns.dismiss)
 
