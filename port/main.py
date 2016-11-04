@@ -1486,7 +1486,10 @@ class GameApp(App):
         high_score_label.text = ""
 
 
-    def trigger_game_mode(self, main_menu, cells, grid, csval, gen, genval, placeval, hsval,btn_sett,mode,r_version_button,*largs):
+    def trigger_game_mode(self, main_menu, cells, grid, csval, gen, genval, placeval, hsval, top_buttons, btns_top_game, btn_sett, mode, r_version_button, *largs):
+        top_buttons.clear_widgets()
+        for btn in btns_top_game:
+            top_buttons.add_widget(btn)
         r_version_button.text = "Select Version"
         r_version_button.background_down = 'atlas://data/images/defaulttheme/button_pressed'
         r_version_button.background_normal = 'atlas://data/images/defaulttheme/button'
@@ -1512,7 +1515,10 @@ class GameApp(App):
         self.reset_labels(csval, gen, genval, placeval, hsval, cells)
         cells.reset_interval(grid, None)
 
-    def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, gen, genval,btn_sett, r_version_button,*largs):
+    def trigger_playground_mode(self, popup, start_patterns, grid, cells, placeval, gen, genval,top_buttons, btns_top_play,btn_sett, r_version_button,*largs):
+        top_buttons.clear_widgets()
+        for btn in btns_top_play:
+            top_buttons.add_widget(btn)
         r_version_button.text = ''
         r_version_button.background_down = 'black_thing.png'
         r_version_button.background_normal = 'black_thing.png'
@@ -1734,11 +1740,12 @@ class GameApp(App):
         placeval = Button(text='100', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         gen = Button(text='Gens:', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
         genval = Button(text='500', font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-        # usrgrid = Button(text='Grid: '+ str(round(usrgridnum,1)), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
-        usrgrid = Button(text='Save', font_name='joystix', on_press=partial(cells.save_pattern, self.user_patterns), background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
+        usrgrid = Button(text='Grid: '+ str(round(usrgridnum,1)), font_name='Roboto', font_size=24, color=[1,.25,0,1], background_normal='black_thing.png', background_down='black_thing.png',border=[0,0,0,0])
+        save_btn = Button(text='Save', font_name='joystix', on_press=partial(cells.save_pattern, self.user_patterns), background_normal='black_thing.png', border=[0,0,0,0], background_disabled_down='black_thing.png', background_disabled_normal='black_thing.png')
 
-        btns_top = [place, placeval, gen, genval, usrgrid, cs, csval, hs, hsval]
-        for btn in btns_top:
+        btns_top_play = [place, placeval, gen, genval, save_btn, cs, csval, hs, hsval]
+        btns_top_game = [place, placeval, gen, genval, usrgrid, cs, csval, hs, hsval]
+        for btn in btns_top_play:
             top_buttons.add_widget(btn)
 
         game_end = Popup(title="Game Over", title_size = 42, title_color=[0,0,0], title_font='joystix', background='black_thing.png', separator_height=0, size_hint=(1,1),title_align='center' ,pos_hint={'center':0.5,'center':0.5},auto_dismiss=False)
@@ -1752,7 +1759,7 @@ class GameApp(App):
         game_end.add_widget(end_layout)
         # setup main menu buttons
 
-        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns, grid, cells,placeval,gen,genval,btn_sett,r_version_button))
+        playground_btn.bind(on_press=partial(self.trigger_playground_mode, main_menu, start_patterns, grid, cells,placeval,gen,genval,top_buttons, btns_top_play,btn_sett,r_version_button))
 
         choose_game = Popup(title="Select Version", background='black_thing.png', title_font='joystix', title_size=50, separator_height=0, size_hint=(1,1), pos_hint={'center':0.5,'center':0.5}, title_align="center", auto_dismiss=False)
         choose_game_layout = BoxLayout(orientation='vertical', spacing=dp(30), pos_hint={'center_x':.5,'center_y':.4}, size_hint=(1,0.8))
@@ -1769,9 +1776,9 @@ class GameApp(App):
         choose_game_layout.add_widget(survival_creation_box)
         choose_game_layout.add_widget(choose_game_main_box)
         choose_game.add_widget(choose_game_layout)
-        creation_mode_btn.bind(on_press=partial(self.trigger_game_mode, choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,1,r_version_button))
+        creation_mode_btn.bind(on_press=partial(self.trigger_game_mode, choose_game, cells, grid, csval, gen,genval, placeval, hsval,top_buttons, btns_top_game,btn_sett,1,r_version_button))
 
-        survival_mode_btn.bind(on_press=partial(self.trigger_game_mode,choose_game, cells, grid, csval, gen,genval, placeval, hsval,btn_sett,2,r_version_button))
+        survival_mode_btn.bind(on_press=partial(self.trigger_game_mode,choose_game, cells, grid, csval, gen,genval, placeval, hsval,top_buttons, btns_top_game,btn_sett,2,r_version_button))
 
         survival_mode_btn.bind(on_release=partial(self.game_cells.survival_mode_check, self.survival_first))
         creation_mode_btn.bind(on_release=partial(self.game_cells.creation_mode_check, self.creation_first))
