@@ -1540,6 +1540,8 @@ class GameApp(App):
                     self.game_cells.lonely = self.config._sections[item][x]
                 if x == 'crowded':
                     self.game_cells.crowded = self.config._sections[item][x]
+                if x == 'color':
+                    self.game_cells.cellcol = self.config._sections[item][x]
         popup.dismiss()
         gen.text = 'Gens:'
         placeval.text = '∞'
